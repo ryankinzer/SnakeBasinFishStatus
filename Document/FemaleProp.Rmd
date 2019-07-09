@@ -14,7 +14,7 @@ knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 
 # Introduction
 
-This work is to estimate female proportions within each branch of DABOM, so we can combine that with escapement estimates and get an estimate of female escapement to each branch. We started with cleaned observations from PITcleanr, which Rick Orme then finalized.
+This work is to estimate female proportions within each TRT population covered by DABOM, so we can combine that with escapement estimates and get an estimate of female escapement to each branch and population. We started with cleaned observations from PITcleanr, which Rick Orme then finalized.
 
 ```{r}
 # load needed libraries
@@ -25,46 +25,39 @@ library(jagsUI)
 
 # Hierarchical Model
 
-Because some branches have many more fish returning to them than others, we wanted to develop a hierarchical model that would allow for some borrowing of information from larger branches to smaller branches, to avoid skewing the sex ratio due solely to small sample sizes in some branches. Our model looks like:
+Because some branches have many more fish returning to them than others, we wanted to develop a hierarchical model that would allow for some borrowing of information from larger branches to smaller branches, to avoid skewing the sex ratio due solely to small sample sizes in some branches. We are ultimately trying to estimate the proportion of females at the TRT population scale, so we focused our model to be able to do that. Our model looks like:
 
 \begin{aligned}
 
-f_i &\sim Bin(p_i, N_i) \\
-\text{logit}(p_i) &\sim N(\mu_{pop_i}, \sigma^2_{pop}) \\
-\mu_{pop} &\sim N(\mu, \sigma^2) \\
+f_i &\sim Bin(p_{pop_i}, N_i) \\
+\text{logit}(p_{pop}) &\sim N(\mu, \sigma^2) \\
 
 \end{aligned}
 
-where $f_i$ is the number of females observed in a branch, $N_i$ is the total number of sexed tags observed in that branch, and $p_i$ is the proportion of females (the quantity of interest). The hierarchy begins by assuming that the logit of $p_i$ comes from a normal distribution centered around a value, $\mu_{pop}$, that is the same for all branches within each MPG (and the variation between those branches is captured by $\sigma^2_{pop}$). The averages for each MPG are also drawn from a normal, with an overall mean, $\mu$ and variance, $\sigma^2$. 
+where $f_i$ is the number of females observed in a branch, $N_i$ is the total number of sexed tags observed in that branch, and $p_{pop_i}$ is the proportion of females for the population containing model branch $i$ (the quantity of interest). We imposed some hierarchy by assuming that the logit of $p_{pop}$ comes from a normal distribution centered around a value, $\mu$, that represents the overall female proportion for the entire DPS. The variation between populations is captured by $\sigma^2$. 
 
 We write this model in the JAGS language.
 
 ```{r}
-modelNm = '../ModelFiles/FemalePropJAGS.txt'
+modelNm = '../data/modelFiles/FemalePropJAGS.txt'
 
 modelCode = '
 model {
   
   for(i in 1:length(f)) {
-    f[i] ~ dbin(p[i], tags[i])
-    p[i] <- ilogit(logit_p[i])    
-
-    logit_p[i] ~ dnorm(mu_pop[mpgBranch[i]], tau_pop)
-
-# to remove MPG hierarchy, comment out line above and use the line below
-    # logit_p[i] ~ dnorm(mu, tau)
+    f[i] ~ dbin(p[popNum[i]], tags[i])
   }
 
-  for(j in 1:max(mpgBranch)) {
-    mu_pop[j] ~ dnorm(mu, tau)
+  for(j in 1:max(popNum)) {
+    p[j] <- ilogit(logit_p[j])
+    logit_p[j] ~ dnorm(mu, tau)
   }
+  # transform overall mean back to proportion scale
+  mu_ilogit <- ilogit(mu)
 
   mu ~ dnorm(0, 0.001)
   sig ~ dunif(0, 100)
   tau <- pow(sig, -2)
-
-  sig_pop ~ dunif(0, 100)
-  tau_pop <- pow(sig_pop, -2)
 
 }'
 
@@ -80,22 +73,23 @@ We read the data in from PITcleanr summaries that have been generated previously
 # set species
 spp = 'Steelhead'
 # set year
-yr = 2013
+yr = 2014
 
 # where are the tag summaries stored?
-tagSummDir = '../data/output/tagSummaries/'
+tagSummDir = '../output/tagSummaries/'
 
 # read in data
 modSexDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
-                      'SexRatio')
+                      'SexRatio',
+                      progress = F)
 
 # pull out relevant bits for JAGS, and name them appropriately
 jagsData = modSexDf %>%
   filter(!is.na(modBranch)) %>%
-  mutate(mpgBranch = as.integer(as.factor(MPG))) %>%
+  mutate(popNum = as.integer(as.factor(TRT))) %>%
   select(f = F,
          tags = nSexed,
-         mpgBranch) %>%
+         popNum) %>%
   as.list()
 
 ```
@@ -104,7 +98,7 @@ Then we set which parameters to save with JAGS, and run the model.
 
 ```{r}
 # set parameters to save
-jagsParams = c('p', 'mu', 'sig', 'mu_pop', 'sig_pop')
+jagsParams = c('p', 'mu', 'sig', 'mu_ilogit')
 
 # run JAGS model
 mod = jags(data = jagsData,
@@ -115,6 +109,11 @@ mod = jags(data = jagsData,
            n.burnin = 5000,
            n.thin = 20,
            verbose = F)
+
+# mod2 = glmer(cbind(F, M) ~ 1 + (1 | TRT),
+#              data = modSexDf,
+#              family = binomial)
+
 ```
 
 # Model Output
@@ -125,57 +124,29 @@ We can take a quick look at a summary of the model:
 summary(mod)
 ```
 
-If that looks OK, we can make a few plots showcasing the output. This one shows the estimates of female proporations for each model branch, color coded by MPG. The point shows the posterior mean, the thick lines show the 25-75th quantiles, and the thinner lines show the 95% credible intervals. 
+If that looks OK, we can make a plot showcasing the output. The one below shows the estimates of female proporations for each TRT population, color coded by MPG, as well as the overall average proportion for the Snake River DPS. The point shows the posterior mean, the thick lines show the 50% credible intervals, and the thinner lines show the 95% credible intervals. 
 
 ```{r}
 # female proportion by model branch, colored by MPG
 mod$summary %>%
   as_tibble(rownames = 'param') %>%
   filter(grepl('^p', param)) %>%
-  mutate(brnchNum = str_extract(param, '[[:digit:]]+'),
-         brnchNum = as.integer(brnchNum)) %>%
-  left_join(modSexDf %>%
-              filter(!is.na(MPG)) %>%
-              mutate(brnchNum = 1:n())) %>%
-  mutate(modBranch = fct_reorder(modBranch, mean)) %>%
-  ggplot(aes(x = modBranch,
-             y = mean,
-             color = MPG)) +
-  geom_linerange(aes(ymin = `2.5%`,
-                     ymax = `97.5%`)) +
-  geom_linerange(aes(ymin = `25%`,
-                     ymax = `75%`),
-                 size = 2) +
-  geom_point(size = 4) +
-  geom_hline(yintercept = 0.5,
-             linetype = 2) +
-  scale_color_brewer(palette = 'Set1') +
-  theme_bw() +
-  coord_flip() +
-  theme(legend.position = 'bottom') +
-  labs(y = 'Female Proportion',
-       x = 'Model Branch',
-       title = paste(spp, yr))
-```
-
-
-We can also look at the estimates of average female proportion by MPG ($\mu_{pop}$) and overall ($\mu$).
-
-```{r}
-# average female proporations by MPG (and overall)
-mod$summary %>%
-  as_tibble(rownames = 'param') %>%
-  filter(grepl('^mu', param)) %>%
   mutate(popNum = str_extract(param, '[[:digit:]]+'),
          popNum = as.integer(popNum)) %>%
   left_join(modSexDf %>%
-              filter(!is.na(MPG)) %>%
-              select(MPG) %>%
-              distinct() %>%
-              mutate(popNum = 1:n())) %>%
-  mutate(MPG = fct_reorder(MPG, mean)) %>%
-  mutate(MPG = fct_explicit_na(MPG, 'Overall')) %>%
-  ggplot(aes(x = MPG,
+              filter(!is.na(TRT)) %>%
+              mutate(popNum = jagsData$popNum),
+            by = 'popNum') %>%
+  bind_rows(mod$summary %>%
+              as_tibble(rownames = 'param') %>%
+              filter(param == 'mu_ilogit')) %>%
+  mutate_at(vars(MPG, TRT, modBranch),
+            list(fct_explicit_na),
+            na_level = 'Overall') %>%
+  mutate(TRT = fct_reorder(TRT, mean),
+         TRT = fct_relevel(TRT, 'Overall',
+                           after = 0)) %>%
+  ggplot(aes(x = TRT,
              y = mean,
              color = MPG)) +
   geom_linerange(aes(ymin = `2.5%`,
@@ -186,13 +157,11 @@ mod$summary %>%
   geom_point(size = 4) +
   geom_hline(yintercept = 0.5,
              linetype = 2) +
-  scale_color_brewer(palette = 'Set2') +
+  scale_color_brewer(palette = 'Set3') +
   theme_bw() +
   coord_flip() +
   theme(legend.position = 'bottom') +
   labs(y = 'Female Proportion',
-       x = 'MPG',
+       x = 'TRT Population',
        title = paste(spp, yr))
-
 ```
-
