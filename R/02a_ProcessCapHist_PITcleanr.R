@@ -142,8 +142,12 @@ for(yr in 2010:2018) {
   
   cat(paste('Starting year', yr, '\n'))
   
-  # start date is July 1 of the previous year
-  startDate = paste0(yr-1, '0701')
+  # start date is July 1 of the previous year for steelhead, or March 1 of current year for Chinook
+  startDate = if_else(spp == 'Steelhead',
+                      paste0(yr-1, '0701'),
+                      if_else(spp == 'Chinook',
+                              paste0(yr, '0301'),
+                              NULL))
   
   # build parent-child table
   parent_child = createParentChildDf(site_df,
@@ -170,7 +174,7 @@ for(yr in 2010:2018) {
   # for Chinook, remove some observations from basins we don't expect Chinook to go to
   if(spp == 'Chinook') {
     proc_list$ProcCapHist %<>%
-      filter(!Group %in% c('Asotin', 'Potlatch', 'JosephCreek', 'Lapwai', 'CarmenCreek'))
+      filter(!Group %in% c('Asotin', 'Lapwai', 'Potlatch', 'JosephCreek', 'CowCreek', 'CarmenCreek', 'Almota', 'Alpowa', 'Penawawa'))
       
   }
   
