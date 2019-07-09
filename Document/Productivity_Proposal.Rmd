@@ -1,0 +1,181 @@
+---
+title: Framework to Estimate Snake Basin Steelhead and Chinook Population Abundance
+  and Productivity
+author:
+- Ryan N. Kinzer and Rick Orme^[Nez Perce Tribe]
+- Chris Beasley, Kevin See and Mike Ackerman^[Biomark ABS]
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  word_document: default
+  pdf_document:
+    latex_engine: pdflatex
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- ## Objective -->
+<!-- Estimate adult natural-origin steelhead and Chinook salmon population abundance and productivity indicators for 5-year status assessments using PIT-tag observations; including unbiased estimates of uncertainty. -->
+
+<!-- ## Background -->
+<!-- Accurate and precise abundance estimates for various steelhead demographic groups (e.g., populations, females, males, age groups) is necessary in building brood tables, understanding productivity trends and to ensure proper species management. Multiple approaches and statistical models (i.e., SCOBI, Box-Car, STADEM, DABOM) are used to provide abundance estimates for steelhead demographic groups within the Snake River basin, however, each approach either falls short of providing abundance for all necessary groups, lack statistical robustness for estimating unbiased uncertainty, or rely on too many assumptions that may become easily violated. The goal of this effort is to identify a single comprehensive and integrated statistical framework for estimating abundance and productivity trends for Snake River basin steelhead status assessments; using a single approach for all populations that uses existing methods if appropriate, and adheres to the principal of parsimony when possible (i.e., uses the simplest approach that requires the fewest assumptions). -->
+
+<!-- Two approaches to estimate Snake River basin population abundance of natural-origin fish include the SCOBI/Box-Car method and STADEM-DABOM method. The SCOBI/Box-Car method first decomposes Lower Granite abundance into genetic stocks with the SCOBI model (Camacho 2018), then moves fish downstream and upstream past sport and tribal fisheries assuming stock based harvest rates, and finally splits genetic stocks into spawning populations using ICTRT intrinsic potential estimates (Stark XXXX). The second method combines STADEM and DABOM model outputs (See et al. 2016). STADEM estimates total natural-origin abundance passing Lower Granite Dam, then, estimates are partitioned into population abundances with DABOM using observations of PIT-tagged fish reaching spawning locations. -->
+
+<!-- Both population abundance estimation approaches have flaws. The SCOBI/Box-Car approach currently does not quantify uncertainty, it assumes harvest impacts with sparse information, and partitions abundance using intrinsic potential estimates with unknown accuracy. The STADEM-DABOM approach does not cover all Snake River basin populations (e.g., Upper Middle Fork Salmon, Little Salmon River) because of missing PIT-tag detection oppurtunities. The STADEM-DABOM approach also fails to partition population abundances into sex and age demographic groups necessary to build brood tables and/or to estimate productivity.    -->
+
+<!-- Other methods exist that estimate pieces to understanding population abundance, productivity and life-history metrics. Powell et al. (2018) estimated demographic proportions for each population using PIT-tag observations used in DABOM population proportions. And Knoth et al. (2018) used a variety of data collection techniques (e.g., weirs, redd counts, in-stream PIT antennas) and analysis methods to create a comprehensive population report with juvenile and adult abundance and productivity metrics. Similar to the above two methods, however, Powell et al. and Knoth et al. methods had flaws.  Powell et al. only estimated proportions of each Snake River basin population demographic and, they did not carry proportions through to estimate abundance. And while Knoth et al. had a comprehensive report methods used varyied widely and not all populations were reported. -->
+
+<!-- Developed methods in isolation do not provide desired population abundance and productivity estimates with unbiased uncertainty, however, current approaches can be combined to achieve the desired estimates. PIT-tag based models developed by See et al. provide a simple approach with minimal assumptions for estimating population abundance. Demographic group abundance for each population can be obtained by calculating the precision around Powell et al. estimated group proportions and multiplying with STADEM/DABOM abundance estimates.  -->
+
+## Background
+PIT-tagging and biological sampling at Lower Granite Dam provides a simple, scientifically defensible, and cost efficient approach to estimating and understanding status and trends of fish populations returning to key spawning locations. The approach also provides a consistent methodology, placing population estimates on equal footing, for conducting trend comparisons across Snake River basin populations.  Previously developed PIT-tag based models adhere to the principal of parsimony (i.e., use the simplest approach that requires the fewest assumptions for meeting the objective), which, is generally recognized as the best approach (Coelho et al. 2018) for ecological modeling applications with a specific and known target (i.e., estimating population indicators). Together, the developed PIT-tag based abundance models, STADEM and DABOM, inform fisheries managers of the abundance of fish returning to the Snake River (Lower Granite Dam) and of those escaping in basin fisheries and surviving to spawning locations. Abundance is estimated from direct observations of tagged fish returning to known spawnings locations without making unnessary assumptions; examples of unnecessary assumptions include migration corridor conditions or fish straying behavior. The developed models only require basic mark-recapture assumptions (See et al. 2016) that are widely accepted and common place in animal marking studies and two other main assumptions; 1) all fish returning to the same population have similar run-timing past Lower Granite Dam, and 2) the most upstream tag detection location represents the location or area of spawning. These same PIT-tag observations used in the DABOM model, combined with biological sampling information collected at Lower Granite Dam, can also provide fisheries managers with valuable life history metrics for each population (Powell et al. 2018). Thus, eliminating the need for additional data collection and the required funds, data processing and QA/QC, and further modeling assumptions regarding life history group survival differences during migration. Additional, by simply combining the two metrics estimated from the same PIT-tag observation dataset (i.e., abundance and life history proportions) biologists can develop run-reconstruction brood tables and estimate productivity efficiently. 
+
+In addition to being the simplest, most cost effective, regionally consistent and statistically robust approach for estimating population status and trends, the previously developed PIT-tag based approaches yield unbiased estimates of uncertainty. The level of uncertainty surrounding status and trend metrics is absolutely necessary for fisheries managers and provide a guage to the true state of the population in question. Without uncertainty surrounding status and trend estimates, an unknown amount of risk is tied to each management decision regarding the population. The STADEM/DABOM approach estimates uncertainty in population indicators by including all available sources of error in Lower Granite abundance estimates and tag observations using a state-space modeling approach (See et al. 2016). Kinzer et al. (2017) showed the estimated uncertainty around population abundance was unbiased with coverage probabilities matching desired alpha levels. And although Powell et al. (2018) did not report uncertainty around estimated life history metrics, variance calculations for proportion are well known (Agresti 2002; Casella and Berger 2002) and have reliable statistical properties. Once variances are calculated for life history metrics we can use common variance properties to produce uncertainty around brood table components and adult-to-adult productivity values thus giving fisheries managers the tools necessary for sound and confident decision making.
+
+This document serves as a draft outline of the methods necessary to estimate Snake River basin steelhead and Chinook salmon population abundance and productivity with uncertainty by integrating available models. Model integration is explicitly defined in this document and provide fisheries managers with a framework and path forward to estimate the abundance of various life history groups (e.g., females, age classes) within populations with sufficient PIT-tag monitoring, and for developing population productivity estimates with uncertainty. We propose using a regionally consistent framework that takes full advantage of the existing sampling and tagging effort at Lower Granite Dam and the current PIT tag detection infrastructure to estimate and report fish population indicators and metrics for the purpose of ESA status assessments by adapting the STADEM and DABOM models to integrate with life history information.
+
+## Methodology
+
+### Abundance
+Weekly main tributary branch abundance is estimated by combining the posterior distributions of wild escapement $(w)$ past Lower Granite Dam for each weekly $(t)$ time period, $(X_{w,t})$, from STADEM with weekly movement probabilities, $(\psi_{j,t})$, into each main tributary branch $(j)$ from DABOM. Total tributary branch abundance is then estimated by summing across the product for all $n$ weeks.
+
+
+$$
+\hat{N}_{j} = \sum^{n}_{t=1} X_{w,t} \psi_{j,t}
+$$
+
+
+Population spawner abundance is obtained by summing across all main branch estimates that belong to population $Pop$.
+ 
+
+$$
+\hat{N}_{Pop} = \sum_{j \in Pop} \hat{N}_{j}
+$$
+
+
+### Life History
+Female proportions $(f_{j})$ for each main branch can be estimated using a hierarchical logistic regression model and the sex $(s)$ of all unique PIT-tagged fish $(x_{i,j,s})$ observed in the branch.
+
+
+$$
+logit(\frac{f_{j}}{1-f_{j}}) = \alpha_{j} + \beta_{j}x_{i,j,s}
+$$
+
+Where $\alpha_{j}$ and $\beta_{j}$ parameters come from normal distributions that have a common mean $(\mu)$ and standard deviation $(\sigma)$ for all branches.
+
+$$
+\begin{aligned}
+\alpha_{j} &\sim Normal(\mu_{\alpha}, \sigma_{\alpha}) \\
+\beta_{j} &\sim Normal(\mu_{\beta}, \sigma_{\beta})
+\end{aligned}
+$$
+
+Proportions of each age group $(a)$ within branches can be estimated using a multinomial distribution, and the age determined from Lower Granite scale analaysis of all unique PIT-tagged fish observed in each main branch $(x_{i,j,a})$. 
+
+$$
+x_{i,j,a} \sim MultiNom(A_{j,a})
+$$
+
+Where $(A_{j,a})$ is a vector of all age classes returning to branch $j$. Each age class proportion is derived from a uniform dirichlet hyper-distribution.
+
+$$
+A_{j,a} \sim Dir(1,.....,1)
+$$
+
+### Productivity
+After branch proporitons are estimated for each life history group, abundance is estimated for groups by multiplying posterior distributions of branch abundance $(\hat{N}_{j})$ with the desired life history proportions, $\hat{f}_{j}$ or $(A_{j,a})$, and summed across all branches within a population to obtain population level estimates.
+
+$$
+\begin{aligned}
+\hat{N}_{Pop,f} &= \sum_{j \in Pop} \hat{N}_{j} \hat{f}_{j} \\ 
+\hat{N}_{Pop,a} &= \sum_{j \in Pop} \hat{N}_{j} \hat{A}_{j,a}
+\end{aligned}
+$$
+
+Brood tables and adult to adult productivity $(P)$ estimates are then formed by summing age classes of returning fish (i.e., recruits; $R$) belonging to similar brood years $(BY)$ and dividing by the estimated population spawner abundance $(\hat{N}_{BY,Pop})$ for the same year.
+
+$$
+\begin{aligned}
+\hat{R}_{BY,Pop} &= \sum_{a \in BY} \hat{N}_{Pop,a} \\
+\hat{P}_{BY,Pop} &= \frac{\hat{R}_{BY,Pop}}{\hat{N}_{BY,Pop}}
+\end{aligned}
+$$
+
+
+### Proportion of Hatchery Origin Spawners
+The proportion of hatchery origin spawner abundance $(pHOS)$ contributing to natural spawning is often needed for status assessments and other management needs.  Using only fish PIT-tag as juveniles for each hatchery stock observed at tributary in-stream PIT-tag antennas $(n^{Trib}_{Stock})$, and hatchery stock abundance at Lower Granite Dam from parent-based tagging $(\hat{N}^{LGD}_{Stock})$ we can estimate $pHOS$ assuming a consistent PIT-tagged to un-tagged ratio. The estimate of population level $\hat{pHOS}_{Pop}$ is derived by first calculating the abundance of each hatchery stock $(\hat{N}^{Trib}_{Pop,Stock})$ returning to population tributaries.
+
+$$
+\hat{N}^{Trib}_{POP,Stock} = \frac{n^{Trib}_{POP,Stock}\hat{N}^{LGD}_{Stock}}{n^{LGD}_{Stock}}
+$$
+
+Then, total hatchery returns to a population is the sum across hatchery stocks in a population.
+
+$$
+\hat{N}_{Pop,Hat} = \sum_{Stock \in Pop} \hat{N}^{Trib}_{POP,Stock}
+$$
+
+And, $\hat{pHOS}_{Pop}$ becomes ratio of all hatchery fish returning to the population, minus brood stock removals and tributary harvest, divided by total (i.e., hatchery and natural) fish returning. 
+
+$$
+\hat{pHOS}_{Pop} = \frac{\hat{N}^{Trib}_{Pop,Hat}-(BroodStock + Harvest)}{\hat{N}^{Trib}_{Pop,Hat}+\hat{N}^{Trib}_{POP,Nat}}
+$$
+
+<!-- Consequently, the amount of hatchery stock straying $(\hat{S}_{Stock})$ to other populations can be estimated as the sum of all returns to non-target populations divided by the total stock abundance at Lower Granite Dam.  -->
+
+<!-- $$ -->
+<!-- \hat{S}_{Stock} = \frac{\sum_{Stock \notin Pop} \hat{N}^{Trib}_{POP,Stock}} {\hat{N}^{LGD}_{Stock}} -->
+<!-- $$ -->
+<!-- **NOT SURE WE WANT TO INCLUDE B/C OF GSI**
+Straying for natural stocks can be estimated by assuming genetic stock identificaion assignments are unbiased and accurate. Where  -->
+
+<!-- $$ -->
+<!-- \hat{S}_{Nat,Pop} = \frac{n^{PIT}_{GSI,Other Array}}{(n^{PIT}_{GSI,Other Array}+n^{PIT}_{GSI,Correct Array})} -->
+<!-- $$ -->
+
+## Tasks to Complete Before July 24th
+  1.  Create new/consistent PITcleanR processed capture history files for all years using the 2017 site diagram; excludes sites installed after 2017 (e.g., upper Lochsa and Selway, Wenaha, Minam).  **Done**
+
+  2.  Using new capture history files generate final spawn locations with PITcleanR.  **Started**
+
+  3.  Re-run DABOM to get abundance estimates generated from a consistent site diagram and JAGS model. **Started**
+
+  4.  Build and run hierarchical models to estimate female and age proportions for all years with uncertainty using final spawn locations from PITcleanR.
+
+  5.  Construct run-reconstruction/brood tables with uncertainty by multiplying life history proportions and abundance estimates for each population.
+
+  6.  Estimate population pHOS using parent-based tagging numbers at Lower Granite and PIT-tags observed.
+
+
+
+## Comments-Talking Points for Jason V. with Lance H.
+1. The above outline is merely a proof of concept and is missing important details (e.g. broodstock and harvest removal in tributary); we anticipate a more detailed and complete product on July 24th for full group discussion. 
+
+2. Our goal before the July 24th meeting is to further develop the modeling framework and statistical equations for review, produce a draft sensitivity analysis to test statistical properties (e.g., expected uncertainty around productivity estimates), and produce actual results for review.
+
+3. Participants include Biomark ABS staff (Chris Beasley, Kevin See, Mike Ackerman), NPT staff (Rick Orme, Ryan Kinzer) and IDFG staff (if interested, potential folks could include; Tim Copeland, Matt Campbell, Eric Stark, Brian Knoth, or new John Powell).
+      
+      * We want to be cautious of participant's time, yet, remain focused on producing results for the July 24th discussion. Participation is contingent on being available to spend considerable time during the next few weeks to meet the goal.  
+
+4. PIT-tag Run-Decomposition Method - Estimating abundance and productivity indicators for status assessment needs was an original goal of this PIT-tag based modeling effort from the beginning under the ISEMP contract. NPT was sub-contracted to assist in the development of abundance models and to report abundance estimates (Rick Orme). IDFG was sub-contracted to provide life-history metrics of PIT-tagged fish through genetic sex determination and scale analysis (Matt Campbell's group). Abundance and life-history metrics were then going to be combined to create productivity estimates for status assessment needs, and reported in a collaborative multi-entity report for the entriety of the Snake River Basin TRT populations. The full integrated approach has never been completed, and the collaborative report has never been implemented, although this is the simplest, most efficient and consistent across the entire region.
+
+5. IDFG Steelhead and Chinook Monitoring Reports - Instead of the agreed to Collaborative Report, IDFG began producing steelhead and Chinook population monitoring reports in select tributaries, using data collected from multiple entities, without co-manager collaboration, for the purpose of providing status assessment information (examples include: Knoth et al. 2018, Felts et al. 2018).
+
+>"The purpose of this report is to develop and summarize population level information to evaluate the status of wild adult steelhead populations in Idaho.  Population abundance, productivity and life history information are key data to information DSP viability and management. This is the third year in which we assembled all wild adult steelhead information collected state-wide under one cover".
+
+`r tufte::quote_footer('---Knoth et al. 2018')`
+
+The Steelhead and Chinook monitoring reports are IDFG project centric and is not a regionally consistent methodology, does not include all the TRT population being currently monitored with PIT-tags in Idaho, and also excludes monitored populations in Oregon and Washington (only includes populaitons with weirs or PIT arrays paired with IDFG screw traps).
+
+6. Steelhead Run Reconstruction/Box-Car Method - Another IDFG driven process, Stark et al. (2018), has developed a run-reconstruction approach that is currently being proposed as the method of choice for steelhead status assessments.  The effort produces a collaborative report in authorship only to recognize data sources. However, the methods were developed by IDFG without co-manager collaboration, yet, authorship is mis-leading and suggests co-managers support the methods and resulting estimates. This run-reconstruction method relies on GSI estimates, harvest mortality and encounter rate assumptions, and the distribution of GSI groupings into population specific abundances using TRT's habitat intrinsic potential maps. This methodology is complex and relies on numerous unvalidated assumptions. In addition, we strongly believe that GSI estimates are only a gross and very inaccurate estimate of wild stock abundance at Lower Granite Dam, and should not be used to estimate tributary or population abundance.  Additionally, the current GSI methodology provides a biased estimate of uncertainty by ignoring error associated with total Lower Granite abundance and genetic stock assignment. As such, it does not make sense to use GSI based population estimates when other methods are available (i.e., PIT-tag based approaches).    
+
+6. Co-managers need to decide if we should provide a single estimate for population status assessment needs or continue to produce multiple estimates using different methodology. If a single estimate is chosen, method development and reporting should be a multi-entity collaborative process. And further, to best protect the resources method selection should be based on the best available science and not previous reporting responsibilities, data collecting agencies, cost, or from concerns over future funding. Alternatively co-managers may decide different methods are necessary to meet different purposes, and choose to provide multiple estimates for each population which would allow data consumers, regulatory and funding agencies, and general users to select methods that are best matched for their needs. 
+
+    * Current Independent Approaches to Population Status Assessment Metrics
+      * Proposed PIT-tag Run-Decomposition Method: IDFG Genetics Lab, NPT and Biomark ABS
+      * Idaho Adult Steelhead and Chinook Monitoring: IDFG Research
+      * Snake River Basin Steelhead Run-Reconstruction: IDFG Research

@@ -1,0 +1,25 @@
+
+model {
+  
+  for(i in 1:length(f)) {
+    f[i] ~ dbin(p[i], tags[i])
+    p[i] <- ilogit(logit_p[i])    
+
+    logit_p[i] ~ dnorm(mu_pop[mpgBranch[i]], tau_pop)
+
+# to remove MPG hierarchy, comment out line above and use the line below
+    # logit_p[i] ~ dnorm(mu, tau)
+  }
+
+  for(j in 1:max(mpgBranch)) {
+    mu_pop[j] ~ dnorm(mu, tau)
+  }
+
+  mu ~ dnorm(0, 0.001)
+  sig ~ dunif(0, 100)
+  tau <- pow(sig, -2)
+
+  sig_pop ~ dunif(0, 100)
+  tau_pop <- pow(sig_pop, -2)
+
+}
