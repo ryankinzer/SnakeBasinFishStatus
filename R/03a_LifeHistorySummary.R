@@ -245,10 +245,10 @@ for(yr in 2010:2018) {
        SexRatio = modSexDf,
        AgeFreq = modAgeDf,
        BroodYear = modBrdYrDf) %>%
-    WriteXLS(paste0('output/tagSummaries/LGR_', spp, '_', yr, '.xlsx'),
+    WriteXLS(paste0('data/output/tagSummaries/LGR_', spp, '_', yr, '.xlsx'),
              AdjWidth = T,
              BoldHeaderRow = T,
-             AutoFilter = T,
+             AutoFilter = F,
              FreezeRow = 1)
   
   rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df, detectSites)
