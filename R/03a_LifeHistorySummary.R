@@ -201,6 +201,8 @@ for(yr in 2010:2018) {
                                   '.*:'),
            swAge_tmp = str_replace_all(swAge_tmp,
                                        'S', '1'),
+           swAge_tmp = str_replace_all(swAge_tmp,
+                                       's', '1'),
            swAge_tmp = str_split(swAge_tmp, '')) %>%
     mutate(swAge = map_int(swAge_tmp,
                            .f = function(x) sum(as.integer(x)))) %>%
