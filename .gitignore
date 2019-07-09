@@ -2,3 +2,16 @@
 .Rhistory
 .RData
 .Ruserdata
+
+GSI/
+NotShared/
+TrappingDBase/
+
+CleanedProcHist/
+CompleteTagHistories/
+ConfigurationFiles/
+LifeHistoryData/
+output/
+PreppedData/
+ValidTagLists/
+PBTData/
