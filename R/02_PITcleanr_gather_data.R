@@ -16,7 +16,7 @@ source('./R/loadLGTrappingDBase.R')
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
 spp = 'Steelhead'  # either 'Chinook' or 'Steelhead'
-yr = 2018        # tagging operations started in spawn year 2009
+yr = 2016        # tagging operations started in spawn year 2009
 
 #------------------------------------------------------------------------------
 # Download all PTAGIS interrogation and MRR sites, antennas and configuations,
@@ -161,25 +161,16 @@ write.csv(parent_child,
 ## Get valid tags from Lower Granite trapping database and relavent fields,
 # and saves a .txt file of tag codes for upload into PTAGIS complete tag 
 # history query
-#
-# retrieves all specified species and spawn year,
-#                        returning adults (LGDLifeStage = RF)
-#                        LGDValid = 1,
-#                         LGDMarkAD = AI
-#                       fish with tag codes.
-#
-#  AND ONLY INCLUDES SRR = 15X (trap call not PTAGIS mark call) 
-#       if species = 'Chinook';
-#    spring/summer chinook catch at trap MUST BE CALLED SRR = '15X'
 #------------------------------------------------------------------------------
 
-trapDB_filepath <- './data/LGTrappingExportJodyW.accdb'
-con <- loadLGTrappingDBase(trapDB_filepath)
+# Export .csv file from access database
+#trapDB_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
+#con <- loadLGTrappingDBase(trapDB_filepath)
 
-trap_df <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
-write_csv(trap_df, path = 'data/tblLGDMasterCombineExportJodyW.csv')
+#trap_df <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
+#write_csv(trap_df, path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
 
-trap_filepath = './data/tblLGDMasterCombineExportJodyW.csv'
+trap_filepath = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
 
 valid_df = filterLGRtrapDB(trap_path = trap_filepath,
                            species = spp,
@@ -197,39 +188,6 @@ observations$`Antenna ID` <- str_pad(observations$`Antenna ID`, 2, pad = '0')
 #------------------------------------------------------------------------------
 # Combines node names with raw PTAGIS observations and runs cleaning/processing
 # algorithms
-#
-# returns a list with 5 objects
-# 1. ValidPaths - path of fish from GRA to each Node; created with parent child table and 
-#                   the getValidPaths() functions
-# 2. NodeOrder - metadata for each Node - possible DABOM model information and parameter settingss
-#                     runs from createNodeOrder(), writeLGRNodeNetwork(), createParentChildDf control
-#                     much of the DABOM groups and model landscape
-# 3. ValidTrapData - LowerGraniteDB for the correct species and spawnyear and no 'H' in SRR
-# 4. ValidObs - duplicates in ValidTrapData removed and trap date is min(CollectionDate),
-#                 LGR trap data is combined with observation data and Nodes are assigned,
-#                 observations are also truncated to only valid nodes and obs dates and 
-#                 the extra detections at a site (min obs date within an uninterupted sequence by node.)
-# 5. ProcCapHist - from writeCapHistOutput(), has processed observations using two seperate
-#               cleaning algorithms, direction of travel and migration direction
-#
-# Fix/add max date to ProcCapHist object which comes from writeCapHistOutput().
-#    need Obsdate to be minObsdate at the node and need to include a 
-#    maxObsdate at the node for each detection sequence.
-#
-# Fix ModelObs call - which comes from the writeSpwnPaths or assignNodes
-#     need to flag all fish seen in two branches
-#
-# Fix maxUpDate field from writeSpwnPaths() could be incorrect if a fish moves downstream
-# and then goes partially back up, maybe just flag observations for reveiw
-#
-# Fix truncate = F, currently doesn't run.
-#
-# Fix save_file portion if we think its needed. Change in function to save as .csv
-#
-# Fix filter_by_PBT to include/exclude wild, hnc
-#
-# step_num = points to main branch column in site_df - NEEDS TO BE 3
-# filter_by_PGT = removes all 'XXH' from SRR field in Lower Granite DB
 #------------------------------------------------------------------------------
 
 proc_list = processCapHist_LGD(species = spp,
@@ -243,11 +201,47 @@ proc_list = processCapHist_LGD(species = spp,
                                site_df = site_df,
                                step_num = 3,
                                save_file = F,
-                               file_name = paste0('data/ProcCapHist_', spp, '_', yr, '.csv'))
+                               file_name = paste0('data/PreppedData/ProcCapHist_', spp, '_', yr, '.csv'))
 
 # save list object as data frame for saving
 proc_ch <- proc_list$ProcCapHist %>%
   as_tibble()
+
+#------------------------------------------------------------------------------
+# The code below is all wrapped in the processCapHist_LGD function above.  I 
+# have listed out each step below to assist in debugging, and to improve the
+# understanding of the black-box.
+#------------------------------------------------------------------------------
+# cat("Constructing valid pathways\n")
+# valid_paths = getValidPaths(parent_child)
+# 
+# if (class(valid_paths) == "character") {
+#   print(paste("The following nodes returned an error:", 
+#               paste(valid_paths, collapse = ", ")))
+#   return(NULL)
+# }
+# 
+# cat("Filtering trap database\n")
+# trap_df = filterLGRtrapDB(trap_path, species, spawnYear)
+# if (filter_by_PBT) {
+#   trap_df = trap_df %>% filter(!grepl("H$", SRR))
+# }
+# 
+# cat("Getting valid tags\n")
+# valid_tag_df = trap_df %>% group_by(TagID = LGDNumPIT) %>% 
+#   summarise(TrapDate = min(CollectionDate, na.rm = T))
+# 
+# cat("Assigning nodes\n")
+# valid_obs = assignNodes(valid_tag_df, observations, configuration, 
+#                         parent_child, truncate)
+# 
+# cat("Creating node order\n")
+# node_order = createNodeOrder(valid_paths = valid_paths, configuration = configuration, 
+#                              site_df = site_df, step_num = step_num)
+# 
+# cat("Processing assigned nodes\n")
+# save_df = writeCapHistOutput(valid_obs, valid_paths, node_order, 
+#                              last_obs_date, save_file, file_name)
 
 #------------------------------------------------------------------------------
 # Save Data
@@ -255,6 +249,10 @@ proc_ch <- proc_list$ProcCapHist %>%
 write.csv(proc_ch, 
      file = paste0('./data/PreppedData/ProcCapHist_NULL_', spp, '_', yr,'.csv'),
      row.names = FALSE)
+
+# add items to proc_list
+proc_list$parent_child <- parent_child
+proc_list$site_df <- site_df
 
 # save entire list to feed into DABOM package
 save(proc_list,

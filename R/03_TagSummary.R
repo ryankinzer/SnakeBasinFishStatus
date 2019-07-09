@@ -1,7 +1,8 @@
 
 #------------------------------------------------------------------------------
 # Read in processed observation data after final biologist call is made.
-# Then summarize for final spawn location and IDFG genetic work.
+# Then summarize for final spawn location, and sex and age summaries. GSI
+# comparisons can also be made with PIT-tag observations.
 #------------------------------------------------------------------------------
 
 library(tidyverse)
@@ -21,9 +22,17 @@ load(paste0('data/PreppedData/LGR_', spp, '_', yr,'.rda'))
 proc_ch = read_excel(paste0('./data/CleanedProcHist/LGR_',spp,'_EDITTED_',yr,'.xlsx')) %>%
   mutate(TrapDate = ymd(TrapDate),
          ObsDate = ymd_hms(ObsDate),
-         lastObsDate = ymd_hms(lastObsDate)) %>%
-  filter(ModelObs=='TRUE')
+         lastObsDate = ymd_hms(lastObsDate),
+         AutoProcStatus = as.logical(AutoProcStatus),
+         UserProcStatus = as.logical(UserProcStatus),
+         ModelObs = as.logical(ModelObs),
+         ValidPath = as.logical(ValidPath)) %>%
+  filter(ModelObs)
 
+
+#------------------------------------------------------------------------------
+# Check auto processed calls against user/biologist call.
+#------------------------------------------------------------------------------
 call_diff <- proc_ch %>%
   mutate(call_diff = case_when(
     AutoProcStatus != UserProcStatus ~ 1,
@@ -49,12 +58,58 @@ zero_tags <- proc_list$NodeOrder %>%
   arrange(Group)
 # nodes with zero tags that have observations in proc_list$ValidObs
 miss_obs <- inner_join(zero_tags, proc_list$ValidObs, by = 'Node') %>%
-  group_by(Group, SiteID, Node)# %>%
-#  summarise(n = n_distinct(TagID))
+  group_by(Group, SiteID, Node) %>%
+  summarise(n = n_distinct(TagID))
 
-parent_child = read.csv(paste0('./data/ConfigurationFiles/parent_child_',spp,'_',yr,'.csv'))
-site_df <- read.csv(paste0('./data/ConfigurationFiles/site_df_',spp,'_',yr,'.csv'))
+#------------------------------------------------------------------------------
+# Node efficiencies
+#------------------------------------------------------------------------------
+eff <- estNodeEff(proc_ch, proc_list$NodeOrder)
 
-valid_paths <- getValidPaths(parent_child, 'GRA')
-node_order <- createNodeOrder(valid_paths, proc_list$my_config, site_df, step_num = 3)
-eff <- estNodeEff(proc_ch, node_order)
+
+#------------------------------------------------------------------------------
+# Life History Summary - for IDFG and summarizing sex, age and GSI representation
+#------------------------------------------------------------------------------
+
+lifehistory_summ = summariseTagData(capHist_proc = proc_ch,
+                                    trap_data = proc_list$ValidTrapData) %>%
+  mutate(equal_robots = ifelse(PtagisEventLastSpawnSite == AssignSpawnSite, TRUE,FALSE),
+         equal_robots = ifelse(AssignSpawnNode == 'GRA', TRUE, equal_robots),
+         equal_robots = ifelse(is.na(equal_robots), FALSE, equal_robots))
+
+#------------------------------------------------------------------------------
+# what is the agreement with IDFG
+#------------------------------------------------------------------------------
+
+# proportion of final spawn sites that disagree
+length(which(!lifehistory_summ$equal_robots))/length(lifehistory_summ$equal_robots)
+
+# number of final spawn sites that disagree
+length(which(!lifehistory_summ$equal_robots))
+
+# save file for IDFG Genetics Lab
+write.csv(lifehistory_summ, 
+          file = paste0('./data/LifeHistoryData/lifehistory_summ_', spp, '_', yr,'.csv'))
+
+not_equal <- lifehistory_summ %>%
+  filter(!equal_robots) %>%
+  select(TagID:TagPath, contains('Ptagis'))
+
+#------------------------------------------------------------------------------
+# Save Data
+#------------------------------------------------------------------------------
+
+proc_list[["life_hist"]] <- lifehistory_summ
+proc_list[["sex"]]
+proc_list[["age"]]
+# save entire list to feed into DABOM package
+save(proc_list,
+     file = paste0('data/PreppedData/LGR_', spp, '_', yr,'_',timestp,'.rda'))
+
+
+
+
+
+#------------------------------------------------------------------------------
+# Sex Ratios
+#------------------------------------------------------------------------------
