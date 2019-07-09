@@ -76,7 +76,7 @@ spp = 'Steelhead'
 yr = 2014
 
 # where are the tag summaries stored?
-tagSummDir = '../output/tagSummaries/'
+tagSummDir = '../data/output/tagSummaries/'
 
 # read in data
 modSexDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
