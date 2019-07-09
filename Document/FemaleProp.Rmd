@@ -39,7 +39,7 @@ where $f_i$ is the number of females observed in a branch, $N_i$ is the total nu
 We write this model in the JAGS language.
 
 ```{r}
-modelNm = '../data/modelFiles/FemalePropJAGS.txt'
+modelNm = '../ModelFiles/FemalePropJAGS.txt'
 
 modelCode = '
 model {
