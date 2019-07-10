@@ -76,10 +76,10 @@ spp = 'Steelhead'
 yr = 2014
 
 # where are the tag summaries stored?
-tagSummDir = '../data/output/tagSummaries/'
+filepath <- './data/LifeHistoryData/'
 
 # read in data
-modSexDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
+modSexDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
                       'SexRatio',
                       progress = F)
 
