@@ -12,12 +12,17 @@ library(magrittr)
 library(forcats)
 library(STADEM)
 
-## Trap database
+# set up folder structure
+stademFolder = 'STADEM_results'
+if(!dir.exists(stademFolder)) {
+  dir.create(stademFolder)
+}
+
+## Requires a copy of the Lower Granite Dam Trap Database and the odbc driver
 source('./R/loadLGTrappingDBase.R')
-trap_filepath <- './data/LGTrappingExportJodyW.accdb'
-trap_dbase <- loadLGTrappingDBase(trap_filepath)
-# uses STADEM function
-trap_dbase <- readLGRtrapDB(trap_filepath)
+trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
+con <- loadLGTrappingDBase(trapDB_filepath)
+trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
 
 # set species and spawn year
 species = c('Chinook', 'Steelhead')  # either Chinook or Steelhead
@@ -77,19 +82,7 @@ for(i in 1:length(species)){
     
     # save results
     save(stadem_mod, stadem_list,
-         file = paste0('./STADEM_results/LGR_STADEM_', spp, '_', yr, '.rda'))
+         file = paste0(stademFolder,'/LGR_STADEM_', spp, '_', yr, '.rda'))
     
   } # close j loop
 } # close i loop
-
-spp <- 'Chinook'
-yr <- 2018
-load(paste0('./STADEM_results/LGR_STADEM_', spp, '_', yr, '.rda'))
-
-library(tidyverse)
-df <- week_df %>%
-  mutate(month = month(Start_Date))
-
-df %>%
-  group_by(month) %>%
-  summarise(mu = mean(trap_rate, na.rm = TRUE))
