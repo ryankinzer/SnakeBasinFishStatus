@@ -13,6 +13,13 @@ library(readxl)
 library(WriteXLS)
 library(PITcleanr)
 
+
+# set up folder structure
+LifeHistory = 'data/LifeHistoryData' # for processed files
+if(!dir.exists(LifeHistory)) {
+  dir.create(LifeHistory)
+}
+
 #-----------------------------------------------------------------
 # what sites are in which GSI boundaries - SHOULD BE PITCLEANR FUNCTION!!!!
 gsiSites = read_excel('data/GSI/SITE-NODE meta data.xlsx',
@@ -248,7 +255,7 @@ for(yr in 2010:2018) {
        SexRatio = modSexDf,
        AgeFreq = modAgeDf,
        BroodYear = modBrdYrDf) %>%
-    WriteXLS(paste0('data/output/tagSummaries/LGR_', spp, '_', yr, '.xlsx'),
+    WriteXLS(paste0(LifeHistory,'/LGR_', spp, '_', yr, '.xlsx'),
              AdjWidth = T,
              BoldHeaderRow = T,
              AutoFilter = F,

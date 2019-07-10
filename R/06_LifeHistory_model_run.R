@@ -55,7 +55,7 @@ filepath <- './data/LifeHistoryData/'
 
 # Set species and Spawn Year
 spp = 'Steelhead'
-#yr = 2010
+#yr = 2018
 
 #------------------------------------------------------------------------------
 # Run Sex Model
@@ -68,7 +68,7 @@ modSexDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
                       progress = F)
 
 # pull out relevant bits for JAGS, and name them appropriately
-jagsData = modSexDf %>%
+sex_jagsData = modSexDf %>%
   filter(!is.na(modBranch)) %>%
   mutate(popNum = as.integer(as.factor(TRT))) %>%
   select(f = F,
@@ -80,7 +80,7 @@ jagsData = modSexDf %>%
 jagsParams = c('p', 'mu', 'sig', 'mu_ilogit')
 
 # run JAGS model
-sex_mod = jags(data = jagsData,
+sex_mod = jags(data = sex_jagsData,
            parameters.to.save = jagsParams,
            model.file = modelNm,
            n.chains = 3,
@@ -89,7 +89,7 @@ sex_mod = jags(data = jagsData,
            n.thin = 20,
            verbose = F)
 
-save(spp, yr, sex_mod, modSexDf,
+save(sex_mod, sex_jagsData, modSexDf,
      file = paste0(SexFolder, '/Population_SexProp_', spp, '_', yr, '.rda'))
 }
 
