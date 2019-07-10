@@ -1,0 +1,329 @@
+---
+title: "Age Proportions - Steelhead"
+author: "Kevin See"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+    html_notebook:
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setUp_options, echo = F, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+# Introduction
+
+This work is to estimate age frequencies within each TRT population covered by DABOM, so we can combine that with escapement estimates and get an estimate of escapement by brood year to each branch and population. We started with cleaned observations from PITcleanr, which Rick Orme then finalized.
+
+```{r, message=FALSE}
+# load needed libraries
+library(tidyverse)
+library(readxl)
+library(jagsUI)
+```
+
+# Hierarchical Model
+
+Because some branches have many more fish returning to them than others, we wanted to develop a hierarchical model that would allow for some borrowing of information from larger branches to smaller branches, to avoid skewing the age frequencies due solely to small sample sizes in some branches. We are ultimately trying to estimate the proportion of ages at the TRT population scale, so we focused our model to be able to do that. Our model looks like:
+
+\begin{aligned}
+A_i &\sim Mn(\pi_{pop_i}, N_i) \\
+\end{aligned}
+
+where $A_i$ is the vector of age classes observed in a branch, $N_i$ is the total number of aged tags observed in that branch, and $\pi_{pop_i}$ is the vector of proportion of ages for the population containing model branch $i$ (the quantity of interest). 
+
+We then imposed some hierarchy by assuming that the vector of age proportions for each branch, $\pi_{pop_i}$, is drawn from a multivarite logistic normal distribution, with mean vector $\mu$ and covariance matrix $\Sigma$.
+
+$$
+\text{alr}(\pi_{pop_i}) \sim MVN(\mu, \Sigma)
+$$
+
+where the additive log ratio transformation is $\text{alr}(\pi_i) = \left(\log(\frac{p_{i,a_2}}{p_{i, a_1}}), ..., \log(\frac{p_{i,a_{max}}}{p_{i, a_1}}) \right)$. This formulation requires the choice of a reference age, so that the lenght of $\mu$ is one less than the total number of ages observed. We chose to use the smallest age, age 2, as the reference age. 
+
+We write this model in the JAGS language.
+
+```{r non-hierarchical, eval = F}
+modelNm = '../ModelFiles/AgePropJAGS_simp.txt'
+
+modelCode = '
+data {
+  D <- dim(ageMat)
+}
+
+model {
+
+  for(i in 1:D[1]) {
+    ageMat[i,] ~ dmulti(pi[popNum[i],], tags[i])
+  }
+
+  for(k in 1:D[2]) {
+    alpha[k] <- 1
+  }
+
+  for(j in 1:max(popNum)) {
+    pi[j,1:D[2]] ~ ddirch(alpha[1:D[2]])
+  }
+
+}'
+
+cat(modelCode,
+    file = modelNm)
+```
+
+
+```{r hierarchical, eval = T}
+modelNm = '../ModelFiles/AgePropJAGS_hier.txt'
+
+modelCode = '
+data {
+  D <- dim(ageMat)
+}
+
+model {
+  
+  for(i in 1:D[1]) {
+    ageMat[i,] ~ dmulti(pi[popNum[i],], tags[i])
+  }
+
+  # multivariate logistic normal transformation to make it hierarchical
+  for(j in 1:max(popNum)) {
+    p[j, 1] <- 0
+    p[j,2:D[2]] ~ dmnorm(mu[1:(D[2] - 1)], Tau[1:(D[2] - 1), 1:(D[2] - 1)])
+    
+    sum_exp_p[j] <- sum(exp_p[j,])
+
+    for(k in 1:D[2]) {
+      exp_p[j,k] = exp(p[j, k])
+      pi[j, k] <- exp(p[j, k]) / sum_exp_p[j]
+    }
+  }
+  
+  # transform mu back to proportions
+  muProp[1] = 0
+  for(i in 2:D[2]) {
+    muProp[i] = mu[i-1]
+  }
+  sum_exp_mu = sum(exp_mu)
+  for(i in 1:D[2]) {
+    exp_mu[i] = exp(muProp[i])
+    avgPi[i] = exp_mu[i] / sum_exp_mu
+  }
+
+  # Cauchy prior on the MVN mean vector
+  for(i in 1:(D[2] - 1)) {
+    mu[i] ~ dt(0, 0.001, 1)
+  }
+  # Priors on the precision matrix
+  Tau ~ dwish(R, k)
+  k <- D[2] + 1
+
+}'
+
+
+cat(modelCode,
+    file = modelNm)
+```
+
+# Prepare Data
+
+We read the data in from PITcleanr summaries that have been generated previously.
+
+```{r}
+# set species
+spp = 'Steelhead'
+# set year
+yr = 2014
+
+# where are the tag summaries stored?
+tagSummDir = '../data/output/tagSummaries/'
+
+# read in data
+modAgeDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
+                      'AgeFreq',
+                      progress = F)
+
+# pull out relevant bits for JAGS, and name them appropriately
+jagsData = modAgeDf %>%
+  filter(!is.na(modBranch)) %>%
+  mutate(popNum = as.integer(as.factor(TRT))) %>%
+  select(tags = nAged,
+         popNum) %>%
+  as.list()
+
+jagsData$ageMat = modAgeDf %>%
+  filter(!is.na(modBranch)) %>%
+  select(starts_with('age')) %>%
+  as.matrix()
+
+# drop ages with no observed fish in them
+if(sum(colSums(jagsData$ageMat) == 0) > 0) {
+  jagsData$ageMat = jagsData$ageMat[,!colSums(jagsData$ageMat) == 0]
+}
+
+jagsData$R = diag(1, ncol(jagsData$ageMat) - 1)
+
+```
+
+Then we set which parameters to save with JAGS, and run the model.
+
+```{r}
+# set parameters to save
+jagsParams = c('pi', 'mu', 'Tau', 'avgPi')
+
+# run JAGS model
+mod = jags(data = jagsData,
+           parameters.to.save = jagsParams,
+           model.file = modelNm,
+           n.chains = 3,
+           n.iter = 20000,
+           n.burnin = 10000,
+           n.thin = 20,
+           # parallel = T,
+           verbose = F)
+
+```
+
+# Model Output
+
+We can take a quick look at a summary of the model:
+
+```{r}
+summary(mod)
+```
+
+If that looks OK, we can make a plot showcasing the output. The one below shows the estimates of female proporations for each TRT population, as well as the overall average proportions for the Snake River DPS. 
+
+```{r}
+# age proportions for each TRT population
+mod$summary %>%
+  as_tibble(rownames = 'param') %>%
+  filter(grepl('^pi', param)) %>%
+  mutate(popNum = str_extract(param, '[:digit:]+'),
+         age = str_split(param, ',', simplify = T)[,2],
+         age = str_remove(age, '\\]')) %>%
+  mutate_at(vars(popNum, age),
+            list(as.integer)) %>%
+  mutate(age = age + 1) %>%
+  select(popNum, age, prop = mean) %>%
+  # spread(age, mean) %>%
+  left_join(modAgeDf %>%
+              filter(!is.na(TRT)) %>%
+              mutate(popNum = jagsData$popNum) %>%
+              select(popNum, MPG:TRT) %>%
+              distinct(),
+            by = 'popNum') %>%
+  select(popNum, MPG, TRT, age, prop) %>%
+  # add overall average age proportions
+  bind_rows(mod$summary %>%
+              as_tibble(rownames = 'param') %>%
+              filter(grepl('^avgPi', param)) %>%
+              mutate(age = str_extract(param, '[:digit:]+'),
+                     age = as.integer(age),
+                     age = age + 1) %>%
+              mutate(TRT = 'Overall',
+                     MPG = 'Overall') %>%
+              select(MPG, TRT, age, prop = mean)) %>%
+  mutate_at(vars(MPG:age),
+            list(as.factor)) %>%
+  mutate(MPG = fct_relevel(MPG, 'Overall'),
+         TRT = fct_relevel(TRT, 'Overall')) %>%
+  ggplot(aes(x = TRT,
+             y = prop,
+             fill = age)) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  scale_fill_brewer(palette = 'Set1') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = 'Age',
+       y = 'Proportion',
+       title = paste(spp, yr))
+
+
+```
+
+The plot below shows the observed age proportions plotted against the predicted ones, colored by MPG.
+
+```{r}
+mod$summary %>%
+  as_tibble(rownames = 'param') %>%
+  filter(grepl('^pi', param)) %>%
+  mutate(popNum = str_extract(param, '[:digit:]+'),
+         age = str_split(param, ',', simplify = T)[,2],
+         age = str_remove(age, '\\]')) %>%
+  mutate_at(vars(popNum, age),
+            list(as.integer)) %>%
+  mutate(age = age + 1) %>%
+  left_join(modAgeDf %>%
+              filter(!is.na(TRT)) %>%
+              mutate(popNum = jagsData$popNum) %>%
+              mutate_at(vars(starts_with('age')),
+                        list(~ . / nAged)) %>%
+              gather(age, obsProp, starts_with('age')) %>%
+              mutate(age = str_remove(age, 'age'),
+                     age = as.integer(age))) %>%
+  filter(obsProp > 0) %>%
+  ggplot(aes(x = obsProp,
+             y = mean,
+             color = MPG)) +
+  geom_abline(linetype = 2) +
+  geom_point(aes(size = nAged)) +
+  theme_bw() +
+  facet_wrap(~ age,
+             scales = 'free') +
+  labs(x = 'Observed',
+       y = 'Predicted',
+       size = '# Aged')
+
+```
+
+
+
+```{r, eval = F}
+mod$summary %>%
+  as_tibble(rownames = 'param') %>%
+  filter(grepl('^avgPi', param)) %>%
+  mutate(age = str_extract(param, '[:digit:]+'),
+         age = as.integer(age),
+         age = age + 1) %>%
+  mutate_at(vars(age),
+            list(~as.factor(as.character(.)))) %>%
+  mutate(TRT = 'Overall',
+         MPG = 'Overall') %>%
+  ggplot(aes(x = TRT,
+             y = mean,
+             fill = age)) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  scale_fill_brewer(palette = 'Set1') +
+  coord_flip() +
+  theme_bw() +
+  theme(axis.title.y = element_blank()) +
+  labs(fill = 'Age',
+       y = 'Proportion',
+       title = paste(spp, yr, '- Overall'))
+
+mod$sims.list$avgPi %>%
+  as_tibble() %>%
+  gather(age, prop) %>%
+  mutate(age = str_remove(age, 'V'),
+         age = as.integer(age),
+         age = age + 1) %>%
+  mutate_at(vars(age),
+            list(as.factor)) %>%
+  ggplot(aes(x = age, 
+             y = prop,
+             fill = age)) +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  stat_summary(geom = 'point',
+               fun.y = mean,
+               show.legend = F) +
+  scale_fill_brewer(palette = 'Set1',
+                    guide = 'none') +
+  theme_bw() +
+  labs(fill = 'Age',
+       x = 'Age',
+       y = 'Proportion')
+```
+

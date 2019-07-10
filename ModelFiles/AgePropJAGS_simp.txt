@@ -1,0 +1,20 @@
+
+data {
+  D <- dim(ageMat)
+}
+
+model {
+
+  for(i in 1:D[1]) {
+    ageMat[i,] ~ dmulti(pi[popNum[i],], tags[i])
+  }
+
+  for(k in 1:D[2]) {
+    alpha[k] <- 1
+  }
+
+  for(j in 1:max(popNum)) {
+    pi[j,1:D[2]] ~ ddirch(alpha[1:D[2]])
+  }
+
+}
