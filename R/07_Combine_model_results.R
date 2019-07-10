@@ -14,6 +14,7 @@ library(PITcleanr)
 library(DABOM)
 library(WriteXLS)
 source('./R/definePopulations.R')
+source('./R/summarisePosterior.R')
 
 # set up folder structure
 AbundanceFolder = 'Abundance_results' # for processed files
@@ -144,9 +145,9 @@ pop_post <- left_join(N_pop, p_pop, by = c('TRT', 'iter')) %>%
   mutate(N_females = N * p)
 
 
-N_pop_summ <- summarisePosterior(df, N, TRT)
-p_f <-summarisePosterior(df, p, TRT)
-N_f_summ <-summarisePosterior(df, N_females, TRT)
+N_pop_summ <- summarisePosterior(pop_post, N, TRT)
+p_f <- summarisePosterior(pop_post, p, TRT)
+N_f_summ <-summarisePosterior(pop_post, N_females, TRT)
   
 
 
@@ -168,7 +169,7 @@ N_f_summ <-summarisePosterior(df, N_females, TRT)
 
 
 save(detect_summ,trans_summ, wk_trans_summ, trib_summ, report_summ,
-     file = paste0(AbundanceFolder'/LGR_PIT_estimates_',timestp,'.rda'))
+     file = paste0(AbundanceFolder, '/LGR_PIT_estimates_',timestp,'.rda'))
 
 #------------------------------------------------------------------------------
 # Load model run/estimates
