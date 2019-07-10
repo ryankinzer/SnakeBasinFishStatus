@@ -41,7 +41,7 @@ timestp <- gsub('[^0-9]','', Sys.Date())
   load(file = paste0('./DABOM_results/',tmp_file))
   
   load(paste0('./Sex_results/Population_SexProp_',spp,'_',yr,'.rda'))
-  #load(paste0('./Age_results/Population_AgeProp_',spp,'_',yr,'.rda'))
+  load(paste0('./Age_results/Population_AgeProp_',spp,'_',yr,'.rda'))
 
 #------------------------------------------------------------------------------
 ## Gather Detection Probabilities
@@ -98,6 +98,8 @@ pop_df <- definePopulations(spp)
 #------------------------------------------------------------------------------
 ## Gather Posterior Estimates -- NEED TO WORK ON!!!!!
 #------------------------------------------------------------------------------
+# how many samples from each posterior?
+nSamps = 1000
 
 # abundance at main branches, upstream sites and black-boxes
 abundance_post = calcTribEscape_LGD(dabom_mod,
@@ -130,28 +132,67 @@ sex_post <- sex_mod$sims.list$p %>%
               mutate(popNum = sex_jagsData$popNum),
             by = 'popNum')
 
+age_post <- age_mod$sims.list$pi %>%
+  as.data.frame.table() %>%
+  as_tibble() %>%
+  rename(iter = Var1,
+         popNum = Var2,
+         age = Var3,
+         ageProp = Freq) %>%
+  mutate_at(vars(iter, popNum, age),
+            list(as.integer)) %>%
+  mutate(age = age + 1) %>%
+  left_join(modAgeDf %>%
+              filter(!is.na(TRT)) %>%
+              mutate(popNum = age_jagsData$popNum) %>%
+              select(popNum, MPG:TRT) %>%
+              distinct(),
+            by = 'popNum')
+
 N_pop <- N_post %>%
   group_by(TRT) %>%
-  sample_n(size = 1000, replace = T) %>%
+  sample_n(size = nSamps, replace = T) %>%
   mutate(iter = 1:n())
 
 p_pop <- sex_post %>%
   group_by(TRT) %>%
-  sample_n(1000, replace = T) %>%
-  mutate(iter = 1:n())
+  sample_n(nSamps, replace = T) %>%
+  mutate(iter = 1:n()) %>%
+  select(iter, TRT, p)
 
+age_pop <- age_post %>%
+  mutate(age = paste0('age', age)) %>%
+  spread(age, ageProp) %>%
+  group_by(TRT) %>%
+  sample_n(nSamps, replace = T) %>%
+  mutate(iter = 1:n()) %>%
+  select(iter, TRT, starts_with('age'))
 
-pop_post <- left_join(N_pop, p_pop, by = c('TRT', 'iter')) %>%
-  mutate(N_females = N * p)
+pop_post <- N_pop %>%
+  left_join(p_pop, 
+            by = c('TRT', 'iter')) %>%
+  left_join(age_pop,
+            by = c('TRT', 'iter')) %>%
+  mutate(N_females = N * p) %>%
+  mutate_at(vars(starts_with('age')),
+            list(~ . * N))
 
 
 N_pop_summ <- summarisePosterior(pop_post, N, TRT)
-p_f <- summarisePosterior(pop_post, p, TRT)
-N_f_summ <-summarisePosterior(pop_post, N_females, TRT)
-  
+p_f <- summarisePosterior(pop_post, p, TRT, round = F)
+N_f_summ <- summarisePosterior(pop_post, N_females, TRT)
 
-
-
+age_summ <- summarisePosterior(pop_post, age2, TRT) %>%
+  mutate(age = 2) %>%
+  bind_rows(summarisePosterior(pop_post, age3, TRT) %>%
+              mutate(age = 3)) %>%
+  bind_rows(summarisePosterior(pop_post, age4, TRT) %>%
+              mutate(age = 4)) %>%
+  bind_rows(summarisePosterior(pop_post, age5, TRT) %>%
+              mutate(age = 5)) %>%
+  bind_rows(summarisePosterior(pop_post, age6, TRT) %>%
+              mutate(age = 6)) %>%
+  select(age, everything())
 
 
 # ggplot(pop_post, aes(x = N_females)) +
@@ -168,7 +209,7 @@ N_f_summ <-summarisePosterior(pop_post, N_females, TRT)
 
 
 
-save(detect_summ,trans_summ, wk_trans_summ, trib_summ, report_summ,
+save(detect_summ, trans_summ, wk_trans_summ, trib_summ, report_summ,
      file = paste0(AbundanceFolder, '/LGR_PIT_estimates_',timestp,'.rda'))
 
 #------------------------------------------------------------------------------
