@@ -4,6 +4,8 @@ author: "Kevin See"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
     html_notebook:
+      fig_width: 6
+      fig_height: 6
 editor_options: 
   chunk_output_type: inline
 ---
@@ -43,7 +45,7 @@ where the additive log ratio transformation is $\text{alr}(\pi_i) = \left(\log(\
 
 We write this model in the JAGS language.
 
-```{r non-hierarchical, eval = F}
+```{r non-hierarchical, eval = F, echo = F}
 modelNm = '../ModelFiles/AgePropJAGS_simp.txt'
 
 modelCode = '
@@ -228,15 +230,17 @@ mod$summary %>%
             list(as.factor)) %>%
   mutate(MPG = fct_relevel(MPG, 'Overall'),
          TRT = fct_relevel(TRT, 'Overall')) %>%
-  ggplot(aes(x = TRT,
+  ggplot(aes(x = fct_rev(TRT),
              y = prop,
              fill = age)) +
   geom_bar(stat = 'identity',
            position = position_stack(reverse = T)) +
   scale_fill_brewer(palette = 'Set1') +
+  coord_flip() +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90)) +
   labs(fill = 'Age',
+       x = 'TRT',
        y = 'Proportion',
        title = paste(spp, yr))
 
@@ -280,7 +284,7 @@ mod$summary %>%
 
 
 
-```{r, eval = F}
+```{r, eval = F, echo = F}
 mod$summary %>%
   as_tibble(rownames = 'param') %>%
   filter(grepl('^avgPi', param)) %>%
