@@ -27,14 +27,14 @@ summarisePosterior <- function(data, summary_var, group_var, pt_est_nm = NULL, c
               mode = estMode(!!summary_var),
               sd = sd(!!summary_var),
               cv = sd / mean) %>%
+    left_join(credInt,
+              by = 'TRT') %>%
     ungroup()
   
   if(round) {
     post_summ = post_summ %>%
       mutate_at(vars(mean, median, mode, sd),
                 funs(ifelse(. < 0, 0, .))) %>%
-      left_join(credInt,
-                by = 'TRT') %>%
       mutate_at(vars(mean, median, mode),
                 funs(round)) %>%
       mutate_at(vars(sd, lowerCI, upperCI),
