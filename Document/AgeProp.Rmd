@@ -33,13 +33,13 @@ A_i &\sim Mn(\pi_{pop_i}, N_i) \\
 
 where $A_i$ is the vector of age classes observed in a branch, $N_i$ is the total number of aged tags observed in that branch, and $\pi_{pop_i}$ is the vector of proportion of ages for the population containing model branch $i$ (the quantity of interest). 
 
-We then imposed some hierarchy by assuming that the vector of age proportions for each branch, $\pi_{pop_i}$, is drawn from a multivarite logistic normal distribution, with mean vector $\mu$ and covariance matrix $\Sigma$.
+We then imposed some hierarchy by assuming that the vector of age proportions for each branch, $\pi_{pop_i}$, is drawn from a multivariate logistic normal distribution, with mean vector $\mu$ and covariance matrix $\Sigma$.
 
 $$
 \text{alr}(\pi_{pop_i}) \sim MVN(\mu, \Sigma)
 $$
 
-where the additive log ratio transformation is $\text{alr}(\pi_i) = \left(\log(\frac{p_{i,a_2}}{p_{i, a_1}}), ..., \log(\frac{p_{i,a_{max}}}{p_{i, a_1}}) \right)$. This formulation requires the choice of a reference age, so that the lenght of $\mu$ is one less than the total number of ages observed. We chose to use the smallest age, age 2, as the reference age. 
+where the additive log ratio transformation is $\text{alr}(\pi_i) = \left(\log(\frac{p_{i,a_2}}{p_{i, a_1}}), ..., \log(\frac{p_{i,a_{max}}}{p_{i, a_1}}) \right)$. This formulation requires the choice of a reference age, so that the length of $\mu$ is one less than the total number of ages observed. We chose to use the smallest age, age 2, as the reference age. 
 
 We write this model in the JAGS language.
 
@@ -192,7 +192,7 @@ We can take a quick look at a summary of the model:
 summary(mod)
 ```
 
-If that looks OK, we can make a plot showcasing the output. The one below shows the estimates of female proporations for each TRT population, as well as the overall average proportions for the Snake River DPS. 
+If that looks OK, we can make a plot showcasing the output. The one below shows the estimates of female proportions for each TRT population, as well as the overall average proportions for the Snake River DPS. 
 
 ```{r}
 # age proportions for each TRT population
