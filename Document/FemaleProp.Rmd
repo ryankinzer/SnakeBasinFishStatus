@@ -39,7 +39,7 @@ where $f_i$ is the number of females observed in a branch, $N_i$ is the total nu
 We write this model in the JAGS language.
 
 ```{r}
-modelNm = '../data/modelFiles/FemalePropJAGS.txt'
+modelNm = '../ModelFiles/FemalePropJAGS.txt'
 
 modelCode = '
 model {
@@ -76,7 +76,7 @@ spp = 'Steelhead'
 yr = 2014
 
 # where are the tag summaries stored?
-tagSummDir = '../output/tagSummaries/'
+tagSummDir = '../data/output/tagSummaries/'
 
 # read in data
 modSexDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
