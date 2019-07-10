@@ -14,7 +14,7 @@ library(WriteXLS)
 library(PITcleanr)
 
 #-----------------------------------------------------------------
-# what sites are in which GSI boundaries
+# what sites are in which GSI boundaries - SHOULD BE PITCLEANR FUNCTION!!!!
 gsiSites = read_excel('data/GSI/SITE-NODE meta data.xlsx',
                       sheet = 'RO_org_config',
                       range = 'O5:T5749') %>%
@@ -82,7 +82,7 @@ rm(sthdPops)
 # set species
 spp = 'Steelhead'
 # set year
-# yr = 2014
+yr = 2014
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
@@ -119,7 +119,8 @@ for(yr in 2010:2018) {
     ungroup() %>%
     arrange(TagID, CollectionDate)
   
-  # deal with duplicated tags
+  # deal with duplicated tags - are these fallback and reascension tags?
+  # we could deal with this be changing our join in summariseTagData()
   dupTags = tagSumm %>%
     filter(nRec > 1)
   n_distinct(dupTags$TagID)
