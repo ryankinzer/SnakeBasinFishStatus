@@ -61,6 +61,14 @@ if(spp == 'Chinook') {
  }
 
 #------------------------------------------------------------------------------
+# Because HLM was giving us problems...
+# Switch Potlatch detections - move POTREF and POTRWF to HLMA0 with det = 1.0
+#------------------------------------------------------------------------------
+proc_ch <- proc_ch %>%
+  mutate(Node = ifelse(Node %in% c('POTREF', 'POTRWF'), 'HLMA0', Node))
+
+
+#------------------------------------------------------------------------------
 # Create default LGR branch occupancy JAGs model code.
 #------------------------------------------------------------------------------
 
@@ -89,12 +97,6 @@ fixNoFishNodes(basic_modNm,
                mod_path,
                proc_ch,
                proc_list$NodeOrder)
-
-#------------------------------------------------------------------------------
-# Switch Potlatch detections - move POTREF to HLMB0 with det = 1.0
-#------------------------------------------------------------------------------
- proc_ch <- proc_ch %>%
-   mutate(Node = ifelse(Node == 'POTREF', 'HLMB0', Node))
 
 #------------------------------------------------------------------------------
 # Create capture history matrices for each main branch to be used in 
