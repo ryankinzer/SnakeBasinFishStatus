@@ -80,7 +80,7 @@ jagsData = modSexDf %>%
 jagsParams = c('p', 'mu', 'sig', 'mu_ilogit')
 
 # run JAGS model
-mod = jags(data = jagsData,
+sex_mod = jags(data = jagsData,
            parameters.to.save = jagsParams,
            model.file = modelNm,
            n.chains = 3,
@@ -89,7 +89,7 @@ mod = jags(data = jagsData,
            n.thin = 20,
            verbose = F)
 
-save(spp, yr, mod, jagsData, modSexDf,
+save(spp, yr, sex_mod, modSexDf,
      file = paste0(SexFolder, '/Population_SexProp_', spp, '_', yr, '.rda'))
 }
 
