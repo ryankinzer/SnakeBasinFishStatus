@@ -228,12 +228,9 @@ for(yr in 2016:2018){
        file = paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', yr, '.rda'))
   
   # save summaries
-  save(N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ,
+  save(detect_summ, trans_summ, wk_trans_summ, trib_summ, N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ,
        file = paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', yr, '.rda'))
-  
-  
-  # save(detect_summ, trans_summ, wk_trans_summ, trib_summ, report_summ,
-  #      file = paste0(AbundanceFolder, '/LGR_PIT_estimates_',timestp,'.rda'))
+
 }
 
 #------------------------------------------------------------------------------
@@ -242,31 +239,45 @@ allSumm = as.list(2016:2018) %>%
   rlang::set_names() %>%
   map(.f = function(x) {
     load(paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', x[1], '.rda'))
-    list(N_pop_summ = N_pop_summ,
-         # p_f = p_f, 
+    list(detect_summ = detect_summ,
+         trib_summ = trib_summ,
+         N_pop_summ = N_pop_summ,
+         p_f = p_f, 
          N_f_summ = N_f_summ, 
-         # age_prop_summ = age_prop_summ, 
+         age_prop_summ = age_prop_summ, 
          age_summ = age_summ)
   })
+
+
+detect_all = allSumm %>%
+  map_df(.id = NULL,
+         .f = 'detect_summ')
+
+trib_all = allSumm %>%
+  map_df(.id = NULL,
+         .f = 'trib_summ')
 
 N_pop_all = allSumm %>%
   map_df(.id = NULL,
          .f = 'N_pop_summ')
 
+p_all = allSumm %>%
+  map_df(.id = NULL,
+         .f = 'p_f')
+
 N_f_all = allSumm %>%
   map_df(.id = NULL,
          .f = 'N_f_summ')
+
+age_prop_all = allSumm %>%
+  map_df(.id = NULL,
+         .f = 'age_prop_summ')
 
 age_all = allSumm %>%
   map_df(.id = NULL,
          .f = 'age_summ') %>%
   mutate(brood_yr = spawn_yr - age) %>%
   select(spawn_yr, species, brood_yr, everything())
-
-list('Total Esc' = N_pop_all,
-     'Female Esc' = N_f_all,
-     'Age Esc' = age_all) %>%
-WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries.xlsx'))
 
 #------------------------------------------------------------------------------
 # Build brood year tables
@@ -326,16 +337,15 @@ spawnRec_summ = spawnRec_post %>%
   select(species, brood_yr, TRT, S, R, lambda) %>%
   filter(!is.na(lambda))
 
+brood_table <- N_pop_all %>%
+  
+  
 
-#------------------------------------------------------------------------------
-# Load model run/estimates
-load('./DABOM_estimates/LGR_PIT_estimates_20180314.rda')
-
-library(WriteXLS)
-#testPerl()
-
-WriteXLS(x = c('detect_summ', 'trib_summ', 'report_summ'),
-         ExcelFileName = paste0('./DABOM_estimates/LGR_PIT_estimates_',timestp,'.xlsx'),
-         SheetNames = c('Detection_Eff','Site_ests','Population_ests'))
-
-#}
+list('Total Esc' = N_pop_all,
+     'Female Esc' = N_f_all,
+     'Age Esc' = age_all,
+     'Female Props' = p_all,
+     'Age Props' = age_prop_all,
+     'Site Esc' = trib_all,
+     'Detect Eff' = detect_all) %>%
+  WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries.xlsx'))
