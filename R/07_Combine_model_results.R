@@ -294,9 +294,9 @@ allBrYr = as.list(2016:2018) %>%
       filter(!is.na(age)) %>%
       mutate(brood_yr = spawn_yr - as.integer(str_remove(age, 'age')),
              Nage = N * ageProp) %>%
-      group_by(spawn_yr, TRT) %>%
-      select(spawn_yr, species, TRT, iter, brood_yr, N, Nage) %>%
-      ungroup()
+       #group_by(spawn_yr, TRT) %>%
+       #select(spawn_yr, species, TRT, iter, brood_yr, N, Nage) %>%
+       ungroup()
   })
 
 allBrYr %>%
@@ -337,13 +337,27 @@ spawnRec_summ = spawnRec_post %>%
   select(species, brood_yr, TRT, S, R, lambda) %>%
   filter(!is.na(lambda))
 
-brood_table <- N_pop_all %>%
-  
-  
+#-----------------------------------------------------------------------------
+# RK test
+brood_table <- allBrYr %>%
+  select(spawn_yr:iter, N) %>%
+  distinct() %>%
+  group_by(spawn_yr, species, TRT) %>%
+  summarise(S = median(N, na.rm=TRUE)) %>%
+  full_join(allBrYr %>%
+  group_by(brood_yr, species, TRT, age) %>%
+  summarise(Nage = median(Nage, na.rm=TRUE)) %>%
+  spread(age, Nage), by = c('spawn_yr' = 'brood_yr', 'species', 'TRT')) %>%
+  rename(brood_yr = spawn_yr) %>%
+  arrange(species, TRT, brood_yr) %>%
+  ungroup() %>%
+  mutate(R = rowSums(select(.,contains('age'))),
+         lambda = R/S)
 
 list('Total Esc' = N_pop_all,
      'Female Esc' = N_f_all,
      'Age Esc' = age_all,
+     'Brood Table' = brood_table,
      'Female Props' = p_all,
      'Age Props' = age_prop_all,
      'Site Esc' = trib_all,
