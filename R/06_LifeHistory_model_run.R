@@ -198,3 +198,55 @@ for(yr in 2010:2018){
   
   rm(age_mod, age_jagsData, modAgeDf)
 }
+
+#------------------------------------------------------------------------------
+# make an observed vs predicted age proportion plot, by population
+allAgeDf = as.list(2010:2018) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'Year',
+         .f = function(x) {
+           load(paste0(AgeFolder, '/Population_AgeProp_', spp, '_', x[1], '.rda'))
+           
+           age_mod$summary %>%
+             as_tibble(rownames = 'param') %>%
+             filter(grepl('^pi', param)) %>%
+             mutate(popNum = str_extract(param, '[:digit:]+'),
+                    age = str_split(param, ',', simplify = T)[,2],
+                    age = str_remove(age, '\\]')) %>%
+             mutate_at(vars(popNum, age),
+                       list(as.integer)) %>%
+             mutate(age = age + 1) %>%
+             left_join(modAgeDf %>%
+                         filter(!is.na(TRT)) %>%
+                         mutate(popNum = as.integer(as.factor(TRT))) %>%
+                         mutate_at(vars(starts_with('age')),
+                                   list(~ . / nAged)) %>%
+                         gather(age, obsProp, starts_with('age')) %>%
+                         mutate(age = str_remove(age, 'age'),
+                                age = as.integer(age)))
+         })
+
+age_ObsVsPred_p = allAgeDf %>%
+  filter(obsProp > 0) %>%
+  ggplot(aes(x = obsProp,
+             y = mean,
+             color = as.factor(age))) +
+  geom_abline(linetype = 2) +
+  geom_point(aes(size = nAged)) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  scale_color_brewer(palette = 'Set1') +
+  facet_wrap(~ TRT,
+             scales = 'free') +
+  labs(x = 'Observed',
+       y = 'Predicted',
+       title = 'Age Proportions',
+       color = 'Age',
+       size = '# Aged')
+
+age_ObsVsPred_p
+
+ggsave('Figures/ObsVsPred_AgeProp.pdf',
+       age_ObsVsPred_p,
+       width = 8,
+       height = 8)
