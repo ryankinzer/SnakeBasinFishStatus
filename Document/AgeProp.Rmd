@@ -35,7 +35,7 @@ A_i &\sim Mn(\pi_{pop_i}, N_i) \\
 
 where $A_i$ is the vector of age classes observed in a branch, $N_i$ is the total number of aged tags observed in that branch, and $\pi_{pop_i}$ is the vector of proportion of ages for the population containing model branch $i$ (the quantity of interest). 
 
-We then imposed some hierarchy by assuming that the vector of age proportions for each branch, $\pi_{pop_i}$, is drawn from a multivariate logistic normal distribution, with mean vector $\mu$ and covariance matrix $\Sigma$.
+We then imposed some hierarchy by assuming that the vector of age proportions for each branch, $\pi_{pop_i}$, is drawn from a multivariate logistic normal distribution, with mean vector $\mu$ and covariance matrix $\Sigma$. To account for the potential differences in age proportions between A-run and B-run populations, we used 2 different $\mu$ vectors, one for each type of population.
 
 $$
 \text{alr}(\pi_{pop_i}) \sim MVN(\mu, \Sigma)
@@ -74,7 +74,7 @@ cat(modelCode,
 ```
 
 
-```{r hierarchical, eval = T}
+```{r hierarchical, eval = F, echo = F}
 modelNm = '../ModelFiles/AgePropJAGS_hier.txt'
 
 modelCode = '
@@ -127,6 +127,64 @@ cat(modelCode,
     file = modelNm)
 ```
 
+```{r hierarchical_v2, eval = T, echo = T}
+modelNm = '../ModelFiles/AgePropJAGS_hier.txt'
+
+modelCode = '
+data {
+  D <- dim(ageMat)
+}
+
+model {
+  
+  for(i in 1:D[1]) {
+    ageMat[i,] ~ dmulti(pi[popNum[i],], tags[i])
+  }
+
+  # multivariate logistic normal transformation to make it hierarchical
+  for(j in 1:max(popNum)) {
+    p[j, 1] <- 0
+    p[j,2:D[2]] ~ dmnorm(mu[runType[j], 1:(D[2] - 1)], Tau[1:(D[2] - 1), 1:(D[2] - 1)])
+    
+    sum_exp_p[j] <- sum(exp_p[j,])
+
+    for(k in 1:D[2]) {
+      exp_p[j,k] = exp(p[j, k])
+      pi[j, k] <- exp(p[j, k]) / sum_exp_p[j]
+    }
+  }
+  
+  # transform mu back to proportions
+  for(j in 1:max(runType)) {
+    muProp[j,1] = 0
+    for(i in 2:D[2]) {
+      muProp[j,i] = mu[j,i-1]
+    }
+    sum_exp_mu[j] = sum(exp_mu[j,])
+    for(i in 1:D[2]) {
+      exp_mu[j,i] = exp(muProp[j,i])
+      avgPi[j,i] = exp_mu[j,i] / sum_exp_mu[j]
+    }
+  }
+
+  # Cauchy prior on the MVN mean vector
+  for(i in 1:(D[2] - 1)) {
+    for(j in 1:max(runType)) {
+      mu[j, i] ~ dt(0, 0.001, 1)
+    }
+  }
+  # Priors on the precision matrix
+  Tau ~ dwish(R, k)
+  k <- D[2] + 1
+
+}'
+
+
+cat(modelCode,
+    file = modelNm)
+```
+
+
 # Prepare Data
 
 We read the data in from PITcleanr summaries that have been generated previously.
@@ -138,7 +196,7 @@ spp = 'Steelhead'
 yr = 2014
 
 # where are the tag summaries stored?
-tagSummDir = '../data/output/tagSummaries/'
+tagSummDir = '../data/LifeHistoryData/'
 
 # read in data
 modAgeDf = read_excel(paste0(tagSummDir, 'LGR_', spp, '_', yr, '.xlsx'),
@@ -164,6 +222,25 @@ if(sum(colSums(jagsData$ageMat) == 0) > 0) {
 }
 
 jagsData$R = diag(1, ncol(jagsData$ageMat) - 1)
+
+
+# assign populations as A-run or B-run
+jagsData$runType = modAgeDf %>%
+  filter(!is.na(modBranch)) %>%
+  select(TRT) %>%
+  mutate(Run = if_else(TRT %in% c('CRLMA-s',
+                                  'CRLOC-s',
+                                  'CRLOL-s',
+                                  'CRSEL-s',
+                                  'CRSFC-s',
+                                  'MFBIG-s',
+                                  'SFMAI-s',
+                                  'SFSEC-s'),
+                       'B', 'A')) %>%
+  distinct() %>%
+  mutate(Run = as.factor(Run),
+         runType = as.integer(Run)) %>%
+  pull(runType)
 
 ```
 
@@ -217,19 +294,36 @@ mod$summary %>%
             by = 'popNum') %>%
   select(popNum, MPG, TRT, age, prop) %>%
   # add overall average age proportions
+  # bind_rows(mod$summary %>%
+  #             as_tibble(rownames = 'param') %>%
+  #             filter(grepl('^avgPi', param)) %>%
+  #             mutate(age = str_extract(param, '[:digit:]+'),
+  #                    age = as.integer(age),
+  #                    age = age + 1) %>%
+  #             mutate(TRT = 'Overall',
+  #                    MPG = 'Overall') %>%
+  #             select(MPG, TRT, age, prop = mean)) %>%
   bind_rows(mod$summary %>%
               as_tibble(rownames = 'param') %>%
               filter(grepl('^avgPi', param)) %>%
-              mutate(age = str_extract(param, '[:digit:]+'),
+              mutate(runType = str_extract(param, '[:digit:]'),
+                     runType = if_else(runType == 1, 'A', 
+                                       if_else(runType == 2, 
+                                               'B', as.character(NA))),
+                     age = str_sub(param, -2, -2),
                      age = as.integer(age),
                      age = age + 1) %>%
-              mutate(TRT = 'Overall',
-                     MPG = 'Overall') %>%
+              mutate_at(vars(runType),
+                        list(as.factor)) %>%
+              # mutate_at(vars(age),
+              #           list(~as.factor(as.character(.)))) %>%
+              mutate(TRT = paste0(runType, '-run'),
+                     MPG = paste0(runType, '-run')) %>%
               select(MPG, TRT, age, prop = mean)) %>%
   mutate_at(vars(MPG:age),
             list(as.factor)) %>%
-  mutate(MPG = fct_relevel(MPG, 'Overall'),
-         TRT = fct_relevel(TRT, 'Overall')) %>%
+  # mutate(MPG = fct_relevel(MPG, 'Overall'),
+  #        TRT = fct_relevel(TRT, 'Overall')) %>%
   ggplot(aes(x = fct_rev(TRT),
              y = prop,
              fill = age)) +
@@ -282,6 +376,60 @@ mod$summary %>%
 
 ```
 
+```{r}
+mod$summary %>%
+  as_tibble(rownames = 'param') %>%
+  filter(grepl('^avgPi', param)) %>%
+  mutate(runType = str_extract(param, '[:digit:]'),
+         runType = if_else(runType == 1, 'A', 
+                           if_else(runType == 2, 
+                                   'B', as.character(NA))),
+         age = str_sub(param, -2, -2),
+         age = as.integer(age),
+         age = age + 1) %>%
+  mutate_at(vars(runType),
+            list(as.factor)) %>%
+  mutate_at(vars(age),
+            list(~as.factor(as.character(.)))) %>%
+  mutate(TRT = 'Overall',
+         MPG = 'Overall') %>%
+  ggplot(aes(x = fct_rev(runType),
+             y = mean,
+             fill = age)) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  scale_fill_brewer(palette = 'Set1') +
+  coord_flip() +
+  theme_bw() +
+  # theme(axis.title.y = element_blank()) +
+  labs(fill = 'Age',
+       x = 'Run Type',
+       y = 'Proportion',
+       title = paste(spp, yr, '- Overall'))
+
+ggsave('../Figures/AvsB_muVec.png',
+       height = 5,
+       width = 8)
+
+mod$summary %>%
+  as_tibble(rownames = 'param') %>%
+  filter(grepl('^avgPi', param)) %>%
+  mutate(runType = str_extract(param, '[:digit:]'),
+         runType = if_else(runType == 1, 'A', 
+                           if_else(runType == 2, 
+                                   'B', as.character(NA))),
+         age = str_sub(param, -2, -2),
+         age = as.integer(age),
+         age = age + 1) %>%
+  mutate_at(vars(runType),
+            list(as.factor)) %>%
+  mutate_at(vars(age),
+            list(~as.factor(as.character(.)))) %>%
+  select(runType, age, mean) %>%
+  spread(age, mean) %>%
+  pander::pander()
+
+```
 
 
 ```{r, eval = F, echo = F}
