@@ -218,3 +218,75 @@ ggsave('Figures/ObsVsPred_AgeProp.pdf',
        age_ObsVsPred_p,
        width = 8,
        height = 8)
+
+# plot showing estimated age proportions (mean) for each TRT population, by year
+ageProp_p = allAgeDf %>%
+  select(Year, MPG, TRT, age, mean) %>%
+  distinct() %>%
+  ggplot(aes(x = fct_rev(TRT),
+             y = mean,
+             fill = as.factor(age))) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  scale_fill_brewer(palette = 'Set1') +
+  coord_flip() +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 5),
+        legend.position = 'bottom') +
+  facet_wrap(~ Year) +
+  labs(fill = 'Age',
+       x = 'TRT',
+       y = 'Proportion')
+
+ggsave('Figures/AgePropEst.pdf',
+       ageProp_p,
+       width = 8,
+       height = 8)
+
+
+muVecDf = as.list(2010:2018) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'Year',
+         .f = function(x) {
+           load(paste0('Age_results/Population_AgeProp_', spp, '_', x[1], '.rda'))
+           
+           age_mod$summary %>%
+             as_tibble(rownames = 'param') %>%
+             filter(grepl('^avgPi', param)) %>%
+             mutate(runType = str_extract(param, '[:digit:]'),
+                    runType = if_else(runType == 1, 'A', 
+                                      if_else(runType == 2, 
+                                              'B', as.character(NA))),
+                    age = str_sub(param, -2, -2),
+                    age = as.integer(age),
+                    age = age + 1) %>%
+             mutate_at(vars(runType),
+                       list(as.factor)) %>%
+             mutate_at(vars(age),
+                       list(~as.factor(as.character(.)))) %>%
+             mutate(TRT = paste0(runType, '-run'),
+                    MPG = paste0(runType, '-run'))
+         })
+
+muProp_p = muVecDf %>%
+  select(Year, TRT, age, mean) %>%
+  distinct() %>%
+  ggplot(aes(x = fct_rev(TRT),
+             y = mean,
+             fill = as.factor(age))) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  scale_fill_brewer(palette = 'Set1') +
+  coord_flip() +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 8),
+        legend.position = 'right') +
+  facet_wrap(~ Year) +
+  labs(fill = 'Age',
+       x = 'Run Type',
+       y = 'Proportion')
+
+ggsave('Figures/AvgAgePropEst_mu.pdf',
+       muProp_p,
+       width = 8,
+       height = 8)
