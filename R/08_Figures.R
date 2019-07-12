@@ -8,10 +8,11 @@ library(lubridate)
 library(PITcleanr)
 
 spp = 'Steelhead'
+yr_range = 2016:2018
 
 # Detection ------------------------------------------------------------------------------
 # make an observed vs predicted of detection probs.
-allEffDf = as.list(2016:2018) %>%
+allEffDf = as.list(yr_range) %>%
   rlang::set_names() %>%
   map_df(.id = 'spawn_year',
          .f = function(x) {
@@ -47,6 +48,8 @@ ggsave('Figures/ObsVsPred_DetectProp.pdf',
        height = 8)
 
 detect_p <- allEffDf %>%
+  filter(estimate != 0 & estimate != 1) %>%
+  filter(!is.na(Group)) %>%
   ggplot(aes(x = Node,
              y = estimate,
              color = Group,
@@ -57,10 +60,10 @@ detect_p <- allEffDf %>%
   geom_point(size = 2, position = position_dodge(width = .5)) +
   scale_colour_viridis_d() +
   coord_flip() +
-  facet_wrap(~spawn_year, scales = 'free_y', ncol = 3) +
+  facet_wrap(~spawn_year, scales = 'free', ncol = 3) +
   theme_bw() +
   theme(legend.position = 'bottom') +
-  labs(x = 'TRT',
+  labs(x = 'Node',
        y = 'Detection Probability',
        colour = 'Main Branch')
 
@@ -69,7 +72,37 @@ detect_p
 ggsave('Figures/DetectProp.pdf',
        detect_p,
        width = 8,
-       height = 15)
+       height = 10)
+
+# Abundance----
+# plot population abundance
+allAbundDf = as.list(yr_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x) {
+           load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
+           N_pop_summ
+         })
+
+pop_N <- allAbundDf %>%
+  ggplot(aes(x = TRT,
+             y = median,
+             color = spawn_year,
+             group = spawn_year)) +
+  geom_linerange(aes(ymin = lowerCI,
+                     ymax = upperCI),
+                 position = position_dodge(width = .5)) +
+  geom_point(size = 2, position = position_dodge(width = .5)) +
+  scale_colour_viridis_d() +
+  coord_flip() +
+  facet_wrap(~spawn_year, scales = 'free', ncol = 3) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Node',
+       y = 'Detection Probability',
+       colour = 'Main Branch')
+
+detect_p
 
 # Sex ------------------------------------------------------------------------------
 # make an observed vs predicted female proportion plot, by population
