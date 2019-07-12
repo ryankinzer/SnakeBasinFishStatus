@@ -3,85 +3,73 @@
 # Created: 7/12/19
 # Modified: 
 
+library(tidyverse)
+library(lubridate)
+library(PITcleanr)
+
 spp = 'Steelhead'
 
-load(file = paste0('DABOM_results/LGR_DABOM_Bio_', spp, '_', yr, '_20190304.rda'))
-
-# Detection Probabilities Directly from `DABOM`, we can extract estimates of
-# the detection probability of the observation nodes. These are average
-# probabiliities across the entire season of the run, and how these nodes match
-# up to actual arrays and antennas is defined in the configuration file.
-
-detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
-                                   capHist_proc = proc_list$proc_ch)
-head(detect_summ)
-
-# Detections Probs From PITcleanr
-config_filepath <- './data/ConfigurationFiles/my_config_20190304.csv'
-my_config <- read_csv(config_filepath)
-
-sitedf_filepath <- './data/ConfigurationFiles/site_df_20190304.csv'
-site_df <- read_csv(sitedf_filepath, col_types = cols(.default = 'c'))
-
-parentchild_filepath <- './data/ConfigurationFiles/parent_child_20190304.csv'
-parent_child <- read_csv(parentchild_filepath)
-
-valid_paths <- getValidPaths(parent_child, 'GRA')
-node_order <- createNodeOrder(valid_paths, my_config, site_df, step_num = 3)
-
-eff <- estNodeEff(proc_list$proc_ch, node_order, method = 'Chapman')
-
-eff_df <- left_join(detect_summ, eff, by = 'Node')
+# Detection ------------------------------------------------------------------------------
+# make an observed vs predicted of detection probs.
+allEffDf = as.list(2016:2018) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x) {
+           load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
+            
+           eff <- estNodeEff(filter(proc_list$ProcCapHist,UserProcStatus), node_order = proc_list$NodeOrder)    
+           
+           load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
+           
+           detect_summ %>%
+             left_join(eff, by = 'Node') %>%
+             left_join(proc_list$NodeOrder %>%
+                         select(Node, Group), by = 'Node')
+         })
 
 
-eff_df %>%
-  filter(Node != 'GRA') %>%
-  ggplot(aes(x = median, y = detEff, size = tagsAboveNode, size = n_tags)) +
+ObsPred_detect_p <- allEffDf %>%
+  filter(!detEff == 1 & !estimate == 1, !detEff == 0 & !estimate == 0) %>%
+  ggplot(aes(x = detEff, y = estimate, size = n_tags)) +
   geom_point()+
   geom_text(aes(label = Node),size = 2, hjust = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  theme_bw()
+  facet_wrap(~spawn_year) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Predicted with PITcleanR',
+       y = 'Predicted with DABOM',
+       size = 'Unique Tags Observed')
 
-eff_df %>%
-  filter(Node != 'GRA') %>%
-  ggplot(aes(x= n_tags, y = estTagsAtNode, size = n_tags)) +
-  geom_point()+
-  geom_text(aes(label = Node),size = 2, hjust = 2) +
-  geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  theme_bw()
+ggsave('Figures/ObsVsPred_DetectProp.pdf',
+       ObsPred_detect_p,
+       width = 8,
+       height = 8)
 
-# Estimate Escapement with **STADEM** and **DABOM**
+detect_p <- allEffDf %>%
+  ggplot(aes(x = Node,
+             y = estimate,
+             color = Group,
+             group = spawn_year)) +
+  geom_linerange(aes(ymin = lowerCI,
+                     ymax = upperCI),
+                 position = position_dodge(width = .5)) +
+  geom_point(size = 2, position = position_dodge(width = .5)) +
+  scale_colour_viridis_d() +
+  coord_flip() +
+  facet_wrap(~spawn_year, scales = 'free_y', ncol = 3) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'TRT',
+       y = 'Detection Probability',
+       colour = 'Main Branch')
 
-load(paste0('STADEM_results/LGR_STADEM_', spp, '_', yr, '.rda'))
+detect_p
 
-# compiles posteriors of escapement
-trib_summ = calcTribEscape_LGD(dabom_mod,
-                               stadem_mod,
-                               stadem_param_nm = 'X.new.wild',
-                               bootstrap_samp = 5, #2000
-                               node_order = proc_list$NodeOrder,
-                               summ_results = T,
-                               pt_est_nm = 'median',
-                               cred_int_prob = 0.95)
-
-report_summ = calcRepGrpEscape_LGD(dabom_mod = dabom_mod,
-                                   stadem_mod = stadem_mod,
-                                   node_order = proc_list$NodeOrder,
-                                   pt_est_nm = 'median',
-                                   spp = spp)
-
-#------------------------------------------------------------------------------
-## Save Results to an excel file - CURRENTLY NOT WORKING!!!
-#------------------------------------------------------------------------------
-list('Report Groups' = report_summ,
-     'All Escapement' = trib_summ,
-     'Detection' = detect_summ) %>%
-  WriteXLS(ExcelFileName = paste0('DABOM_results/Escapement_', spp, '_', yr, '.xlsx'),
-           AdjWidth = T,
-           AutoFilter = T,
-           BoldHeaderRow = T,
-           FreezeRow = 1)
-
+ggsave('Figures/DetectProp.pdf',
+       detect_p,
+       width = 8,
+       height = 15)
 
 # Sex ------------------------------------------------------------------------------
 # make an observed vs predicted female proportion plot, by population
