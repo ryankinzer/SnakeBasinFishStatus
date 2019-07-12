@@ -6,9 +6,12 @@
 library(tidyverse)
 library(lubridate)
 library(PITcleanr)
+source('./R/site_trt_designations.R')
 
 spp = 'Steelhead'
 yr_range = 2016:2018
+
+# Need GSI to PIT Comparisons!!!
 
 # Detection ------------------------------------------------------------------------------
 # make an observed vs predicted of detection probs.
@@ -18,14 +21,18 @@ allEffDf = as.list(yr_range) %>%
          .f = function(x) {
            load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
             
-           eff <- estNodeEff(filter(proc_list$ProcCapHist,UserProcStatus), node_order = proc_list$NodeOrder)    
+           eff <- estNodeEff(filter(proc_list$ProcCapHist,UserProcStatus), node_order = proc_list$NodeOrder)  
+           
+           trt_df <- site_trt_designations(spp, configuration)
            
            load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
            
            detect_summ %>%
              left_join(eff, by = 'Node') %>%
              left_join(proc_list$NodeOrder %>%
-                         select(Node, Group), by = 'Node')
+                         select(Node, Group), by = 'Node') %>%
+             left_join(trt_df %>%
+                         select(Node, MPG, TRT) %>% distinct(), by = 'Node')
          })
 
 
@@ -80,8 +87,15 @@ allAbundDf = as.list(yr_range) %>%
   rlang::set_names() %>%
   map_df(.id = 'spawn_year',
          .f = function(x) {
+           
+           load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
            load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
-           N_pop_summ
+           
+           trt_df <- site_trt_designations(spp, configuration)
+           
+           N_pop_summ %>%
+           left_join(trt_df %>%
+                       select(MPG, TRT) %>% distinct(), by = 'TRT')
          })
 
 pop_N <- allAbundDf %>%
@@ -95,14 +109,13 @@ pop_N <- allAbundDf %>%
   geom_point(size = 2, position = position_dodge(width = .5)) +
   scale_colour_viridis_d() +
   coord_flip() +
-  facet_wrap(~spawn_year, scales = 'free', ncol = 3) +
   theme_bw() +
   theme(legend.position = 'bottom') +
-  labs(x = 'Node',
-       y = 'Detection Probability',
-       colour = 'Main Branch')
+  labs(x = 'TRT',
+       y = 'Abundance',
+       colour = 'Spawn Year')
 
-detect_p
+pop_N
 
 # Sex ------------------------------------------------------------------------------
 # make an observed vs predicted female proportion plot, by population
