@@ -5,7 +5,6 @@
 
 spp = 'Steelhead'
 
-
 load(file = paste0('DABOM_results/LGR_DABOM_Bio_', spp, '_', yr, '_20190304.rda'))
 
 # Detection Probabilities Directly from `DABOM`, we can extract estimates of
