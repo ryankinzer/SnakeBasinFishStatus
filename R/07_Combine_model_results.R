@@ -345,12 +345,14 @@ brood_table <- allBrYr %>%
   group_by(spawn_yr, species, TRT) %>%
   summarise(S = median(N, na.rm=TRUE)) %>%
   full_join(allBrYr %>%
-  group_by(brood_yr, species, TRT, age) %>%
-  summarise(Nage = median(Nage, na.rm=TRUE)) %>%
-  spread(age, Nage), by = c('spawn_yr' = 'brood_yr', 'species', 'TRT')) %>%
+              group_by(brood_yr, species, TRT, age) %>%
+              summarise(Nage = median(Nage, na.rm=TRUE)) %>%
+              spread(age, Nage), 
+            by = c('spawn_yr' = 'brood_yr', 'species', 'TRT')) %>%
   rename(brood_yr = spawn_yr) %>%
   arrange(species, TRT, brood_yr) %>%
   ungroup() %>%
+  mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
   mutate(R = rowSums(select(.,contains('age'))),
          lambda = R/S)
 
