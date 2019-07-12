@@ -3,6 +3,10 @@ title: "Evaluation of Run Reconstruction 'Boxcar' Model"
 author: "Kevin See"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
+  pdf_document:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
   html_document:
     fig_caption: yes
     fig_height: 8
