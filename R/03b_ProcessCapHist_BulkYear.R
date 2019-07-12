@@ -48,9 +48,9 @@ configuration = org_config %>%
                                      'RRT'),
                        'SC2A0',
                        Node),
-         Node = ifelse(Node == 'ACB',
-                       'ACBB0',
-                       Node),
+         # Node = ifelse(Node == 'ACB',
+         #               'ACBB0',
+         #               Node),
          Node = ifelse(Node == 'CCA',
                        'CCAB0',
                        Node),
@@ -194,6 +194,7 @@ for(yr in 2010:2018) {
     mutate_at(vars(Group),
               list(factor),
               levels = levels(proc_list$ProcCapHist$Group)) %>%
+    mutate(Node = ifelse(Node == 'ACBB0', 'ACB', Node)) %>%  # added to match jags code.
     arrange(TagID, ObsDate)
   
   
