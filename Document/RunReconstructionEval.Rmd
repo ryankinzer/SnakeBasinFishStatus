@@ -1,0 +1,187 @@
+---
+title: "Evaluation of Run Reconstruction 'Boxcar' Model"
+author: "Kevin See"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  pdf_document:
+    fig_caption: yes
+    fig_height: 6
+    fig_width: 7
+  html_document:
+    fig_caption: yes
+    fig_height: 8
+    fig_width: 8
+bibliography:
+- /Users/kevin/Dropbox/Bibliography/Research.bib
+---
+
+```{r setUp, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(knitr)
+library(pander)
+
+opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+
+# options for table formatting
+panderOptions('big.mark', ',')
+panderOptions('keep.trailing.zeros', FALSE)
+
+# load packages
+library(tidyverse)
+library(sf)
+library(magrittr)
+library(readxl)
+
+```
+
+# Introduction
+
+This document contains a brief evaluation of the run reconstruction model presented in @Stark2018. The goal of that report is to "summarize data describing the abundance of steelhead crossing Lower Granite Dam, the spatial distribution of spawning fish, and known fates/disposition." The analysis starts from Lower Granite dam, and moves upstream, accounting for harvest in various reaches, and downstream, by estimating the conversion rates between dams. 
+
+# Pros
+
+This boxcar model attempts to incorporate movement and harvest rates within specific reaches, and partition the remaining fish into TRT designated populations (the spatial scale of interest for management). It accounts for night passage as well as fall-back and reascension at Lower Granite dam. It makes use of genetic data, some PIT tag data and harvest data. 
+
+# Concerns
+
+My biggest concerns include:
+
+* There is no attempt to characterize uncertainty in any of the data sources, or estimates, or propogate uncertainty through the entire analysis. Given the complexity of this model, and the many sources of data being used, if uncertainty was appropriately accounted for, it is possible the end results may come with high CVs.
+* The entire analysis begins with the assumption that the GSI calls of the fish caught at Lower Granite dam are without error.
+    * There is no acknowledgement of the assigned probabilities of GSI designation, which can fall below 80% for a number of fish in certain stocks.
+    * Based on PIT tag observations of these fish, some GSI stocks have a high rate of non-concordance with the GSI call and the observed PIT tag detections (see figure below).
+* GSI boundaries are generally larger than TRT populations, so each GSI group of fish is partitioned into TRT populations based on the proportion of intrinsic potential within each TRT population contained by that GSI stock. 
+
+Smaller concerns include:
+
+* Conversion rates between dams should probably be estimated using some form of CJS model, rather than just a straight ratio of number of tags detected at one dam and the number detected at another. Imperfect detectability is not currently accounted for.
+* Harvest data came from several agencies, collected using different methods. There was no assessment of error or uncertainty in this data.
+* This model includes an estimate of "dip-in" rates for lower and north fork Clearwater reaches. This is an important parameter, to account for fish who wander into those reaches when not their population of origin and are harvested there. However, it is dependent on an unreported sample size of tissues analyzed, and the reported/estimated harvest rate for those reaches. Again, this is potentially fraught with unreported uncertainty.  
+
+# Figures
+
+```{r prepData, results='hide'}
+spp = 'Steelhead'
+
+gsiSites = read_excel('../data/GSI/SITE-NODE meta data.xlsx',
+                      sheet = 'RO_org_config',
+                      range = 'O5:T5749') %>%
+  select(SiteID = `DABOM site`,
+         Node = `DABOM node`,
+         sthdGSI = steelGSI,
+         sthdTRT = steelTRT,
+         chnkGSI = `CHNK GSI`,
+         chnkTRT = ChinookTRT) %>%
+  distinct() %>%
+  # fix one Chinook GSI
+  mutate(chnkGSI = if_else(SiteID == 'PCM',
+                           'HELLSC',
+                           chnkGSI)) %>%
+  # break out a couple sites into A and B nodes
+  mutate(Node = recode(Node,
+                       'SC2' = 'SC2B0',
+                       'AFC' = 'AFCB0'))
+gsiSites %<>%
+  bind_rows(gsiSites %>%
+              filter(Node %in% c('SC2B0', 'AFCB0')) %>%
+              mutate(Node = str_replace(Node, 'B0$', 'A0')))
+
+
+gsiSites %<>%
+  gather(var, value, matches('GSI'), matches('TRT')) %>%
+  mutate(Species = if_else(grepl('sthd', var),
+                           'Steelhead',
+                           if_else(grepl('chnk', var),
+                                   'Chinook',
+                                   as.character(NA)))) %>%
+  mutate(var = str_remove(var, 'sthd'),
+         var = str_remove(var, 'chnk')) %>%
+  distinct() %>%
+  spread(var, value)
+
+#-----------------------------------------------------------------
+# set CRS code
+myCRS = 5070
+
+# spatial file of steelhead population boundaries
+sthdPops = st_read('../data/ConfigurationFiles/SnakeRiver_Sthd_Pops.shp') %>%
+  st_transform(crs = myCRS)
+
+# pull out MPGs
+sthdMPG = sthdPops %>%
+  group_by(MPG) %>%
+  summarise(nPopID = n_distinct(NWR_POPID)) %>%
+  ungroup() %>%
+  mutate_at(vars(MPG),
+            list(fct_drop))
+
+# pull out TRT populations
+sthdTRT = sthdPops %>%
+  filter(ESU_DPS == 'Snake River Basin Steelhead DPS') %>%
+  group_by(NWR_POPID, NWR_NAME) %>%
+  summarise_at(vars(SHAPE_AREA),
+               list(sum)) %>%
+  ungroup() %>%
+  mutate_at(vars(NWR_POPID, NWR_NAME),
+            list(fct_drop))
+
+rm(sthdPops)
+
+# match assigned spawn site / node with GSI group
+tagSumm = as.list(2010:2018) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'Year',
+         .f = function(x) {
+           read_excel(paste0('../data/LifeHistoryData/LGR_', spp, '_', x[1], '.xlsx'),
+                      'TagSummary')
+         }) %>%
+  select(Year, TagID, SRR, CollectionDate, LastObs, AssignSpawnSite, AssignSpawnNode, LGDFLmm, GenSex, GenStock, GenStockProb, BioScaleFinalAge, BiosamplesValid, nRec:MPG) %>%
+  mutate_at(vars(CollectionDate),
+            list(lubridate::ymd)) %>%
+  mutate_at(vars(LastObs),
+            list(lubridate::ymd_hms))
+
+gsiSumm = tagSumm %>%
+  filter(GenStock != 'NG') %>%
+  group_by(Year, GenStock) %>%
+  # group_by(Year, obsGSI) %>%
+  summarise(avgGSIProb = mean(GenStockProb, na.rm = T),
+            nTags = n_distinct(TagID),
+            nBB = n_distinct(TagID[AssignSpawnNode == 'GRA']),
+            nInTrib = n_distinct(TagID[AssignSpawnNode != 'GRA']),
+            nNonConcord = n_distinct(TagID[GenStock != obsGSI & !is.na(obsGSI)]),
+            nConcord = n_distinct(TagID[GenStock == obsGSI & !is.na(obsGSI)]),
+            percNC = nNonConcord / (nNonConcord + nConcord),
+            percBB = nBB / nTags) %>%
+  arrange(Year, desc(percNC)) %>%
+  ungroup()
+```
+
+To create the figure below, we matched the last upstream observed PIT tag detection site to the GSI stock it is associated with. We then evaluated the concordance between the GSI call at Lower Granite and which stock the last detection site was within. Some GSI stocks have high levels of concordance, others have much lower levels of concordance. It should be noted that the higher levels of non-concordance are for fish with lower probabilities of GSI assignments, and the stocks with greater levels of non-concordance also have more fish with lower probabilities of GSI assignment. 
+
+```{r}
+tagSumm %>%
+  filter(GenStock != 'NG',
+         !is.na(obsGSI)) %>%
+  group_by(Year, GenStock) %>%
+  mutate(nTags = n_distinct(TagID)) %>%
+  ungroup() %>%
+  filter(nTags > 2) %>%
+  mutate(concord = if_else(GenStock == obsGSI, T, F)) %>%
+  ggplot(aes(x = GenStockProb,
+             fill = concord,
+             color = concord)) +
+  geom_histogram(position = 'dodge',
+                 binwidth = 0.05) +
+  # geom_density(alpha = 0.3) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  facet_wrap(~ GenStock,
+             scales = 'free_y') +
+  labs(fill = 'Concordance',
+       color = 'Concordance',
+       x = 'Probability of GSI Assignment')
+```
+
+
+# References
+

@@ -113,7 +113,7 @@ model {
   # multivariate logistic normal transformation to make it hierarchical
   for(j in 1:max(popNum)) {
     p[j, 1] <- 0
-    p[j,2:D[2]] ~ dmnorm(mu[1:(D[2] - 1)], Tau[1:(D[2] - 1), 1:(D[2] - 1)])
+    p[j,2:D[2]] ~ dmnorm(mu[runType[j], 1:(D[2] - 1)], Tau[1:(D[2] - 1), 1:(D[2] - 1)])
     
     sum_exp_p[j] <- sum(exp_p[j,])
     
@@ -124,23 +124,28 @@ model {
   }
   
   # transform mu back to proportions
-  muProp[1] = 0
-  for(i in 2:D[2]) {
-    muProp[i] = mu[i-1]
-  }
-  sum_exp_mu = sum(exp_mu)
-  for(i in 1:D[2]) {
-    exp_mu[i] = exp(muProp[i])
-    avgPi[i] = exp_mu[i] / sum_exp_mu
+  for(j in 1:max(runType)) {
+    muProp[j,1] = 0
+    for(i in 2:D[2]) {
+      muProp[j,i] = mu[j,i-1]
+    }
+    sum_exp_mu[j] = sum(exp_mu[j,])
+    for(i in 1:D[2]) {
+      exp_mu[j,i] = exp(muProp[j,i])
+      avgPi[j,i] = exp_mu[j,i] / sum_exp_mu[j]
+    }
   }
   
   # Cauchy prior on the MVN mean vector
   for(i in 1:(D[2] - 1)) {
-    mu[i] ~ dt(0, 0.001, 1)
+    for(j in 1:max(runType)) {
+      mu[j, i] ~ dt(0, 0.001, 1)
+    }
   }
   # Priors on the precision matrix
   Tau ~ dwish(R, k)
   k <- D[2] + 1
+
 }'
 
 cat(modelCode,
@@ -177,6 +182,23 @@ for(yr in 2010:2018){
   
   age_jagsData$R = diag(1, ncol(age_jagsData$ageMat) - 1)
   
+  # assign populations as A-run or B-run
+  age_jagsData$runType = modAgeDf %>%
+    filter(!is.na(modBranch)) %>%
+    select(TRT) %>%
+    mutate(Run = if_else(TRT %in% c('CRLMA-s',
+                                    'CRLOC-s',
+                                    'CRLOL-s',
+                                    'CRSEL-s',
+                                    'CRSFC-s',
+                                    'MFBIG-s',
+                                    'SFMAI-s',
+                                    'SFSEC-s'),
+                         'B', 'A')) %>%
+    distinct() %>%
+    mutate(Run = as.factor(Run),
+           runType = as.integer(Run)) %>%
+    pull(runType)
   
   # set parameters to save
   jagsParams = c('pi', 'mu', 'Tau', 'avgPi')
