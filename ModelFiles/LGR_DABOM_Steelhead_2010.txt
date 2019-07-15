@@ -10,14 +10,22 @@ model{
   ACMB0_p <- 0 # no detections / not in operation
   GEORGC_p <- 1 # assume perfect detection
   ASOTIC_p ~ dbeta(1,1)
+<<<<<<< HEAD
+  ACB_p ~ dbeta(1,1)
+=======
   ACBA0_p <- 0 # no detections / not in operation
   ACBB0_p <- 0 # no detections / not in operation
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
   AFCA0_p <- 0 # no detections / not in operation
   AFCB0_p <- 0 # no detections / not in operation
   CCAA0_p <- 0 # no detections / not in operation
   CCAB0_p <- 1 # Single array, no upstream detections
 
+<<<<<<< HEAD
+  LTR_p ~ dbeta(1,1)
+=======
   LTR_p <- 1 # Single array, no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
   MTR_p <- 0 # no detections / not in operation
   UTR_p <- 0 # no detections / not in operation
   TUCH_p <- 0 # no detections / not in operation
@@ -122,7 +130,11 @@ model{
   ESSA0_p ~ dbeta(1,1)
   ESSB0_p ~ dbeta(1,1)
   JOHNSC_p <- 0 # no detections / not in operation
+<<<<<<< HEAD
+KRS_p <- 1 # Single array, no upstream detections
+=======
   KRS_p <- 1 # Single array, no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
   STR_p <- 0 # no detections / not in operation
   ZENA0_p ~ dbeta(1,1)
   ZENB0_p ~ dbeta(1,1)
@@ -250,8 +262,13 @@ model{
   # P(being in bin) = P(migrating from next lowest bin) * present in lower bin (1/0)
 
   # priors for transition probabilities
+<<<<<<< HEAD
+  phi_mtr ~ dbeta(1,1)  # probability of moving past MTR
+  phi_utr ~ dbeta(1,1)  # probability of moving past UTR
+=======
   phi_mtr <- 0 # no upstream detections
   phi_utr <- 0 # no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
   phi_tuch <- 0 # no upstream detections
 
   for ( i in 1:n.fish ) {
@@ -287,9 +304,15 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
+<<<<<<< HEAD
+    Penawawa[i] ~ dbern(PENAWC_p * catexp[i,2])
+    Almota[i] ~ dbern(ALMOTC_p * catexp[i,3])
+    Alpowa[i] ~ dbern(ALPOWC_p * catexp[i,4])
+=======
     Penawawa[i,1] ~ dbern(PENAWC_p * catexp[i,2])
     Almota[i,1] ~ dbern(ALMOTC_p * catexp[i,3])
     Alpowa[i,1] ~ dbern(ALPOWC_p * catexp[i,4])
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   }
 
@@ -328,15 +351,23 @@ model{
     Asotin[i,3] ~ dbern(ACMA0_p * max(catexp_Aso[i,1:(n.pops.Asotin[1])]))
 
     # George Creek (GEORGC)
+<<<<<<< HEAD
+    Asotin[i,5] ~ dbern(GEORGC_p * catexp_Aso[i,2])
+=======
     Asotin[i,6] ~ dbern(GEORGC_p * catexp_Aso[i,2])
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
     # Past adult trap (ASOTIC)
     Asotin[i,1] ~ dbern(ASOTIC_p * catexp_Aso[i,3])
 
     # Past ACB
     z_acb[i] ~ dbern(catexp_Aso[i,3] * phi_acb)
+<<<<<<< HEAD
+    Asotin[i,4] ~ dbern(ACB_p * z_acb[i])
+=======
     Asotin[i,4] ~ dbern(ACBB0_p * z_acb[i])
     Asotin[i,5] ~ dbern(ACBA0_p * z_acb[i])
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
 
   }
@@ -367,12 +398,21 @@ model{
     #------------------------------------
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Asotin -- thus the max statement)
     # CCA
+<<<<<<< HEAD
+    Asotin[i,6] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
+    Asotin[i,7] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
+
+    # AFC
+    Asotin[i,8] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
+    Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
+=======
     Asotin[i,7] ~ dbern(CCAB0_p * catexp_AsoUp[i,2])
     Asotin[i,8] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
 
     # AFC
     Asotin[i,9] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
     Asotin[i,10] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   } # ends the ifish loop started at the top of this section
 
@@ -382,7 +422,11 @@ model{
   # only have to worry about observation piece
   for ( i in 1:n.fish ) {
 
+<<<<<<< HEAD
+    TenMileCreek[i] ~ dbern(TENMC2_p * catexp[i,6])
+=======
     TenMileCreek[i,1] ~ dbern(TENMC2_p * catexp[i,6])
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   }
 
@@ -522,7 +566,11 @@ model{
   #   Now we deal with Joseph Creek
   ####################################################
   # getting past JOSEPC
+<<<<<<< HEAD
+  phi_josepc ~ dbeta(1,1)
+=======
   phi_josepc <- 0 # no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   for (i in 1:n.fish) {
   #------------------------------------
@@ -589,8 +637,13 @@ model{
   pMat_ImnWeir[2,(n.pops.Imnaha[3]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # probability of moving past certain points
+<<<<<<< HEAD
+  phi_iml ~ dbeta(1,1)
+  phi_ir5 ~ dbeta(1,1)
+=======
   phi_iml <- 0 # no upstream detections
   phi_ir5 <- 0 # no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   for (i in 1:n.fish) {
   #------------------------------------
@@ -728,7 +781,11 @@ model{
   #   Now we deal with Lochsa
   ####################################################
   # probability of moving past FISTRP
+<<<<<<< HEAD
+phi_fistrp <- 1 # no detections at LRL
+=======
   phi_fistrp <- 1 # no detections at LRL
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   for (i in 1:n.fish) {
 
@@ -750,7 +807,11 @@ model{
   for (i in 1:n.fish) {
 
     # first array (SW1)
+<<<<<<< HEAD
+    Selway[i] ~ dbern( SW1_p * catexp[i,16] )
+=======
     Selway[i,1] ~ dbern( SW1_p * catexp[i,16] )
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   }
 
@@ -762,7 +823,11 @@ model{
   for (i in 1:n.fish) {
 
     # first array (LOOKGC)
+<<<<<<< HEAD
+    LookingGlass[i] ~ dbern( LOOKGC_p * catexp[i,17] )
+=======
     LookingGlass[i,1] ~ dbern( LOOKGC_p * catexp[i,17] )
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   }
 
@@ -854,7 +919,11 @@ model{
   for (i in 1:n.fish) {
 
     # first array (RAPH)
+<<<<<<< HEAD
+    RapidRiver[i] ~ dbern( RAPH_p * catexp[i,20] )
+=======
     RapidRiver[i,1] ~ dbern( RAPH_p * catexp[i,20] )
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   }
 
@@ -874,7 +943,11 @@ model{
   # upstream migration parameters
   phi_lakec <- 0 # no upstream detections
   phi_johnsc <- 0 # no upstream detections
+<<<<<<< HEAD
+  phi_str <- 0 # no upstream detections
+=======
   phi_str ~ dbeta(1,1)
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
 
   for (i in 1:n.fish) {
     #------------------------------------
@@ -1029,7 +1102,11 @@ model{
   pMat_UpLemhi[2,(n.pops.Lemhi[2]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # movement up Big Timber Creek
+<<<<<<< HEAD
+  phi_btm ~ dbeta(1,1)
+=======
   phi_btm <- 0 # no upstream detections
+>>>>>>> 30379f5fcd45399a6bf2af35e14bb0143f0052eb
   phi_btu <- 0 # no upstream detections
 
 
