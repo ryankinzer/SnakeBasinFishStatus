@@ -3,7 +3,7 @@
 # Created: 7/12/19
 # Modified:
 
-site_trt_designations <- function(species, configuration){
+site_trt_designations <- function(species, configuration, site_df){
 
   load('./data/ConfigurationFiles/DABOM_map_data.rda')
 
