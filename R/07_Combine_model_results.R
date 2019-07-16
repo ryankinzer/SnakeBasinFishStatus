@@ -31,7 +31,9 @@ spp <- 'Steelhead'  # either Chinook or Steelhead
 yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 timestp <- gsub('[^0-9]','', Sys.Date())
 
-for(yr in 2016:2018){
+year_range <- c(2010:2013,2016:2018)
+
+for(yr in year_range){
   
   load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',yr,'.rda')) 
   
@@ -235,7 +237,7 @@ for(yr in 2016:2018){
 
 #------------------------------------------------------------------------------
 # combine summaries by year
-allSumm = as.list(2016:2018) %>%
+allSumm = as.list(year_range) %>%
   rlang::set_names() %>%
   map(.f = function(x) {
     load(paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', x[1], '.rda'))
@@ -284,7 +286,7 @@ age_all = allSumm %>%
 # Still need to figure out how to best filter out years where we don't have complete brood year returns
 
 # combine posteriors by year
-allBrYr = as.list(2016:2018) %>%
+allBrYr = as.list(year_range) %>%
   rlang::set_names() %>%
   map_df(.f = function(x) {
     load(paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', x[1], '.rda'))
@@ -321,7 +323,8 @@ spawnRec_post = allBrYr %>%
               rename(brood_yr = spawn_yr,
                      S = N)) %>%
   select(iter:brood_yr, S, R) %>%
-  mutate(lambda = R / S)
+  mutate(lambda = R / S) %>%
+  ungroup()
 
 spawnRec_summ = spawnRec_post %>%
   gather(var, value, S:lambda) %>%
@@ -356,12 +359,40 @@ brood_table <- allBrYr %>%
   mutate(R = rowSums(select(.,contains('age'))),
          lambda = R/S)
 
-list('Total Esc' = N_pop_all,
-     'Female Esc' = N_f_all,
-     'Age Esc' = age_all,
-     'Brood Table' = brood_table,
-     'Female Props' = p_all,
-     'Age Props' = age_prop_all,
+prod_df = as.list(2010:2013) %>%
+  rlang::set_names() %>%
+  map_df(.f = function(x) {
+    
+    tmp <- spawnRec_post %>% filter(species == spp,
+                                    brood_yr == x[1])
+    
+    
+    Sdf <- summarisePosterior(tmp, S, TRT, round = T) %>%
+      mutate(brood_yr = x[1],
+             species = spp,
+             variable = 'Spawners') 
+    Rdf <- summarisePosterior(tmp, R, TRT, round = T) %>%
+      mutate(brood_yr = x[1],
+             species = spp,
+             variable = 'Recruits')
+    Ldf <- summarisePosterior(tmp, lambda, TRT, round = F) %>%
+      mutate(brood_yr = x[1],
+             species = spp,
+             variable = 'lambda')
+    
+    bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
+    
+  })
+
+
+#Save all data as .xlsx
+list('Pop Total Esc' = N_pop_all,
+     'Pop Female Esc' = N_f_all,
+     'Pop Age Esc' = age_all,
+     'Pop Brood Table' = brood_table,
+     'Pop Stock Recruit' = prod_df,
+     'Pop Female Props' = p_all,
+     'Pop Age Props' = age_prop_all,
      'Site Esc' = trib_all,
-     'Detect Eff' = detect_all) %>%
+     'Site Detect Eff' = detect_all) %>%
   WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries.xlsx'))

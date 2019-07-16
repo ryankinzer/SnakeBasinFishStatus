@@ -123,6 +123,10 @@ $$
 \hat{pHOS}_{Pop} = \frac{\hat{N}^{Trib}_{Pop,Hat}-(BroodStock + Harvest)}{\hat{N}^{Trib}_{Pop,Hat}+\hat{N}^{Trib}_{POP,Nat}}
 $$
 
+## Results
+
+![Detection Probabilities.]('/Figures/DetectProp.pdf')
+
 <!-- Consequently, the amount of hatchery stock straying $(\hat{S}_{Stock})$ to other populations can be estimated as the sum of all returns to non-target populations divided by the total stock abundance at Lower Granite Dam.  -->
 
 <!-- $$ -->
