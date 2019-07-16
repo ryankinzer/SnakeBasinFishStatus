@@ -16,7 +16,7 @@ library(DABOM)
 # Set species and year of interest
 #------------------------------------------------------------------------------
 spp <- 'Steelhead'
-yr <- 2015 
+yr <- 2018 
 
 timestp <- gsub('[^0-9]','', Sys.Date())
 
@@ -25,7 +25,8 @@ timestp <- gsub('[^0-9]','', Sys.Date())
 #------------------------------------------------------------------------------
 load(paste0('data/DABOMready/LGR_',spp,'_',yr,'.rda'))
 
-proc_ch <- proc_list$ProcCapHist
+proc_ch <- proc_list$ProcCapHist %>%
+  filter(UserProcStatus)
 
 #------------------------------------------------------------------------------
 # Remove all nodes within steelhead branches that we don't care about
