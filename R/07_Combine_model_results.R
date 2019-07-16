@@ -31,7 +31,7 @@ spp <- 'Steelhead'  # either Chinook or Steelhead
 yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 timestp <- gsub('[^0-9]','', Sys.Date())
 
-year_range <- c(2010:2013,2016:2018)
+year_range <- c(2010:2018)
 
 for(yr in year_range){
   
@@ -356,8 +356,8 @@ brood_table <- allBrYr %>%
   arrange(species, TRT, brood_yr) %>%
   ungroup() %>%
   mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
-  mutate(R = rowSums(select(.,contains('age'))),
-         lambda = R/S)
+  mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
+         lambda = ifelse(nRyrs>=5 & !is.na(S),R/S,""))
 
 prod_df = as.list(2010:2013) %>%
   rlang::set_names() %>%

@@ -9,7 +9,7 @@ library(PITcleanr)
 source('./R/site_trt_designations.R')
 
 spp = 'Steelhead'
-yr_range = c(2010:2013,2016:2018)
+yr_range = c(2010:2018)
 
 # Need GSI to PIT Comparisons!!!
 
@@ -55,6 +55,11 @@ ggsave('Figures/ObsVsPred_DetectProp.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/ObsVsPred_DetectProp.png',
+       ObsPred_detect_p,
+       width = 8,
+       height = 8)
+
 detect_p <- allEffDf %>%
   filter(estimate != 0 & estimate != 1) %>%
   filter(!is.na(Group)) %>%
@@ -80,6 +85,11 @@ detect_p <- allEffDf %>%
 detect_p
 
 ggsave('Figures/DetectProp.pdf',
+       detect_p,
+       width = 8,
+       height = 10)
+
+ggsave('Figures/DetectProp.png',
        detect_p,
        width = 8,
        height = 10)
@@ -127,6 +137,11 @@ ggsave('Figures/PopAbund.pdf',
        width = 8,
        height = 10)
 
+ggsave('Figures/PopAbund.png',
+       pop_N,
+       width = 8,
+       height = 10)
+
 # Sex ------------------------------------------------------------------------------
 # make an observed vs predicted female proportion plot, by population
 allSexDf = as.list(yr_range) %>%
@@ -164,8 +179,8 @@ sex_ObsVsPred_p = allSexDf %>%
   theme_bw() +
   theme(legend.position = 'bottom') +
   scale_color_viridis_c() +
-  facet_wrap(~ TRT,
-             scales = 'free') +
+  facet_wrap(~ TRT) +
+             #scales = 'free') +
   labs(x = 'Observed',
        y = 'Predicted',
        title = 'Female Proportions',
@@ -175,6 +190,11 @@ sex_ObsVsPred_p = allSexDf %>%
 sex_ObsVsPred_p
 
 ggsave('Figures/ObsVsPred_SexProp.pdf',
+       sex_ObsVsPred_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/ObsVsPred_SexProp.png',
        sex_ObsVsPred_p,
        width = 8,
        height = 8)
@@ -210,6 +230,10 @@ ggsave('Figures/SexProp.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/SexProp.png',
+       sex_Pred,
+       width = 8,
+       height = 8)
 # Age ------------------------------------------------------------------------------
 # make an observed vs predicted age proportion plot, by population
 allAgeDf = as.list(yr_range) %>%
@@ -263,6 +287,11 @@ ggsave('Figures/ObsVsPred_AgeProp.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/ObsVsPred_AgeProp.png',
+       age_ObsVsPred_p,
+       width = 8,
+       height = 8)
+
 # plot showing estimated age proportions (mean) for each TRT population, by year
 ageProp_p = allAgeDf %>%
   select(spawn_year, MPG, TRT, age, mean) %>%
@@ -290,6 +319,11 @@ ggsave('Figures/AgePropEst.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/AgePropEst.png',
+       ageProp_p,
+       width = 8,
+       height = 8)
+
 ageProp2_p = allAgeDf %>%
   select(spawn_year, MPG, TRT, age, mean) %>%
   distinct() %>%
@@ -312,6 +346,11 @@ ageProp2_p = allAgeDf %>%
 ageProp2_p
 
 ggsave('Figures/AgePropEst2.pdf',
+       ageProp2_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/AgePropEst2.png',
        ageProp2_p,
        width = 8,
        height = 8)
@@ -366,6 +405,11 @@ ggsave('Figures/AvgAgePropEst_mu.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/AvgAgePropEst_mu.png',
+       muProp_p,
+       width = 8,
+       height = 8)
+
 # Spawner-Recruits----
 library(readxl)
 
@@ -400,6 +444,10 @@ ggsave('Figures/lambda.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/lambda.png',
+       lambda_p,
+       width = 8,
+       height = 8)
 
 SR_df <- allSR_Df %>%
   filter(variable == 'Spawners') %>%
@@ -433,6 +481,11 @@ SR_plot <- SR_df %>%
 SR_plot
 
 ggsave('Figures/stock_recruit.pdf',
+       SR_plot,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/stock_recruit.png',
        SR_plot,
        width = 8,
        height = 8)
