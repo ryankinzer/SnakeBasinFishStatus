@@ -15,7 +15,7 @@ library(PITcleanr)
 spp = 'Steelhead'
 
 # where is trap data?
-trap_path = 'data/tblLGDMasterCombineExportJodyW.csv'
+trap_path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
 
 # set up folder structure
 tagsFolder = 'data/ValidTagLists'
@@ -23,9 +23,10 @@ if(!dir.exists(tagsFolder)) {
   dir.create(tagsFolder)
 }
 
+yr_range <- 2019
 #-----------------------------------------------------------------
 # pull out valid tags from trap database, and save them in a file to upload to PTAGIS
-validTags = tibble(Year = 2010:2018) %>%
+validTags = tibble(Year = yr_range) %>%
   mutate(tags = map(Year,
                     .f = function(x) {
                       filterLGRtrapDB(trap_path = trap_path,
