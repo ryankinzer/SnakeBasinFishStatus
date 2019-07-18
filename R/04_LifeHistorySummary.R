@@ -89,7 +89,7 @@ rm(sthdPops)
 # set species
 spp = 'Steelhead'
 # set year
-yr = 2014
+yr = 2019
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year

@@ -27,7 +27,7 @@ filepath <- './data/LifeHistoryData/'
 
 # Set species and Spawn Year
 spp = 'Steelhead'
-#yr = 2018
+yr = 2019
 
 #------------------------------------------------------------------------------
 # Create JAGs model to estimate female proportion

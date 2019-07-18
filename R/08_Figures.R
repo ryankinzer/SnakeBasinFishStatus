@@ -175,7 +175,11 @@ sex_ObsVsPred_p = allSexDf %>%
   ggplot(aes(x = propF,
              y = mean)) +
   geom_abline(linetype = 2) +
+  geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`)) +
+  geom_errorbarh(aes(xmin = propF - 1.96*propF_se, xmax = propF + 1.96*propF_se)) +
   geom_point(aes(size = nSexed)) +
+  xlim(0,1) +
+  ylim(0,1) +
   theme_bw() +
   theme(legend.position = 'bottom') +
   scale_color_viridis_c() +
@@ -268,12 +272,14 @@ age_ObsVsPred_p = allAgeDf %>%
              color = as.factor(age))) +
   geom_abline(linetype = 2) +
   geom_point(aes(size = nAged)) +
+  xlim(0,1) +
+  ylim(0,1) +
   theme_bw() +
   theme(legend.position = 'bottom') +
   #scale_color_brewer(palette = 'Set1') +
   scale_colour_viridis_d() +
-  facet_wrap(~ TRT,
-             scales = 'free') +
+  facet_wrap(~ TRT) + #,
+             #scales = 'free') +
   labs(x = 'Observed',
        y = 'Predicted',
        title = 'Age Proportions',
@@ -303,11 +309,14 @@ ageProp_p = allAgeDf %>%
            position = position_stack(reverse = T)) +
   #scale_fill_brewer(palette = 'Set1') +
   scale_fill_viridis_d() +
+  scale_y_continuous(breaks = c(0,.5,1), labels = c(0,.5,1)) +
   coord_flip() +
   theme_bw() +
-  theme(axis.text.y = element_text(size = 5),
+  theme(#axis.text.y = element_text(size = 5),
+        strip.text.y = element_text(angle = .45),
         legend.position = 'bottom') +
-  facet_wrap(~ spawn_year) +
+  facet_grid(MPG ~ spawn_year, scales = "free", space = 'free', labeller = label_wrap_gen(width = 10)) +
+  #facet_wrap(~ spawn_year) +
   labs(fill = 'Age',
        x = 'TRT',
        y = 'Proportion')
