@@ -19,10 +19,19 @@ if(!dir.exists(stademFolder)) {
 }
 
 ## Requires a copy of the Lower Granite Dam Trap Database and the odbc driver
-source('./R/loadLGTrappingDBase.R')
-trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
-con <- loadLGTrappingDBase(trapDB_filepath)
-trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
+if(.Platform$OS.type != 'unix') {
+  source('./R/loadLGTrappingDBase.R')
+  trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
+  con <- loadLGTrappingDBase(trapDB_filepath)
+  trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
+}
+
+# this works for Mac, or any system really
+if(.Platform$OS.type == 'unix') {
+  # trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
+  trap_filepath <- './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
+  trap_dbase = readLGRtrapDB(trap_filepath)
+}
 
 # set species and spawn year
 species = c('Chinook', 'Steelhead')  # either Chinook or Steelhead
