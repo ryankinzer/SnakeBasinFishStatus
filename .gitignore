@@ -5,4 +5,7 @@
 
 TrappingDBase/
 
+data/LGTrappingExportJodyW.accdb
+data/tblLGDMasterCombineExportJodyW.csv
+Document/
 .DS_Store

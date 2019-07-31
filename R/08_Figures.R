@@ -3,89 +3,148 @@
 # Created: 7/12/19
 # Modified: 
 
+library(tidyverse)
+library(lubridate)
+library(PITcleanr)
+source('./R/site_trt_designations.R')
+
 spp = 'Steelhead'
+yr_range = c(2010:2018)
 
-load(file = paste0('DABOM_results/LGR_DABOM_Bio_', spp, '_', yr, '_20190304.rda'))
+# Need GSI to PIT Comparisons!!!
 
-# Detection Probabilities Directly from `DABOM`, we can extract estimates of
-# the detection probability of the observation nodes. These are average
-# probabiliities across the entire season of the run, and how these nodes match
-# up to actual arrays and antennas is defined in the configuration file.
-
-detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
-                                   capHist_proc = proc_list$proc_ch)
-head(detect_summ)
-
-# Detections Probs From PITcleanr
-config_filepath <- './data/ConfigurationFiles/my_config_20190304.csv'
-my_config <- read_csv(config_filepath)
-
-sitedf_filepath <- './data/ConfigurationFiles/site_df_20190304.csv'
-site_df <- read_csv(sitedf_filepath, col_types = cols(.default = 'c'))
-
-parentchild_filepath <- './data/ConfigurationFiles/parent_child_20190304.csv'
-parent_child <- read_csv(parentchild_filepath)
-
-valid_paths <- getValidPaths(parent_child, 'GRA')
-node_order <- createNodeOrder(valid_paths, my_config, site_df, step_num = 3)
-
-eff <- estNodeEff(proc_list$proc_ch, node_order, method = 'Chapman')
-
-eff_df <- left_join(detect_summ, eff, by = 'Node')
+# Detection ------------------------------------------------------------------------------
+# make an observed vs predicted of detection probs.
+allEffDf = as.list(yr_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x) {
+           load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
+           load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda')) 
+           
+           eff <- estNodeEff(filter(proc_list$ProcCapHist,UserProcStatus), node_order = proc_list$NodeOrder)
+           
+           trt_df <- site_trt_designations(spp, configuration, site_df)
+           
+           detect_summ %>%
+             left_join(eff, by = 'Node') %>%
+             left_join(proc_list$NodeOrder %>%
+                         select(Node, Group), by = 'Node') %>%
+             left_join(trt_df %>%
+                         select(Node, MPG, TRT) %>% distinct(), by = 'Node')
+         })
 
 
-eff_df %>%
-  filter(Node != 'GRA') %>%
-  ggplot(aes(x = median, y = detEff, size = tagsAboveNode, size = n_tags)) +
+ObsPred_detect_p <- allEffDf %>%
+  filter(!detEff == 1 & !estimate == 1, !detEff == 0 & !estimate == 0) %>%
+  ggplot(aes(x = detEff, y = estimate, size = n_tags)) +
   geom_point()+
   geom_text(aes(label = Node),size = 2, hjust = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  theme_bw()
+  facet_wrap(~spawn_year) +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Predicted with PITcleanR',
+       y = 'Predicted with DABOM',
+       size = 'Unique Tags Observed')
 
-eff_df %>%
-  filter(Node != 'GRA') %>%
-  ggplot(aes(x= n_tags, y = estTagsAtNode, size = n_tags)) +
-  geom_point()+
-  geom_text(aes(label = Node),size = 2, hjust = 2) +
-  geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  theme_bw()
+ObsPred_detect_p
 
-# Estimate Escapement with **STADEM** and **DABOM**
+ggsave('Figures/ObsVsPred_DetectProp.pdf',
+       ObsPred_detect_p,
+       width = 8,
+       height = 8)
 
-load(paste0('STADEM_results/LGR_STADEM_', spp, '_', yr, '.rda'))
+ggsave('Figures/ObsVsPred_DetectProp.png',
+       ObsPred_detect_p,
+       width = 8,
+       height = 8)
 
-# compiles posteriors of escapement
-trib_summ = calcTribEscape_LGD(dabom_mod,
-                               stadem_mod,
-                               stadem_param_nm = 'X.new.wild',
-                               bootstrap_samp = 5, #2000
-                               node_order = proc_list$NodeOrder,
-                               summ_results = T,
-                               pt_est_nm = 'median',
-                               cred_int_prob = 0.95)
+detect_p <- allEffDf %>%
+  filter(estimate != 0 & estimate != 1) %>%
+  filter(!is.na(Group)) %>%
+  ggplot(aes(x = Node,
+             y = estimate,
+             color = spawn_year,
+             group = spawn_year)) +
+  geom_linerange(aes(ymin = lowerCI,
+                     ymax = upperCI),
+                 position = position_dodge(width = .5)) +
+  geom_point(size = 2, position = position_dodge(width = .5)) +
+  scale_colour_viridis_d() +
+  coord_flip() +
+  facet_wrap(~MPG, scales = 'free', ncol = 3) +
+  #facet_grid(MPG~., scales = "free_y", space = 'free_y', labeller = label_wrap_gen(width = 10)) #+
+  theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Node',
+       y = 'Detection Probability',
+       colour = 'Spawn Year')
 
-report_summ = calcRepGrpEscape_LGD(dabom_mod = dabom_mod,
-                                   stadem_mod = stadem_mod,
-                                   node_order = proc_list$NodeOrder,
-                                   pt_est_nm = 'median',
-                                   spp = spp)
+detect_p
 
-#------------------------------------------------------------------------------
-## Save Results to an excel file - CURRENTLY NOT WORKING!!!
-#------------------------------------------------------------------------------
-list('Report Groups' = report_summ,
-     'All Escapement' = trib_summ,
-     'Detection' = detect_summ) %>%
-  WriteXLS(ExcelFileName = paste0('DABOM_results/Escapement_', spp, '_', yr, '.xlsx'),
-           AdjWidth = T,
-           AutoFilter = T,
-           BoldHeaderRow = T,
-           FreezeRow = 1)
+ggsave('Figures/DetectProp.pdf',
+       detect_p,
+       width = 8,
+       height = 10)
 
+ggsave('Figures/DetectProp.png',
+       detect_p,
+       width = 8,
+       height = 10)
+
+# Abundance----
+# plot population abundance
+allAbundDf = as.list(yr_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x) {
+           
+           load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
+           load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
+           
+           trt_df <- site_trt_designations(spp, configuration, site_df)
+           
+           N_pop_summ %>%
+           left_join(trt_df %>%
+                       select(MPG, TRT) %>% distinct(), by = 'TRT')
+         })
+
+pop_N <- allAbundDf %>%
+  ggplot(aes(x = spawn_yr,
+             y = median,
+             #colour = MPG,
+             group = TRT)) +
+  geom_ribbon(aes(ymin = lowerCI,
+                     ymax = upperCI),alpha = .2) +
+  geom_line(aes(colour = MPG)) +
+  geom_point(aes(colour = MPG),size = 2) +#, position = position_dodge(width = .5)) +
+  scale_colour_viridis_d() +
+  # coord_flip() +
+  facet_wrap(~TRT, labeller = label_wrap_gen(width = 10)) + #space = 'free_y', 
+  theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Spawn Year',
+       y = 'Abundance',
+       colour = 'MPG')
+
+pop_N
+
+ggsave('Figures/PopAbund.pdf',
+       pop_N,
+       width = 8,
+       height = 10)
+
+ggsave('Figures/PopAbund.png',
+       pop_N,
+       width = 8,
+       height = 10)
 
 # Sex ------------------------------------------------------------------------------
 # make an observed vs predicted female proportion plot, by population
-allSexDf = as.list(2010:2018) %>%
+allSexDf = as.list(yr_range) %>%
   rlang::set_names() %>%
   map_df(.id = 'spawn_year',
          .f = function(x) {
@@ -114,24 +173,32 @@ allSexDf = as.list(2010:2018) %>%
 sex_ObsVsPred_p = allSexDf %>%
   filter(!is.na(propF)) %>%
   ggplot(aes(x = propF,
-             y = mean,
-             color = nSexed)) +
+             y = mean)) +
   geom_abline(linetype = 2) +
+  geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`)) +
+  geom_errorbarh(aes(xmin = propF - 1.96*propF_se, xmax = propF + 1.96*propF_se)) +
   geom_point(aes(size = nSexed)) +
+  xlim(0,1) +
+  ylim(0,1) +
   theme_bw() +
   theme(legend.position = 'bottom') +
   scale_color_viridis_c() +
-  facet_wrap(~ TRT,
-             scales = 'free') +
+  facet_wrap(~ TRT) +
+             #scales = 'free') +
   labs(x = 'Observed',
        y = 'Predicted',
        title = 'Female Proportions',
        color = '# Sexed',
-       size = '')
+       size = '# Sexed')
 
 sex_ObsVsPred_p
 
 ggsave('Figures/ObsVsPred_SexProp.pdf',
+       sex_ObsVsPred_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/ObsVsPred_SexProp.png',
        sex_ObsVsPred_p,
        width = 8,
        height = 8)
@@ -167,11 +234,15 @@ ggsave('Figures/SexProp.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/SexProp.png',
+       sex_Pred,
+       width = 8,
+       height = 8)
 # Age ------------------------------------------------------------------------------
 # make an observed vs predicted age proportion plot, by population
-allAgeDf = as.list(2010:2018) %>%
+allAgeDf = as.list(yr_range) %>%
   rlang::set_names() %>%
-  map_df(.id = 'Year',
+  map_df(.id = 'spawn_year',
          .f = function(x) {
            load(paste0('Age_results/Population_AgeProp_', spp, '_', x[1], '.rda'))
            
@@ -201,11 +272,14 @@ age_ObsVsPred_p = allAgeDf %>%
              color = as.factor(age))) +
   geom_abline(linetype = 2) +
   geom_point(aes(size = nAged)) +
+  xlim(0,1) +
+  ylim(0,1) +
   theme_bw() +
   theme(legend.position = 'bottom') +
-  scale_color_brewer(palette = 'Set1') +
-  facet_wrap(~ TRT,
-             scales = 'free') +
+  #scale_color_brewer(palette = 'Set1') +
+  scale_colour_viridis_d() +
+  facet_wrap(~ TRT) + #,
+             #scales = 'free') +
   labs(x = 'Observed',
        y = 'Predicted',
        title = 'Age Proportions',
@@ -219,34 +293,80 @@ ggsave('Figures/ObsVsPred_AgeProp.pdf',
        width = 8,
        height = 8)
 
+ggsave('Figures/ObsVsPred_AgeProp.png',
+       age_ObsVsPred_p,
+       width = 8,
+       height = 8)
+
 # plot showing estimated age proportions (mean) for each TRT population, by year
 ageProp_p = allAgeDf %>%
-  select(Year, MPG, TRT, age, mean) %>%
+  select(spawn_year, MPG, TRT, age, mean) %>%
   distinct() %>%
   ggplot(aes(x = fct_rev(TRT),
              y = mean,
              fill = as.factor(age))) +
   geom_bar(stat = 'identity',
            position = position_stack(reverse = T)) +
-  scale_fill_brewer(palette = 'Set1') +
+  #scale_fill_brewer(palette = 'Set1') +
+  scale_fill_viridis_d() +
+  scale_y_continuous(breaks = c(0,.5,1), labels = c(0,.5,1)) +
   coord_flip() +
   theme_bw() +
-  theme(axis.text.y = element_text(size = 5),
+  theme(#axis.text.y = element_text(size = 5),
+        strip.text.y = element_text(angle = .45),
         legend.position = 'bottom') +
-  facet_wrap(~ Year) +
+  facet_grid(MPG ~ spawn_year, scales = "free", space = 'free', labeller = label_wrap_gen(width = 10)) +
+  #facet_wrap(~ spawn_year) +
   labs(fill = 'Age',
        x = 'TRT',
        y = 'Proportion')
+
+ageProp_p
 
 ggsave('Figures/AgePropEst.pdf',
        ageProp_p,
        width = 8,
        height = 8)
 
+ggsave('Figures/AgePropEst.png',
+       ageProp_p,
+       width = 8,
+       height = 8)
 
-muVecDf = as.list(2010:2018) %>%
+ageProp2_p = allAgeDf %>%
+  select(spawn_year, MPG, TRT, age, mean) %>%
+  distinct() %>%
+  ggplot(aes(x = spawn_year,
+             y = mean,
+             fill = as.factor(age))) +
+  geom_bar(stat = 'identity',
+           position = position_stack(reverse = T)) +
+  #scale_fill_brewer(palette = 'Set1') +
+  scale_fill_viridis_d() +
+  coord_flip() +
+  theme_bw() +
+  theme(axis.text.y = element_text(size = 5),
+        legend.position = 'bottom') +
+  facet_wrap(~ fct_rev(TRT)) +
+  labs(fill = 'Age',
+       x = 'Spawn Year',
+       y = 'Proportion')
+
+ageProp2_p
+
+ggsave('Figures/AgePropEst2.pdf',
+       ageProp2_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/AgePropEst2.png',
+       ageProp2_p,
+       width = 8,
+       height = 8)
+
+muVecDf = as.list(yr_range) %>%
   rlang::set_names() %>%
-  map_df(.id = 'Year',
+  map_df(.id = 'spawn_year',
          .f = function(x) {
            load(paste0('Age_results/Population_AgeProp_', spp, '_', x[1], '.rda'))
            
@@ -269,24 +389,112 @@ muVecDf = as.list(2010:2018) %>%
          })
 
 muProp_p = muVecDf %>%
-  select(Year, TRT, age, mean) %>%
+  select(spawn_year, TRT, age, mean) %>%
   distinct() %>%
   ggplot(aes(x = fct_rev(TRT),
              y = mean,
              fill = as.factor(age))) +
   geom_bar(stat = 'identity',
            position = position_stack(reverse = T)) +
-  scale_fill_brewer(palette = 'Set1') +
+  #scale_fill_brewer(palette = 'Set1') +
+  scale_fill_viridis_d() +
   coord_flip() +
   theme_bw() +
   theme(axis.text.y = element_text(size = 8),
         legend.position = 'right') +
-  facet_wrap(~ Year) +
+  facet_wrap(~ spawn_year) +
   labs(fill = 'Age',
        x = 'Run Type',
        y = 'Proportion')
 
+muProp_p
+
 ggsave('Figures/AvgAgePropEst_mu.pdf',
        muProp_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/AvgAgePropEst_mu.png',
+       muProp_p,
+       width = 8,
+       height = 8)
+
+# Spawner-Recruits----
+library(readxl)
+
+allSR_Df <- read_excel('Abundance_results/LGR_AllSummaries.xlsx', sheet = 'Pop Stock Recruit') %>%
+  mutate(TRT = gsub('\"',"",TRT))
+
+
+lambda_p <- allSR_Df %>%
+  filter(variable == 'lambda',
+         brood_yr <= 2012) %>%
+  ggplot(aes(x = TRT,
+             y = median,
+             colour = as.factor(brood_yr),
+             group = brood_yr)) +
+  geom_hline(yintercept = 1, linetype = 2) +
+  geom_linerange(aes(ymin = lowerCI, ymax = upperCI),
+                 position = position_dodge(width = .5)) +
+  geom_point(size = 4, position = position_dodge(width = .5)) +
+  scale_colour_viridis_d() +
+  coord_flip() +
+  #facet_wrap(~TRT, scales = 'free_y') +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Spawn Year',
+       y = 'Recruits/Spawner',
+       colour = 'Brood Year')
+
+lambda_p  
+
+ggsave('Figures/lambda.pdf',
+       lambda_p,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/lambda.png',
+       lambda_p,
+       width = 8,
+       height = 8)
+
+SR_df <- allSR_Df %>%
+  filter(variable == 'Spawners') %>%
+  select(brood_yr, species, TRT, spawners = median, s_lower = lowerCI, s_upper = upperCI) %>%
+  left_join(allSR_Df %>%
+              filter(variable == 'Recruits') %>%
+              select(brood_yr, species, TRT, recruits = median, r_lower = lowerCI, r_upper = upperCI))
+
+
+SR_plot <- SR_df %>%
+  filter(brood_yr <= 2012) %>%
+  ggplot(aes(x = spawners,
+             y = recruits,
+             colour = TRT)) +
+  geom_abline(linetype = 2) +
+  geom_errorbar(aes(ymin = r_lower,
+                     ymax = r_upper)) +
+  geom_errorbarh(aes(xmin = s_lower,
+                     xmax = s_upper)) +
+  geom_point(size = 2) +
+  xlim(0,4000) +
+  ylim(0,4000) +
+  scale_colour_viridis_d() +
+  theme_bw() +
+  theme(legend.position = 'bottom') +
+  labs(x = 'Stock',
+       y = 'Recruits',
+       title = 'Steelhead Stock-Recruit Points',
+       colout = 'TRT')
+
+SR_plot
+
+ggsave('Figures/stock_recruit.pdf',
+       SR_plot,
+       width = 8,
+       height = 8)
+
+ggsave('Figures/stock_recruit.png',
+       SR_plot,
        width = 8,
        height = 8)

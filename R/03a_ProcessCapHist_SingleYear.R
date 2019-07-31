@@ -5,9 +5,20 @@
 #------------------------------------------------------------------------------
 # Load Packages and Functions
 #------------------------------------------------------------------------------
+# load needed libraries
 library(tidyverse)
+library(magrittr)
 library(PITcleanr)
-source('./R/loadLGTrappingDBase.R')
+library(readxl)
+library(WriteXLS)
+library(lubridate)
+
+
+#---- set up folder structure
+PITcleanrFolder = 'data/PITcleanr'
+if(!dir.exists(PITcleanrFolder)) {
+  dir.create(PITcleanrFolder)
+}
 
 #------------------------------------------------------------------------------
 # Identify which species and spawn year data is needed. 
@@ -16,7 +27,7 @@ source('./R/loadLGTrappingDBase.R')
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
 spp = 'Steelhead'  # either 'Chinook' or 'Steelhead'
-yr = 2016        # tagging operations started in spawn year 2009
+yr = 2019        # tagging operations started in spawn year 2009
 
 #------------------------------------------------------------------------------
 # Download all PTAGIS interrogation and MRR sites, antennas and configuations,
@@ -29,22 +40,33 @@ org_config = buildConfig()
 # Change and customize the configuration file.
 #------------------------------------------------------------------------------
 
-my_config = org_config %>%
+configuration = org_config %>%
   mutate(Node = ifelse(SiteID %in% c('VC2', 'VC1', 'LTR', 'MTR', 'UTR'),
                        SiteID,
+                       Node),
+         Node = ifelse(SiteID == 'SC2',
+                       'SC2B0',
                        Node),
          Node = ifelse(SiteID %in% c('CROTRP',
                                      'CRT',
                                      'REDTRP',
                                      'REDR',
                                      'RRT'),
-                       'above_SC2',
+                       'SC2A0',
                        Node),
-         Node = ifelse(SiteID == 'ACB', 'ACB', Node),
+         Node = ifelse(Node == 'ACB',
+                       'ACBB0',
+                       Node),
+         Node = ifelse(Node == 'CCA',
+                       'CCAB0',
+                       Node),
          Node = ifelse(SiteID == 'AFC',
                        ifelse(grepl('MAINSTEM', AntennaGroup),
                               'AFCB0',
                               'AFCA0'),
+                       Node),
+         Node = ifelse(SiteID == 'HBC',
+                       'HYCA0',
                        Node),
          Node = ifelse(SiteID %in% c('TUCH', 'TFH'),
                        'TUCH',
@@ -60,6 +82,9 @@ my_config = org_config %>%
                        Node),
          Node = ifelse(SiteID == 'WIMPYC',
                        'WPCA0',
+                       Node),
+         Node = ifelse(SiteID == 'IML' & ConfigID == 130 & AntennaID == '09',
+                       'IMLA0',
                        Node),
          Node = str_replace(Node, '^BTC', 'BTL'),
          Node = ifelse(SiteID %in% c('YANKFK', 'CEY'),
@@ -83,6 +108,9 @@ my_config = org_config %>%
          Node = ifelse(Node == 'HYC',
                        'HYCB0',
                        Node),
+         Node = ifelse(Node == 'YFK',
+                       'YFKB0',
+                       Node),
          Node = ifelse(Node == 'LLR',
                        'LLRB0',
                        Node),
@@ -90,17 +118,9 @@ my_config = org_config %>%
                        'LRWB0',
                        Node),
          Node = ifelse(SiteID == '18M',
-                       paste0('X', Node),
+                       str_replace(Node, '18M', 'HEC'),
                        Node)) %>%
   distinct()
-
-#------------------------------------------------------------------------------
-# Save customized configuration file as .csv with time stamp.
-#------------------------------------------------------------------------------
-my_config <- my_config %>% filter(Node != 'IML')
-
-write.csv(my_config, file = paste0('./data/ConfigurationFiles/my_config_',spp,'_',yr,'.csv'),
-          row.names = FALSE)
 
 #------------------------------------------------------------------------------
 # Create Lower Granite site network and available paths
@@ -122,68 +142,25 @@ site_df = site_df %>%
                         'BIG2C',
                         'RPDTRP'))
 
-#--------------------------
-# Double check SiteId names
-#--------------------------
-anti_join(site_df, my_config, by = 'SiteID') # zero observations is good!
-#not_in_myconfig <- anti_join(my_config, site_df, by = 'SiteID') # lots of observations
-#write.csv(not_in_myconfig, file = './not_in_myconfig.csv')
+# where is trap data?
+trap_path = 'data/TrappingDbase/tblLGDMasterCombineExportJodyW.csv'
 
-# Save Output
-write.csv(site_df, file = paste0('./data/ConfigurationFiles/site_df_',spp,'_',yr,'.csv'),
-          row.names = FALSE)
+# start date is July 1 of the previous year for steelhead, or March 1 of current year for Chinook
+startDate = if_else(spp == 'Steelhead',
+                    paste0(yr-1, '0701'),
+                    if_else(spp == 'Chinook',
+                            paste0(yr, '0301'),
+                            NULL))
 
-#------------------------------------------------------------------------------
-# Create parent-child node network based on site_df and customized
-# configuration.
-#
-# Term: Node Detection Landscape 
-#
-# Joins DABOM site hierarchy with config table to get node names, then it 
-# only keeps node available and needed for DABOM model
-#
-# dates are used to identify which antenna configuration in PTAGIS to use
-#
-# could be maintained externally
-#------------------------------------------------------------------------------
 
 parent_child = createParentChildDf(site_df,
-                                   my_config,
-                                   startDate = ifelse(spp == 'Chinook',
-                                                      paste0(yr, '0301'),
-                                                      paste0(yr-1, '0701')))
+                                  configuration,
+                                   startDate = startDate)
 
-write.csv(parent_child, 
-     file = paste0('./data/ConfigurationFiles/parent_child_',spp,'_',yr,'.csv'),
-     row.names = FALSE)
-
-#------------------------------------------------------------------------------
-## Get valid tags from Lower Granite trapping database and relavent fields,
-# and saves a .txt file of tag codes for upload into PTAGIS complete tag 
-# history query
-#------------------------------------------------------------------------------
-
-# Export .csv file from access database
-#trapDB_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
-#con <- loadLGTrappingDBase(trapDB_filepath)
-
-#trap_df <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
-#write_csv(trap_df, path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
-
-trap_filepath = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
-
-valid_df = filterLGRtrapDB(trap_path = trap_filepath,
-                           species = spp,
-                           spawnYear = yr,
-                           saveValidTagList = T,
-                           validTagFileNm = paste0('data/ValidTagLists/LGR_', spp, '_', yr, '.txt'))
-
-#------------------------------------------------------------------------------
-# Read in the result of the PTAGIS complete tag history query
-#------------------------------------------------------------------------------
+#get observations from PTAGIS
 observations = read_csv(paste0('data/CompleteTagHistories/LGR_', spp, '_', yr, '.csv'))
 
-observations$`Antenna ID` <- str_pad(observations$`Antenna ID`, 2, pad = '0')
+#observations$`Antenna ID` <- str_pad(observations$`Antenna ID`, 2, pad = '0')
 
 #------------------------------------------------------------------------------
 # Combines node names with raw PTAGIS observations and runs cleaning/processing
@@ -192,16 +169,15 @@ observations$`Antenna ID` <- str_pad(observations$`Antenna ID`, 2, pad = '0')
 
 proc_list = processCapHist_LGD(species = spp,
                                spawnYear = yr,
-                               configuration = my_config,
+                               configuration = configuration,
+                               trap_path = trap_path,
                                parent_child = parent_child,
-                               trap_path = trap_filepath,
-                               filter_by_PBT = T,
                                observations = observations,
-                               truncate = T,
                                site_df = site_df,
+                               truncate = T,
                                step_num = 3,
-                               save_file = F,
-                               file_name = paste0('data/PreppedData/ProcCapHist_', spp, '_', yr, '.csv'))
+                               save_file = T,
+                               file_name = paste0(PITcleanrFolder, '/LGR_', spp, '_', yr, '.xlsx'))
 
 # save list object as data frame for saving
 proc_ch <- proc_list$ProcCapHist %>%
@@ -244,17 +220,53 @@ proc_ch <- proc_list$ProcCapHist %>%
 #                              last_obs_date, save_file, file_name)
 
 #------------------------------------------------------------------------------
-# Save Data
+# Save Data for biologist review
 #------------------------------------------------------------------------------
+
 write.csv(proc_ch, 
      file = paste0('./data/PreppedData/ProcCapHist_NULL_', spp, '_', yr,'.csv'),
      row.names = FALSE)
 
-# add items to proc_list
-proc_list$parent_child <- parent_child
-proc_list$site_df <- site_df
+save(spp, yr, startDate, site_df, configuration, parent_child, proc_list, 
+     file = paste0('./data/PreppedData/LGR_', spp, '_', yr,'.rda'))
 
-# save entire list to feed into DABOM package
-save(proc_list,
-     file = paste0('data/PreppedData/LGR_', spp, '_', yr,'.rda'))
+# After biologist review
+spp <- 'Steelhead'
+yr <- 2019
 
+DABOMdataFolder = 'data/DABOMready'
+if(!dir.exists(DABOMdataFolder)) {
+  dir.create(DABOMdataFolder)
+}
+
+load(paste0('./data/PreppedData/LGR_', spp, '_', yr,'.rda'))
+
+# for Chinook, remove some observations from basins we don't expect Chinook to go to
+if(spp == 'Chinook') {
+  proc_list$ProcCapHist %<>%
+    filter(!Group %in% c('Asotin', 'Lapwai', 'Potlatch', 'JosephCreek', 'CowCreek', 'CarmenCreek', 'Almota', 'Alpowa', 'Penawawa'))
+  
+}
+
+# replace default PITcleanr output with files from Rick Orme
+proc_list$ProcCapHist = read_excel(paste0('data/CleanedProcHist/LGR_', spp, '_EDITTED_', yr, '.xlsx')) %>%
+  mutate_at(vars(AutoProcStatus, UserProcStatus, ModelObs, ValidPath),
+            list(as.logical)) %>%
+  # filter(UserProcStatus) %>%
+  select(one_of(names(proc_list$ProcCapHist))) %>%
+  mutate_at(vars(TrapDate),
+            list(ymd)) %>%
+  # mutate_at(vars(TrapDate),
+  #           list(as.POSIXct),
+  #           tz = "America/Los_Angeles") %>%
+  mutate_at(vars(ObsDate, lastObsDate),
+            list(ymd_hms)) %>%
+  mutate_at(vars(Group),
+            list(factor),
+            levels = levels(proc_list$ProcCapHist$Group)) %>%
+  arrange(TagID, ObsDate)
+
+
+# save some stuff
+save(spp, yr, startDate, site_df, configuration, parent_child, proc_list,
+     file = paste0(DABOMdataFolder, '/LGR_', spp, '_', yr, '.rda'))

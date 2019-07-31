@@ -5,6 +5,14 @@
 # Author: Ryan Kinzer
 #------------------------------------------------------------------------------
 
+# Download STADEM Package
+if(!require(STADEM)){
+  devtools::install_github('KevinSee/STADEM', ref = 'master', force = TRUE,
+                           upgrade = "always")
+}
+
+
+
 library(tidyverse)
 library(stringr)
 library(lubridate)
@@ -16,6 +24,11 @@ library(STADEM)
 stademFolder = 'STADEM_results'
 if(!dir.exists(stademFolder)) {
   dir.create(stademFolder)
+}
+
+modelFolder = 'ModelFiles'
+if(!dir.exists(modelFolder)) {
+  dir.create(modelFolder)
 }
 
 ## Requires a copy of the Lower Granite Dam Trap Database and the odbc driver
