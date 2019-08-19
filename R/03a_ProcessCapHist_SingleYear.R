@@ -27,7 +27,7 @@ if(!dir.exists(PITcleanrFolder)) {
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
 spp = 'Steelhead'  # either 'Chinook' or 'Steelhead'
-yr = 2019        # tagging operations started in spawn year 2009
+yr = 2016       # tagging operations started in spawn year 2009
 
 #------------------------------------------------------------------------------
 # Download all PTAGIS interrogation and MRR sites, antennas and configuations,

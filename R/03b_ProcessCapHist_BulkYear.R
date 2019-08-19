@@ -134,11 +134,14 @@ site_df = site_df %>%
 
 
 # where is trap data?
-trap_path = 'data/tblLGDMasterCombineExportJodyW.csv'
+trap_path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
+
+# Has the data been cleaned by Rick, and is it ready for DABOM?
+cleanData = TRUE
 
 #-----------------------------------------------------------------
 # read observations from PTAGIS and process with PITcleanr
-for(yr in 2010:2018) {
+for(yr in 2010:2011) {
   
   cat(paste('Starting year', yr, '\n'))
   
@@ -170,7 +173,8 @@ for(yr in 2010:2018) {
                                  save_file = T,
                                  file_name = paste0(PITcleanrFolder, '/LGR_', spp, '_', yr, '.xlsx'))
   
-  
+  if(cleanData) {
+    
   # for Chinook, remove some observations from basins we don't expect Chinook to go to
   if(spp == 'Chinook') {
     proc_list$ProcCapHist %<>%
@@ -179,7 +183,7 @@ for(yr in 2010:2018) {
   }
   
   # replace default PITcleanr output with files from Rick Orme
-  proc_list$ProcCapHist = read_excel(paste0('data/CleanedProcHist/LGR_', spp, '_EDITTED_', yr, '.xlsx')) %>%
+  proc_list$ProcCapHist = read_excel(paste0('data/CleanedProcHist/LGR_', spp,'_',yr,'_Editted.xlsx')) %>%
     mutate_at(vars(AutoProcStatus, UserProcStatus, ModelObs, ValidPath),
               list(as.logical)) %>%
     # filter(UserProcStatus) %>%
@@ -196,10 +200,11 @@ for(yr in 2010:2018) {
               levels = levels(proc_list$ProcCapHist$Group)) %>%
     arrange(TagID, ObsDate)
   
-  
   # save some stuff
   save(spp, yr, startDate, site_df, configuration, parent_child, proc_list,
        file = paste0(DABOMdataFolder, '/LGR_', spp, '_', yr, '.rda'))
+  
+  }
   
   rm(startDate, parent_child, observations, proc_list)
   

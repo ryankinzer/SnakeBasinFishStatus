@@ -35,7 +35,7 @@ if(!dir.exists(modelFolder)) {
 if(.Platform$OS.type != 'unix') {
   source('./R/loadLGTrappingDBase.R')
   trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
-  con <- loadLGTrappingDBase(trapDB_filepath)
+  con <- loadLGTrappingDBase(trap_filepath)
   trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
 }
 
