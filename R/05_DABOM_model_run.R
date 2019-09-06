@@ -53,6 +53,12 @@ if(spp == 'Chinook') {
 proc_ch <- proc_ch %>%
   mutate(Node = ifelse(Node %in% c('POTREF', 'POTRWF'), 'HLMA0', Node))
 
+
+
+# MOVE ASOTIC obs to ACBA0 for 2010 and 2011.
+
+
+
 #------------------------------------------------------------------------------
 # Create default LGR branch occupancy JAGs model code.
 #------------------------------------------------------------------------------
