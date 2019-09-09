@@ -89,7 +89,7 @@ rm(sthdPops)
 # set species
 spp = 'Steelhead'
 # set year
-yr = 2019
+yr = 2014
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
@@ -170,6 +170,36 @@ for(yr in 2010:2018) {
                              as.character(NA),
                              .)))
   
+  # Calculate age (freshwater, saltwater, total & broody year)
+  tagSumm %<>%
+    mutate(BioScaleFinalAge = if_else(grepl('\\?', BioScaleFinalAge) | BioScaleFinalAge == 'N:A',
+                                    as.character(NA),
+                                    BioScaleFinalAge)) %>%
+    mutate(fwAge = str_sub(BioScaleFinalAge, 1, 1),
+           fwAge = as.integer(fwAge)) %>%
+    mutate(swAge_tmp = str_remove(BioScaleFinalAge,
+                                  '.*:')) %>%
+    # for minijacks, replace MJ with 0
+    rowwise() %>%
+    mutate(swAge_tmp = if_else(Species == 'Chinook',
+                               str_replace_all(swAge_tmp,
+                                               'MJ', '0'),
+                               swAge_tmp)) %>%
+    ungroup() %>%
+    # for repeat spawners, replace the S with a 1 (for one year in the ocean between spawning)
+    mutate(swAge_tmp = str_replace_all(swAge_tmp,
+                                       'S', '1'),
+           swAge_tmp = str_replace_all(swAge_tmp,
+                                       's', '1'),
+           swAge_tmp = str_split(swAge_tmp, '')) %>%
+    mutate(swAge = map_int(swAge_tmp,
+                           .f = function(x) sum(as.integer(x)))) %>%
+    select(-swAge_tmp) %>%
+    mutate(totalAge = fwAge + swAge + 1) %>%
+    # assign brood year
+    mutate(BrdYr = as.integer(str_extract(SpawnYear, '[:digit:]+')) - totalAge)
+  
+  
   # xtabs(~ TRT + NWR_POPID, tagSumm, drop.unused.levels = T)
   
   #-----------------------------------------------------------------
@@ -187,35 +217,10 @@ for(yr in 2010:2018) {
     select(MPG, TRT, modBranch, nSexed, everything())
   
   #-----------------------------------------------------------------
-  # join the spawn node to detectSites to bring in MPG, and summarise age props by model branch and MPG
-  # modAgeDf = tagSumm %>%
-  #   group_by(MPG, TRT, modBranch, BioScaleFinalAge) %>%
-  #   summarise(nTags = n_distinct(TagID)) %>%
-  #   ungroup() %>%
-  #   filter(!grepl('\\?', BioScaleFinalAge),
-  #          BioScaleFinalAge != 'N:A') %>%
-  #   spread(BioScaleFinalAge, nTags,
-  #          fill = 0) %>%
-  #   mutate(nAged = select(., -(MPG:modBranch)) %>% rowSums) %>%
-  #   select(MPG, TRT, modBranch, nAged, everything())
+  # summarise age props (and brood year) by model branch and MPG
   
-  # calculates total age of each fish
   modAgeDf = tagSumm %>%
-    filter(!grepl('\\?', BioScaleFinalAge),
-           BioScaleFinalAge != 'N:A') %>%
-    mutate(fwAge = str_sub(BioScaleFinalAge, 1, 1),
-           fwAge = as.integer(fwAge)) %>%
-    mutate(swAge_tmp = str_remove(BioScaleFinalAge,
-                                  '.*:'),
-           swAge_tmp = str_replace_all(swAge_tmp,
-                                       'S', '1'),
-           swAge_tmp = str_replace_all(swAge_tmp,
-                                       's', '1'),
-           swAge_tmp = str_split(swAge_tmp, '')) %>%
-    mutate(swAge = map_int(swAge_tmp,
-                           .f = function(x) sum(as.integer(x)))) %>%
-    select(-swAge_tmp) %>%
-    mutate(totalAge = fwAge + swAge) %>%
+    filter(!is.na(totalAge)) %>%
     group_by(MPG, TRT, modBranch, totalAge) %>%
     summarise(nTags = n_distinct(TagID)) %>%
     ungroup() %>%
@@ -225,22 +230,8 @@ for(yr in 2010:2018) {
     mutate(nAged = select(., -(MPG:modBranch)) %>% rowSums) %>%
     select(MPG, TRT, modBranch, nAged, everything())
   
-  # calculates brood year of each fish
   modBrdYrDf = tagSumm %>%
-    filter(!grepl('\\?', BioScaleFinalAge),
-           BioScaleFinalAge != 'N:A') %>%
-    mutate(fwAge = str_sub(BioScaleFinalAge, 1, 1),
-           fwAge = as.integer(fwAge)) %>%
-    mutate(swAge_tmp = str_remove(BioScaleFinalAge,
-                                  '.*:'),
-           swAge_tmp = str_replace_all(swAge_tmp,
-                                       'S', '1'),
-           swAge_tmp = str_split(swAge_tmp, '')) %>%
-    mutate(swAge = map_int(swAge_tmp,
-                           .f = function(x) sum(as.integer(x)))) %>%
-    select(-swAge_tmp) %>%
-    mutate(totalAge = fwAge + swAge) %>%
-    mutate(BrdYr = as.integer(str_extract(SpawnYear, '[:digit:]+')) - totalAge) %>%
+    filter(!is.na(BrdYr)) %>%
     group_by(MPG, TRT, modBranch, BrdYr) %>%
     summarise(nTags = n_distinct(TagID)) %>%
     ungroup() %>%
