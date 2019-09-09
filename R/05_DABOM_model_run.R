@@ -53,11 +53,16 @@ if(spp == 'Chinook') {
 proc_ch <- proc_ch %>%
   mutate(Node = ifelse(Node %in% c('POTREF', 'POTRWF'), 'HLMA0', Node))
 
-
-
-# MOVE ASOTIC obs to ACBA0 for 2010 and 2011.
-
-
+#------------------------------------------------------------------------------
+# In 2010 and 2011, the Asotin Creek weir was upstream of ACB. For those years, 
+# take all detections at ASOTIC and move them to ACBA0
+#------------------------------------------------------------------------------
+if(spp == 'Steelhead' & yr %in% c(2010, 2011)) {
+  proc_ch <- proc_ch %>%
+    mutate(Node = if_else(Node == 'ASOTIC',
+                          'ACBA0',
+                          Node))
+}
 
 #------------------------------------------------------------------------------
 # Create default LGR branch occupancy JAGs model code.
