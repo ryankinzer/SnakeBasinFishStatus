@@ -24,10 +24,8 @@ if(!dir.exists(PITcleanrFolder)) {
 # Identify which species and spawn year data is needed. 
 #------------------------------------------------------------------------------
 
-#timestp <- gsub('[^0-9]','', Sys.Date())
-
-spp = 'Steelhead'  # either 'Chinook' or 'Steelhead'
-yr = 2019        # tagging operations started in spawn year 2009
+spp = 'Chinook'  # either 'Chinook' or 'Steelhead'
+yr_range = 2010:2019        # tagging operations started in spawn year 2009
 
 #------------------------------------------------------------------------------
 # Download all PTAGIS interrogation and MRR sites, antennas and configuations,
@@ -145,6 +143,10 @@ site_df = site_df %>%
 # where is trap data?
 trap_path = 'data/TrappingDbase/tblLGDMasterCombineExportJodyW.csv'
 
+for(i in 1:length(yr_range)){
+
+yr <- yr_range[i]  
+print(paste0("Starting to process ", spp, " spawn year ", yr))
 # start date is July 1 of the previous year for steelhead, or March 1 of current year for Chinook
 startDate = if_else(spp == 'Steelhead',
                     paste0(yr-1, '0701'),
@@ -186,7 +188,7 @@ proc_ch <- proc_list$ProcCapHist %>%
 #------------------------------------------------------------------------------
 # The code below is all wrapped in the processCapHist_LGD function above.  I 
 # have listed out each step below to assist in debugging, and to improve the
-# understanding of the black-box.
+# understanding of the black-box....oooohhhh scary.
 #------------------------------------------------------------------------------
 # cat("Constructing valid pathways\n")
 # valid_paths = getValidPaths(parent_child)
@@ -229,6 +231,8 @@ write.csv(proc_ch,
 
 save(spp, yr, startDate, site_df, configuration, parent_child, proc_list, 
      file = paste0('./data/PreppedData/LGR_', spp, '_', yr,'.rda'))
+
+}
 
 # After biologist review
 spp <- 'Steelhead'
