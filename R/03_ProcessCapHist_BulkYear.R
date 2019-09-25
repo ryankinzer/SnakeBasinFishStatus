@@ -14,9 +14,6 @@ library(WriteXLS)
 library(lubridate)
 
 #-----------------------------------------------------------------
-# set species
-spp = 'Steelhead'
-
 # set up folder structure
 PITcleanrFolder = 'data/PITcleanr'
 if(!dir.exists(PITcleanrFolder)) {
@@ -133,12 +130,17 @@ site_df = site_df %>%
                         'RPDTRP'))
 
 
+#-----------------------------------------------------------------
+# read observations from PTAGIS and process with PITcleanr
+# set species
+spp = 'Chinook'
+# have the processed capture history files been cleaned by the 
+# biologist and are they ready for DABOM
+bio_cleaned = TRUE
 # where is trap data?
 trap_path = 'data/tblLGDMasterCombineExportJodyW.csv'
 
-#-----------------------------------------------------------------
-# read observations from PTAGIS and process with PITcleanr
-for(yr in 2010:2018) {
+for(yr in 2010:2019) {
   
   cat(paste('Starting year', yr, '\n'))
   
@@ -170,36 +172,31 @@ for(yr in 2010:2018) {
                                  save_file = T,
                                  file_name = paste0(PITcleanrFolder, '/LGR_', spp, '_', yr, '.xlsx'))
   
-  
-  # for Chinook, remove some observations from basins we don't expect Chinook to go to
-  if(spp == 'Chinook') {
-    proc_list$ProcCapHist %<>%
-      filter(!Group %in% c('Asotin', 'Lapwai', 'Potlatch', 'JosephCreek', 'CowCreek', 'CarmenCreek', 'Almota', 'Alpowa', 'Penawawa'))
+  if(bio_cleaned){
+      # replace default PITcleanr output with files from Rick Orme
+      proc_list$ProcCapHist = read_excel(paste0('data/CleanedProcHist/LGR_', spp, '_EDITTED_', yr, '.xlsx')) %>%
+        mutate_at(vars(AutoProcStatus, UserProcStatus, ModelObs, ValidPath),
+                  list(as.logical)) %>%
+        # filter(UserProcStatus) %>%
+        select(one_of(names(proc_list$ProcCapHist))) %>%
+        mutate_at(vars(TrapDate),
+                  list(ymd)) %>%
+        # mutate_at(vars(TrapDate),
+        #           list(as.POSIXct),
+        #           tz = "America/Los_Angeles") %>%
+        mutate_at(vars(ObsDate, lastObsDate),
+                  list(ymd_hms)) %>%
+        mutate_at(vars(Group),
+                  list(factor),
+                  levels = levels(proc_list$ProcCapHist$Group)) %>%
+        arrange(TagID, ObsDate)
+      
+      
+      # save some stuff
+      save(spp, yr, startDate, site_df, configuration, parent_child, proc_list,
+           file = paste0(DABOMdataFolder, '/LGR_', spp, '_', yr, '.rda'))
       
   }
-  
-  # replace default PITcleanr output with files from Rick Orme
-  proc_list$ProcCapHist = read_excel(paste0('data/CleanedProcHist/LGR_', spp, '_EDITTED_', yr, '.xlsx')) %>%
-    mutate_at(vars(AutoProcStatus, UserProcStatus, ModelObs, ValidPath),
-              list(as.logical)) %>%
-    # filter(UserProcStatus) %>%
-    select(one_of(names(proc_list$ProcCapHist))) %>%
-    mutate_at(vars(TrapDate),
-              list(ymd)) %>%
-    # mutate_at(vars(TrapDate),
-    #           list(as.POSIXct),
-    #           tz = "America/Los_Angeles") %>%
-    mutate_at(vars(ObsDate, lastObsDate),
-              list(ymd_hms)) %>%
-    mutate_at(vars(Group),
-              list(factor),
-              levels = levels(proc_list$ProcCapHist$Group)) %>%
-    arrange(TagID, ObsDate)
-  
-  
-  # save some stuff
-  save(spp, yr, startDate, site_df, configuration, parent_child, proc_list,
-       file = paste0(DABOMdataFolder, '/LGR_', spp, '_', yr, '.rda'))
   
   rm(startDate, parent_child, observations, proc_list)
   
