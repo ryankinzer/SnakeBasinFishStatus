@@ -133,14 +133,14 @@ site_df = site_df %>%
 #-----------------------------------------------------------------
 # read observations from PTAGIS and process with PITcleanr
 # set species
-spp = 'Chinook'
+spp = 'Steelhead'
 # have the processed capture history files been cleaned by the 
 # biologist and are they ready for DABOM
 bio_cleaned = TRUE
 # where is trap data?
-trap_path = 'data/tblLGDMasterCombineExportJodyW.csv'
+trap_path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
 
-for(yr in 2010:2019) {
+for(yr in 2010:2018) {
   
   cat(paste('Starting year', yr, '\n'))
   
