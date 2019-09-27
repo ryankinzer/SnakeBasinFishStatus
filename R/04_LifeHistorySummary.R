@@ -89,7 +89,7 @@ rm(sthdPops)
 # set species
 spp = 'Steelhead'
 # set year
-yr = 2014
+yr = 2018
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
@@ -155,7 +155,7 @@ for(yr in 2010:2018) {
   tagSumm %<>%
     left_join(gsiSites %>%
                 filter(Species == spp) %>%
-                select(Node, obsGSI = GSI, TRT) %>%
+                select(Species, Node, obsGSI = GSI, TRT) %>%
                 distinct(),
               by = c('AssignSpawnNode' = 'Node')) %>%
     left_join(detectSites %>%
@@ -214,7 +214,8 @@ for(yr in 2010:2018) {
     mutate(nSexed = F + M) %>%
     mutate(propF = F / (F + M),
            propF_se = sqrt((propF * (1 - propF)) / (F + M))) %>%
-    select(MPG, TRT, modBranch, nSexed, everything())
+    select(MPG, TRT, modBranch, nSexed, everything()) %>%
+    mutate(modBranch = if_else(is.na(modBranch), 'NotObserved', modBranch))
   
   #-----------------------------------------------------------------
   # summarise age props (and brood year) by model branch and MPG
@@ -228,7 +229,8 @@ for(yr in 2010:2018) {
     spread(totalAge, nTags,
            fill = 0) %>%
     mutate(nAged = select(., -(MPG:modBranch)) %>% rowSums) %>%
-    select(MPG, TRT, modBranch, nAged, everything())
+    select(MPG, TRT, modBranch, nAged, everything()) %>%
+    mutate(modBranch = if_else(is.na(modBranch), 'NotObserved', modBranch))
   
   modBrdYrDf = tagSumm %>%
     filter(!is.na(BrdYr)) %>%
@@ -238,7 +240,8 @@ for(yr in 2010:2018) {
     spread(BrdYr, nTags,
            fill = 0) %>%
     mutate(nAged = select(., -(MPG:modBranch)) %>% rowSums) %>%
-    select(MPG, TRT, modBranch, nAged, everything())
+    select(MPG, TRT, modBranch, nAged, everything()) %>%
+    mutate(modBranch = if_else(is.na(modBranch), 'NotObserved', modBranch))
   
   
   
@@ -247,7 +250,7 @@ for(yr in 2010:2018) {
        AgeFreq = modAgeDf,
        BroodYear = modBrdYrDf) %>%
     WriteXLS(paste0(LifeHistory,'/LGR_', spp, '_', yr, '.xlsx'),
-             AdjWidth = T,
+             AdjWidth = F,
              BoldHeaderRow = T,
              AutoFilter = F,
              FreezeRow = 1)
