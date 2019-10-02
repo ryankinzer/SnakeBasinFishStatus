@@ -1,0 +1,40 @@
+# Purpose: Helper function to assign MPG, TRTs and GSI groups
+# to Sites and Nodes.
+# Author: Ryan Kinzer
+# Created: 7/12/19
+# Modified:
+
+assign_POP_GSI <- function(species, configuration, site_df){
+
+  #load('./data/ConfigurationFiles/DABOM_map_data.rda')
+  load('./data/ConfigurationFiles/Snake_POP_metadata.rda')
+
+  config <- configuration %>%
+    filter(SiteID %in% site_df$SiteID) %>%
+    filter(SiteID != 'GRA') %>%
+    select(SiteID, SiteType, SiteName, RKM, Latitude, Longitude, Node) %>%
+    distinct() %>%
+    sf::st_as_sf(coords = c('Longitude', 'Latitude'),
+                 crs = 4326)
+
+  if(species == 'Steelhead'){
+    pop_sf <- SR_st_pop
+  }
+  
+  if(species == 'Chinook'){
+    pop_sf <- SR_ch_pop
+  }
+  
+    df <- config %>%
+      sf::st_join(pop_sf %>%
+                    select(ESU_DPS, MPG, POP_NAME, TRT = TRT_POPID, GSI_Group))
+    #as_tibble() %>%
+    #select(-geometry)
+    #   mutate_at(vars(obsGSI, TRT, modBranch, MPG, NWR_POPID),
+    #             list(~ if_else(AssignSpawnNode == 'GRA',
+    #                            as.character(NA),
+    #                            .)))
+  
+  return(list(df, pop_sf))
+
+}

@@ -6,7 +6,7 @@
 library(tidyverse)
 library(lubridate)
 library(PITcleanr)
-source('./R/site_trt_designations.R')
+source('./R/assign_POP_GSI.R')
 
 spp = 'Steelhead'
 yr_range = c(2010:2018)
@@ -24,14 +24,15 @@ allEffDf = as.list(yr_range) %>%
            
            eff <- estNodeEff(filter(proc_list$ProcCapHist,UserProcStatus), node_order = proc_list$NodeOrder)
            
-           trt_df <- site_trt_designations(spp, configuration, site_df)
+           trt_df <- assign_POP_GSI(spp, configuration, site_df)[[1]] %>% as_tibble()
            
            detect_summ %>%
              left_join(eff, by = 'Node') %>%
              left_join(proc_list$NodeOrder %>%
                          select(Node, Group), by = 'Node') %>%
              left_join(trt_df %>%
-                         select(Node, MPG, TRT) %>% distinct(), by = 'Node')
+                         select(Node, MPG, TRT) %>% distinct() %>%
+                         as_tibble(), by = 'Node')
          })
 
 
