@@ -12,6 +12,12 @@ library(lubridate)
 library(PITcleanr)
 library(DABOM)
 
+# set up folder structure
+dabomFolder = 'DABOM_results'
+if(!dir.exists(dabomFolder)) {
+  dir.create(dabomFolder)
+}
+
 #------------------------------------------------------------------------------
 # Set species and year of interest
 #------------------------------------------------------------------------------
@@ -165,6 +171,6 @@ dabom_mod <- jags.basic(data = jags_data,
 proc_list[["proc_ch"]] <- proc_ch
 
 save(dabom_mod, dabom_list, proc_list,
-     file = paste0('DABOM_results/LGR_DABOM_Bio_', spp, '_', yr,'_',timestp,'.rda'))
+     file = paste0(dabomFolder,'/LGR_DABOM_Bio_', spp, '_', yr,'_',timestp,'.rda'))
 
 detach('package:jagsUI')
