@@ -1,0 +1,70 @@
+POP_NAME,TRT_POPID,GSI_Group
+Lapwai/Big Canyon,CRLAP,HELLSC
+Lawyer Creek,SCLAW,HELLSC
+Potlatch River,CRPOT,HELLSC
+Upper South Fork Clearwater,SCUMA,HELLSC
+Big Sheep Creek,IRBSH,HELLSC
+Catherine Creek,GRCAT,HELLSC
+Grande Ronde River upper mainstem,GRUMA,HELLSC
+Imnaha River mainstem,IRMAI,HELLSC
+Lookingglass Creek,GRLOO,HELLSC
+Lostine River,GRLOS,HELLSC
+Minam River,GRMIN,HELLSC
+Wenaha River,GRWEN,HELLSC
+Asotin Creek,SNASO,TUCANO
+Tucannon River,SNTUC,TUCANO
+Bear Valley Creek,MFBEA,MFSALM
+Big Creek,MFBIG,MFSALM
+Camas Creek,MFCAM,MFSALM
+Chamberlain Creek,SRCHA,CHMBLN
+Loon Creek,MFLOO,MFSALM
+Marsh Creek,MFMAR,MFSALM
+Middle Fork Salmon River above Indian Creek,MFUMA,MFSALM
+Middle Fork Salmon River below Indian Creek,MFLMA,MFSALM
+Sulphur Creek,MFSUL,MFSALM
+East Fork South Fork Salmon River,SFEFS,SFSALM
+Little Salmon River,SRLSR,HELLSC
+Secesh River,SFSEC,SFSALM
+South Fork Salmon River mainstem,SFMAI,SFSALM
+East Fork Salmon River,SREFS,UPSALM
+Lemhi River,SRLEM,UPSALM
+North Fork Salmon River,SRNFS,UPSALM
+Pahsimeroi River,SRPAH,UPSALM
+Panther Creek,SRPAN,UPSALM
+Salmon River lower mainstem below Redfish Lake,SRLMA,UPSALM
+Valley Creek,SRVAL,UPSALM
+Yankee Fork,SRYFS,UPSALM
+Lochsa River,CRLOC,HELLSC
+Lolo Creek,CRLOL,HELLSC
+Lower North Fork Clearwater,NCLMA,HELLSC
+Meadow Creek,SEMEA,HELLSC
+Moose Creek,SEMOO,HELLSC
+Upper North Fork Clearwater,NCUMA,HELLSC
+Upper Selway River,SEUMA,HELLSC
+Salmon River upper mainstem above Redfish Lake,SRUMA,UPSALM
+Clearwater River lower mainstem,CRLMA-s,LOCLWR
+Lochsa River,CRLOC-s,UPCLWR
+Lolo Creek,CRLOL-s,SFCLWR
+North Fork Clearwater River,CRNFC-s,UPCLWR
+Selway River,CRSEL-s,UPCLWR
+South Fork Clearwater River,CRSFC-s,SFCLWR
+Grande Ronde River lower mainstem tributaries,GRLMT-s,GRROND
+Grande Ronde River upper mainstem,GRUMA-s,GRROND
+Joseph Creek,GRJOS-s,GRROND
+Wallowa River,GRWAL-s,GRROND
+Hells Canyon,SNHCT-s,LSNAKE
+Imnaha River,IRMAI-s,IMNAHA
+Asotin Creek,SNASO-s,LSNAKE
+Tucannon River,SNTUC-s,LSNAKE
+"Big, Camas, and Loon Creek",MFBIG-s,MFSALM
+Chamberlain Creek,SRCHA-s,MFSALM
+East Fork Salmon River,SREFS-s,UPSALM
+Lemhi River,SRLEM-s,UPSALM
+Little Salmon and Rapid River,SRLSR-s,LOSALM
+Middle Fork Salmon River upper mainstem,MFUMA-s,MFSALM
+North Fork Salmon River,SRNFS-s,UPSALM
+Pahsimeroi River,SRPAH-s,UPSALM
+Panther Creek,SRPAN-s,UPSALM
+Salmon River upper mainstem,SRUMA-s,UPSALM
+Secesh River,SFSEC-s,SFSALM
+South Fork Salmon River,SFMAI-s,SFSALM
