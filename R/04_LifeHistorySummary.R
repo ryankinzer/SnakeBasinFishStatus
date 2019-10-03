@@ -26,26 +26,14 @@ source('./R/assign_POP_GSI.R')
 
 # set species
 spp = 'Steelhead'
-# set year
-yr = 2018
 
 pop_ls <- assign_POP_GSI(species = spp, configuration, site_df)
 grp_df <- pop_ls[[1]]
 map_df <- pop_ls[[2]]
 
-#site_labs <- distinct(grp_df, SiteID)
-
-# left_join(map_df, modSexDf, by = c('TRT_POPID' = 'TRT')) %>%
-#  ggplot() +
-#    geom_sf(aes(fill = propF)) +
-#    scale_fill_continuous(type = 'viridis') +
-# #   geom_sf(data = grp_df) +
-#    geom_sf_text(aes(label = round(propF,2)), size = 3)
-
-
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
-for(yr in 2010:2018) {
+for(yr in 2010:2019) {
   cat(paste('Working on', spp, 'in', yr, '\n'))
   
   load(paste0('data/DABOMready/LGR_', spp, '_', yr, '.rda'))
@@ -66,7 +54,7 @@ for(yr in 2010:2018) {
   dupTags = tagSumm %>%
     filter(nRec > 1)
   
-  n_distinct(dupTags$TagID)
+  #n_distinct(dupTags$TagID)
   
   dupTagsKeep1 = dupTags %>%
     group_by(TagID) %>%
@@ -175,7 +163,7 @@ for(yr in 2010:2018) {
              AutoFilter = F,
              FreezeRow = 1)
   
-  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df, detectSites)
+  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df)
   
 }
 
