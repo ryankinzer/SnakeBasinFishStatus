@@ -38,7 +38,7 @@ bio_cleaned = TRUE
 # where is trap data?
 trap_path = 'data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
 
-for(yr in 2010:2018) {
+for(yr in 2010:2019) {
   
   cat(paste('Starting year', yr, '\n'))
   
