@@ -28,19 +28,19 @@ stadem_files <- list.files('./STADEM_results')
 #------------------------------------------------------------------------------
 # set species, spawn year and time stamp
 spp <- 'Steelhead'  # either Chinook or Steelhead
-yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
-timestp <- gsub('[^0-9]','', Sys.Date())
+#yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
+#timestp <- gsub('[^0-9]','', Sys.Date())
 
-year_range <- c(2010:2018)
+year_range <- c(2010:2019)
 
 for(yr in year_range){
   
   load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',yr,'.rda')) 
-  
+  load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',yr,'.rda'))
   # steps are necessary b/c each DABOM filename contains a time stamp
-  spp_files <- dabom_files[str_detect(dabom_files, spp)]
-  tmp_file <- spp_files[str_detect(spp_files, as.character(paste0("_",yr,"_")))]
-  load(file = paste0('./DABOM_results/',tmp_file))
+  #spp_files <- dabom_files[str_detect(dabom_files, spp)]
+  #tmp_file <- spp_files[str_detect(spp_files, as.character(paste0("_",yr,"_")))]
+  
   
   load(paste0('./Sex_results/Population_SexProp_',spp,'_',yr,'.rda'))
   load(paste0('./Age_results/Population_AgeProp_',spp,'_',yr,'.rda'))

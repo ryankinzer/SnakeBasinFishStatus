@@ -27,7 +27,7 @@ filepath <- './data/LifeHistoryData/'
 
 # Set species and Spawn Year
 spp = 'Steelhead'
-yr = 2019
+#yr = 2019
 
 #------------------------------------------------------------------------------
 # Create JAGs model to estimate female proportion
@@ -61,7 +61,7 @@ cat(modelCode,
 # Run Sex Model
 # read in data
 
-for(yr in 2010:2018){
+for(yr in 2010:2019){
   cat(paste('Starting sex model for', spp, 'in run year', yr, '\n'))
   
   modSexDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
@@ -70,7 +70,7 @@ for(yr in 2010:2018){
   
   # pull out relevant bits for JAGS, and name them appropriately
   sex_jagsData = modSexDf %>%
-    filter(!is.na(modBranch)) %>%
+    filter(Group != 'NotObserved') %>%
     mutate(popNum = as.integer(as.factor(TRT))) %>%
     select(f = F,
            tags = nSexed,
@@ -155,7 +155,7 @@ cat(modelCode,
 # Run Age Model
 # read in data
 
-for(yr in 2010:2018){
+for(yr in 2010:2019){
   cat(paste('Starting age model for', spp, 'in run year', yr, '\n'))
   
   modAgeDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
@@ -164,14 +164,14 @@ for(yr in 2010:2018){
   
   # pull out relevant bits for JAGS, and name them appropriately
   age_jagsData = modAgeDf %>%
-    filter(!is.na(modBranch)) %>%
+    filter(Group != 'NotObserved') %>%
     mutate(popNum = as.integer(as.factor(TRT))) %>%
     select(tags = nAged,
            popNum) %>%
     as.list()
   
   age_jagsData$ageMat = modAgeDf %>%
-    filter(!is.na(modBranch)) %>%
+    filter(Group != 'NotObserved') %>%
     select(starts_with('age')) %>%
     as.matrix()
   
@@ -184,7 +184,7 @@ for(yr in 2010:2018){
   
   # assign populations as A-run or B-run
   age_jagsData$runType = modAgeDf %>%
-    filter(!is.na(modBranch)) %>%
+    filter(Group != 'NotObserved') %>%
     select(TRT) %>%
     mutate(Run = if_else(TRT %in% c('CRLMA-s',
                                     'CRLOC-s',
