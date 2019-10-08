@@ -25,7 +25,7 @@ load('./data/ConfigurationFiles/site_config.rda')
 source('./R/assign_POP_GSI.R')
 
 # set species
-spp = 'Steelhead'
+spp = 'Chinook'
 
 pop_ls <- assign_POP_GSI(species = spp, configuration, site_df)
 grp_df <- pop_ls[[1]]
@@ -33,7 +33,7 @@ map_df <- pop_ls[[2]]
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
-for(yr in 2010:2019) {
+for(yr in 2010:2018) {
   cat(paste('Working on', spp, 'in', yr, '\n'))
   
   load(paste0('data/DABOMready/LGR_', spp, '_', yr, '.rda'))
@@ -163,7 +163,7 @@ for(yr in 2010:2019) {
              AutoFilter = F,
              FreezeRow = 1)
   
-  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df)
+#  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df)
   
 }
 
