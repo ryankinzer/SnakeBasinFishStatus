@@ -22,7 +22,7 @@ theme_set(theme_bw())
 #---------------------------------------
 # choose species and year combination
 spp = c('Chinook', 'Steelhead')[2]
-yr = 2012
+yr = 2013
 
 #---------------------------------------
 # where are results stored?
@@ -93,6 +93,7 @@ param_chk = convg_df %>%
 # param_chk = '_p$'
 
 # diagnostic plots with postpack package
+# you can save these plots by adding an arguement save = T, and file = your file path
 diag_plots(post = my_mod,
            p = param_chk)
 
@@ -117,7 +118,7 @@ ggmcmc(my_ggs,
        param_page = 10)
 
 
-# a few plots to look at
+# a few specific plots to look at
 dens_p = ggs_density(my_ggs)
 trace_p = ggs_traceplot(my_ggs)
 run_mean_p = ggs_running(my_ggs)
@@ -146,3 +147,13 @@ param_fam = c('JOSEPC', 'JOC', 'phi_josepc')
 
 diag_plots(my_mod,
            param_fam)
+
+#---------------------------------------
+# use tools from Shiny STAN
+#---------------------------------------
+library(shinystan)
+
+# lauch shinystan, then go to Diagnose, then Rhat, n_eff, se_mean tab
+my_mod %>%
+  as.shinystan %>%
+  launch_shinystan()
