@@ -31,7 +31,7 @@ spp <- 'Steelhead'  # either Chinook or Steelhead
 #yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
-year_range <- c(2010:2018)
+year_range <- c(2010:2019)
 
 for(yr in year_range){
   

@@ -124,11 +124,19 @@ jags_data = createJAGSinputs_LGD(dabom_list)
 # CHANGE TIME VARY DATE FOR SPECIES!!!!!!
 
 if(time_varying) {
-  jags_data = c(jags_data,
+  if(spp == 'Steelhead'){
+    jags_data = c(jags_data,
                 addTimeVaryData(proc_ch,
                                 node_order = proc_list$NodeOrder,
                                 start_date = paste0(yr-1,'0701'), 
                                 end_date = paste0(yr,'0630')))
+  } else {
+    jags_data = c(jags_data,
+                  addTimeVaryData(proc_ch,
+                                  node_order = proc_list$NodeOrder,
+                                  start_date = paste0(yr-1,'0301'), 
+                                  end_date = paste0(yr,'0817')))
+  }
 }
 
 #------------------------------------------------------------------------------
