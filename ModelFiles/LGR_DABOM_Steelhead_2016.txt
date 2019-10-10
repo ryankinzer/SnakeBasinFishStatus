@@ -7,10 +7,10 @@ model{
   # SW Washington sites
   #--------------------------------
   ACMA0_p ~ dbeta(1,1)
-  ACMB0_p ~ dbeta(1,1)
+  ACMB0_p <- 0 # no detections / not in operation
   GEORGC_p <- 1 # assume perfect detection
   ASOTIC_p ~ dbeta(1,1)
-  ACBA0_p ~ dbeta(1,1)
+  ACBA0_p <- 0 # no detections / not in operation
   ACBB0_p ~ dbeta(1,1)
   AFCA0_p ~ dbeta(1,1)
   AFCB0_p ~ dbeta(1,1)
@@ -25,7 +25,7 @@ model{
   ALMOTC_p <- 1 # assume perfect detection
   ALPOWC_p <- 1 # assume perfect detection
   PENAWC_p <- 1 # assume perfect detection
-  TENMC2_p <- 1 # assume perfect detection
+  TENMC2_p <- 0 # no detections / not in operation
 
   #--------------------------------
   # Clearwater sites
@@ -39,14 +39,14 @@ model{
   MISA0_p ~ dbeta(1,1)
   MISB0_p ~ dbeta(1,1)
 
-  JUL_p ~ dbeta(1,1)
-  HLMA0_p ~ dbeta(1,1)
-  HLMB0_p ~ dbeta(1,1)
-  POTREF_p <- 1 # assume perfect detection
-  POTRWF_p <- 1 # assume perfect detection
+  JUL_p <- 0 # no detections / not in operation
+  HLMA0_p <- 1 # Single array, no upstream detections
+  HLMB0_p <- 0 # no detections / not in operation
+  POTREF_p <- 0 # no detections / not in operation
+  POTRWF_p <- 0 # no detections / not in operation
   KHSA0_p ~ dbeta(1,1)
   KHSB0_p ~ dbeta(1,1)
-  LBEARC_p <- 1 # assume perfect detection
+  LBEARC_p <- 0 # no detections / not in operation
   BIGBEC_p <- 1 # assume perfect detection
   PCMA0_p ~ dbeta(1,1)
   PCMB0_p ~ dbeta(1,1)
@@ -58,15 +58,15 @@ model{
   SC2B0_p ~ dbeta(1,1)
   SC2A0_p ~ dbeta(1,1)
 
-  CLC_p ~ dbeta(1,1)
-  KOOS_p ~ dbeta(1,1)
+  CLC_p <- 1 # Single array, no upstream detections
+  KOOS_p <- 0 # no detections / not in operation
 
-  LRL_p ~ dbeta(1,1)
-  LRU_p ~ dbeta(1,1)
-  FISTRP_p <- 1 # assume perfect detection
+  LRL_p <- 0 # no detections / not in operation
+  LRU_p <- 0 # no detections / not in operation
+  FISTRP_p <- 0 # no detections / not in operation
 
-  SW1_p ~ dbeta(1,1)
-  SW2_p ~ dbeta(1,1)
+  SW1_p <- 0 # no detections / not in operation
+  SW2_p <- 0 # no detections / not in operation
 
   #--------------------------------
   # NE Oregon sites
@@ -77,8 +77,8 @@ model{
 
   WR1_p ~ dbeta(1,1)
   BCANF_p <- 1 # assume perfect detection
-  WR2B0_p ~ dbeta(1,1)
-  WR2A0_p ~ dbeta(1,1)
+  WR2B0_p <- 0 # no detections / not in operation
+  WR2A0_p <- 0 # no detections / not in operation
   WALH_p <- 1 # assume perfect detection
   LOSTIW_p <- 1 # assume perfect detection
 
@@ -88,11 +88,11 @@ model{
   UGR_p ~ dbeta(1,1)
   CCWA0_p ~ dbeta(1,1)
   CCWB0_p ~ dbeta(1,1)
-  CATHEW_p ~ dbeta(1,1)
+  CATHEW_p <- 0 # no detections / not in operation
 
-  UGSB0_p ~ dbeta(1,1)
-  UGSA0_p ~ dbeta(1,1)
-  GRANDW_p <- 1 # assume perfect detection
+  UGSB0_p <- 0 # no detections / not in operation
+  UGSA0_p <- 0 # no detections / not in operation
+  GRANDW_p <- 0 # no detections / not in operation
 
   COCA0_p ~ dbeta(1,1)
   COCB0_p ~ dbeta(1,1)
@@ -103,26 +103,26 @@ model{
   BSCB0_p ~ dbeta(1,1)
   CMPA0_p ~ dbeta(1,1)
   CMPB0_p ~ dbeta(1,1)
-  HORS3C_p <- 1 # assume perfect detection
+  HORS3C_p <- 0 # no detections / not in operation
   LSHEEF_p <- 1 # assume perfect detection
   IR3A0_p ~ dbeta(1,1)
   IR3B0_p ~ dbeta(1,1)
   CZYA0_p ~ dbeta(1,1)
   CZYB0_p ~ dbeta(1,1)
   FREEZC_p <- 1 # assume perfect detection
-  IR4A0_p ~ dbeta(1,1)
-  IR4B0_p ~ dbeta(1,1)
-  MAHOGC_p <- 1 # assume perfect detection
-  IMLA0_p ~ dbeta(1,1)
-  IMLB0_p ~ dbeta(1,1)
-  IMNAHW_p ~ dbeta(1,1)
-  IR5A0_p ~ dbeta(1,1)
-  IR5B0_p ~ dbeta(1,1)
+  IR4A0_p <- 0 # no detections / not in operation
+  IR4B0_p <- 0 # no detections / not in operation
+  MAHOGC_p <- 0 # no detections / not in operation
+  IMLA0_p <- 0 # no detections / not in operation
+  IMLB0_p <- 0 # no detections / not in operation
+  IMNAHW_p <- 0 # no detections / not in operation
+  IR5A0_p <- 0 # no detections / not in operation
+  IR5B0_p <- 0 # no detections / not in operation
   GUMBTC_p <- 1 # assume perfect detection
-  DRY2C_p <- 1 # assume perfect detection
+  DRY2C_p <- 0 # no detections / not in operation
 
-  WENB0_p ~ dbeta(1,1)
-  WENA0_p ~ dbeta(1,1)
+  WENB0_p <- 0 # no detections / not in operation
+  WENA0_p <- 0 # no detections / not in operation
 
   #--------------------------------
   # Salmon branch sites
@@ -132,17 +132,17 @@ model{
   SFG_p ~ dbeta(1,1)
   ESSA0_p ~ dbeta(1,1)
   ESSB0_p ~ dbeta(1,1)
-  JOHNSC_p <- 1 # assume perfect detection
-  YPPB0_p ~ dbeta(1,1)
-  YPPA0_p ~ dbeta(1,1)
-  KRS_p ~ dbeta(1,1)
-  STR_p <- 1 # assume perfect detection
+  JOHNSC_p <- 0 # no detections / not in operation
+  YPPB0_p <- 0 # no detections / not in operation
+  YPPA0_p <- 0 # no detections / not in operation
+  KRS_p <- 1 # Single array, no upstream detections
+  STR_p <- 0 # no detections / not in operation
   ZENA0_p ~ dbeta(1,1)
   ZENB0_p ~ dbeta(1,1)
-  LAKEC_p <- 1 # assume perfect detection
+  LAKEC_p <- 0 # no detections / not in operation
 
-  PCAB0_p ~ dbeta(1,1)
-  PCAA0_p ~ dbeta(1,1)
+  PCAB0_p <- 0 # no detections / not in operation
+  PCAA0_p <- 0 # no detections / not in operation
 
   TAYA0_p ~ dbeta(1,1)
   TAYB0_p ~ dbeta(1,1)
@@ -150,15 +150,15 @@ model{
   NFSA0_p ~ dbeta(1,1)
   NFSB0_p ~ dbeta(1,1)
 
-  CRCA0_p ~ dbeta(1,1)
-  CRCB0_p ~ dbeta(1,1)
+  CRCA0_p <- 1 # Single array, no upstream detections
+  CRCB0_p <- 0 # no detections / not in operation
 
   LLRA0_p ~ dbeta(1,1)
   LLRB0_p ~ dbeta(1,1)
   AGCA0_p ~ dbeta(1,1)
   AGCB0_p ~ dbeta(1,1)
-  KENA0_p ~ dbeta(1,1)
-  KENB0_p ~ dbeta(1,1)
+  KENA0_p <- 0 # no detections / not in operation
+  KENB0_p <- 0 # no detections / not in operation
   HYCA0_p ~ dbeta(1,1)
   HYCB0_p ~ dbeta(1,1)
   LRWA0_p ~ dbeta(1,1)
@@ -167,24 +167,24 @@ model{
   WPCB0_p ~ dbeta(1,1)
   BHCA0_p ~ dbeta(1,1)
   BHCB0_p ~ dbeta(1,1)
-  LLSA0_p ~ dbeta(1,1)
-  LLSB0_p ~ dbeta(1,1)
-  BTLA0_p ~ dbeta(1,1)
-  BTLB0_p ~ dbeta(1,1)
-  BTMA0_p ~ dbeta(1,1)
-  BTMB0_p ~ dbeta(1,1)
-  BTUA0_p ~ dbeta(1,1)
-  BTUB0_p ~ dbeta(1,1)
-  LCLA0_p ~ dbeta(1,1)
-  LCLB0_p ~ dbeta(1,1)
-  LB8A0_p ~ dbeta(1,1)
-  LB8B0_p ~ dbeta(1,1)
-  LBSA0_p ~ dbeta(1,1)
-  LBSB0_p ~ dbeta(1,1)
-  CACA0_p ~ dbeta(1,1)
-  CACB0_p ~ dbeta(1,1)
-  HECA0_p ~ dbeta(1,1)
-  HECB0_p ~ dbeta(1,1)
+  LLSA0_p <- 0 # no detections / not in operation
+  LLSB0_p <- 0 # no detections / not in operation
+  BTLA0_p <- 0 # no detections / not in operation
+  BTLB0_p <- 0 # no detections / not in operation
+  BTMA0_p <- 0 # no detections / not in operation
+  BTMB0_p <- 0 # no detections / not in operation
+  BTUA0_p <- 0 # no detections / not in operation
+  BTUB0_p <- 0 # no detections / not in operation
+  LCLA0_p <- 0 # no detections / not in operation
+  LCLB0_p <- 0 # no detections / not in operation
+  LB8A0_p <- 0 # no detections / not in operation
+  LB8B0_p <- 0 # no detections / not in operation
+  LBSA0_p <- 1 # Single array, no upstream detections
+  LBSB0_p <- 0 # no detections / not in operation
+  CACA0_p <- 0 # no detections / not in operation
+  CACB0_p <- 0 # no detections / not in operation
+  HECA0_p <- 0 # no detections / not in operation
+  HECB0_p <- 0 # no detections / not in operation
 
   USE_p ~ dbeta(1,1)
   USI_p ~ dbeta(1,1)
@@ -193,11 +193,11 @@ model{
   YFKA0_p ~ dbeta(1,1)
   YFKB0_p ~ dbeta(1,1)
   STL_p <- 1 # assume perfect detection
-  SALEFT_p <- 1 # assume perfect detection
+  SALEFT_p <- 0 # no detections / not in operation
   PAHH_p <- 1 # assume perfect detection
-  RFL_p <- 1 # assume perfect detection
+  RFL_p <- 0 # no detections / not in operation
 
-  BRC_p <- 1 # assume perfect detection
+  BRC_p <- 0 # no detections / not in operation
 
 
   ##################################################################
@@ -608,7 +608,7 @@ model{
   pMat_ImnWeir[2,(n.pops.Imnaha[3]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # probability of moving past certain points
-  phi_iml ~ dbeta(1,1)
+  phi_iml <- 1 # no detections at IR4
   phi_ir5 ~ dbeta(1,1)
 
   for (i in 1:n.fish) {
@@ -759,7 +759,7 @@ model{
   #   Now we deal with Lochsa
   ####################################################
   # probability of moving past FISTRP
-  phi_fistrp ~ dbeta(1,1)
+  phi_fistrp <- 0 # no upstream detections
 
   for (i in 1:n.fish) {
 
@@ -928,9 +928,9 @@ model{
   pMat_SFS[2,(n.pops.SFS[1]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # upstream migration parameters
-  phi_lakec ~ dbeta(1,1)
+  phi_lakec <- 0 # no upstream detections
   #phi_johnsc ~ dbeta(1,1)
-  phi_str ~ dbeta(1,1)
+  phi_str <- 0 # no upstream detections
 
   # set up a matrix that deals with yes/no in the tributary or not
   pMat_ESS[1,1:n.pops.SFS[2]] <- zero_vec[1:(n.pops.SFS[2])] # when not in trib, 0 prob of being in sub areas
@@ -1112,8 +1112,8 @@ model{
   pMat_UpLemhi[2,(n.pops.Lemhi[2]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # movement up Big Timber Creek
-  phi_btm ~ dbeta(1,1)
-  phi_btu ~ dbeta(1,1)
+  phi_btm <- 0 # no upstream detections
+  phi_btu <- 0 # no upstream detections
 
 
   for (i in 1:n.fish) {

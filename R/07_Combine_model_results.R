@@ -22,8 +22,8 @@ if(!dir.exists(AbundanceFolder)) {
   dir.create(AbundanceFolder)
 }
 
-dabom_files <- list.files('./DABOM_results')
-stadem_files <- list.files('./STADEM_results')
+#dabom_files <- list.files('./DABOM_results')
+#stadem_files <- list.files('./STADEM_results')
 
 #------------------------------------------------------------------------------
 # set species, spawn year and time stamp
@@ -31,7 +31,7 @@ spp <- 'Steelhead'  # either Chinook or Steelhead
 #yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
-year_range <- c(2010:2019)
+year_range <- c(2010:2018)
 
 for(yr in year_range){
   
@@ -359,7 +359,7 @@ brood_table <- allBrYr %>%
   mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
          lambda = ifelse(nRyrs>=5 & !is.na(S),R/S,""))
 
-prod_df = as.list(2010:2013) %>%
+prod_df = as.list(2010:2012) %>%
   rlang::set_names() %>%
   map_df(.f = function(x) {
     
@@ -370,7 +370,7 @@ prod_df = as.list(2010:2013) %>%
     Sdf <- summarisePosterior(tmp, S, TRT, round = T) %>%
       mutate(brood_yr = x[1],
              species = spp,
-             variable = 'Spawners') 
+             variable = 'Spawners')
     Rdf <- summarisePosterior(tmp, R, TRT, round = T) %>%
       mutate(brood_yr = x[1],
              species = spp,
@@ -379,8 +379,8 @@ prod_df = as.list(2010:2013) %>%
       mutate(brood_yr = x[1],
              species = spp,
              variable = 'lambda')
-    
-    bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
+    # 
+    # bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
     
   })
 
