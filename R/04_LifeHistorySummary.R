@@ -25,7 +25,7 @@ load('./data/ConfigurationFiles/site_config.rda')
 source('./R/assign_POP_GSI.R')
 
 # set species
-spp = 'Chinook'
+spp = 'Steelhead'
 
 pop_ls <- assign_POP_GSI(species = spp, configuration, site_df)
 grp_df <- pop_ls[[1]]

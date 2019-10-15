@@ -8,14 +8,10 @@
 library(tidyverse)
 library(coda)
 library(jagsUI)
-
 library(postpack)
-
 library(mcmcr)
-
 library(ggmcmc)
 library(ggpubr)
-
 
 theme_set(theme_bw())
 
@@ -90,7 +86,7 @@ param_chk = convg_df %>%
 
 
 # use character vector of different parameters here if you want
-# param_chk = '_p$'
+ param_chk = 'ZENB0_p$'
 
 # diagnostic plots with postpack package
 # you can save these plots by adding an arguement save = T, and file = your file path
