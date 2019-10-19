@@ -33,7 +33,7 @@ map_df <- pop_ls[[2]]
 
 #-----------------------------------------------------------------
 # take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
-for(yr in 2010:2018) {
+for(yr in 2010:2019) {
   cat(paste('Working on', spp, 'in', yr, '\n'))
   
   load(paste0('data/DABOMready/LGR_', spp, '_', yr, '.rda'))

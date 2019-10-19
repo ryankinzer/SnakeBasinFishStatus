@@ -25,9 +25,15 @@ if(!dir.exists(AgeFolder)) {
 # File path to life history summaries
 filepath <- './data/LifeHistoryData/'
 
-# Set species and Spawn Year
+# Set species
 spp = 'Steelhead'
-#yr = 2019
+
+# Set year range based on spp.
+if(spp == 'Steelhead'){
+  year_range = 2010:2019
+} else {
+  year_range = 2010:2018
+}
 
 #------------------------------------------------------------------------------
 # Create JAGs model to estimate female proportion
@@ -61,7 +67,7 @@ cat(modelCode,
 # Run Sex Model
 # read in data
 
-for(yr in 2010:2019){
+for(yr in year_range){
   cat(paste('Starting sex model for', spp, 'in run year', yr, '\n'))
   
   modSexDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
@@ -70,7 +76,7 @@ for(yr in 2010:2019){
   
   # pull out relevant bits for JAGS, and name them appropriately
   sex_jagsData = modSexDf %>%
-    filter(Group != 'NotObserved') %>%
+    filter(!is.na(TRT)) %>%
     mutate(popNum = as.integer(as.factor(TRT))) %>%
     select(f = F,
            tags = nSexed,
@@ -97,7 +103,33 @@ for(yr in 2010:2019){
 #------------------------------------------------------------------------------
 # Create JAGs model to estimate age proportions
 
-ageModelNm = './ModelFiles/AgePropJAGS_hier.txt'
+ageModel_simp = './ModelFiles/AgePropJAGS_simp.txt'
+
+modelCode = '
+data {
+  D <- dim(ageMat)
+}
+
+model {
+
+  for(i in 1:D[1]) {
+    ageMat[i,] ~ dmulti(pi[popNum[i],], tags[i])
+  }
+
+  for(k in 1:D[2]) {
+    alpha[k] <- 1
+  }
+
+  for(j in 1:max(popNum)) {
+    pi[j,1:D[2]] ~ ddirch(alpha[1:D[2]])
+  }
+
+ }'
+
+cat(modelCode,
+    file = ageModel_simp)
+
+ageModel_hier = './ModelFiles/AgePropJAGS_hier.txt'
 
 modelCode = '
 data {
@@ -149,29 +181,39 @@ model {
 }'
 
 cat(modelCode,
-    file = ageModelNm)
+    file =ageModel_hier)
 
 #------------------------------------------------------------------------------
 # Run Age Model
-# read in data
+# set model as fixed population effect or random population with
+# A and B run groups for steelhead.
+model <- c('simple','hierarchical')[2]
 
-for(yr in 2010:2019){
+if(model == 'simple'){
+    ageModelNm = ageModel_simp
+    jagsParams = 'pi'
+  } else {
+    ageModelNm = ageModel_hier
+    jagsParams = c('pi', 'mu', 'Tau', 'avgPi')
+  }
+
+for(yr in year_range){  
   cat(paste('Starting age model for', spp, 'in run year', yr, '\n'))
-  
+  # read in data
   modAgeDf = read_excel(paste0(filepath, 'LGR_', spp, '_', yr, '.xlsx'),
                         'AgeFreq',
                         progress = F)
   
   # pull out relevant bits for JAGS, and name them appropriately
   age_jagsData = modAgeDf %>%
-    filter(Group != 'NotObserved') %>%
+    filter(!is.na(TRT)) %>%
     mutate(popNum = as.integer(as.factor(TRT))) %>%
     select(tags = nAged,
            popNum) %>%
     as.list()
   
   age_jagsData$ageMat = modAgeDf %>%
-    filter(Group != 'NotObserved') %>%
+    filter(!is.na(TRT)) %>%
     select(starts_with('age')) %>%
     as.matrix()
   
@@ -180,9 +222,10 @@ for(yr in 2010:2019){
     age_jagsData$ageMat = age_jagsData$ageMat[,!colSums(age_jagsData$ageMat) == 0]
   }
   
-  age_jagsData$R = diag(1, ncol(age_jagsData$ageMat) - 1)
+  # gather date specific to hierarchical model
+  if(model == 'hierarchical'){
   
-  # assign populations as A-run or B-run
+  # assign populations to groups (ex: A-run or B-run)
   age_jagsData$runType = modAgeDf %>%
     filter(Group != 'NotObserved') %>%
     select(TRT) %>%
@@ -200,9 +243,10 @@ for(yr in 2010:2019){
            runType = as.integer(Run)) %>%
     pull(runType)
   
-  # set parameters to save
-  jagsParams = c('pi', 'mu', 'Tau', 'avgPi')
+  age_jagsData$R = diag(1, ncol(age_jagsData$ageMat) - 1)
   
+  }
+
   # run JAGS model
   age_mod = jags(data = age_jagsData,
                  parameters.to.save = jagsParams,

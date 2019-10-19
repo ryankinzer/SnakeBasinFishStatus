@@ -17,4 +17,4 @@ model {
     pi[j,1:D[2]] ~ ddirch(alpha[1:D[2]])
   }
 
-}
+ }

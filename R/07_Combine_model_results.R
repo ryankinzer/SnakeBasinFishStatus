@@ -27,11 +27,18 @@ if(!dir.exists(AbundanceFolder)) {
 
 #------------------------------------------------------------------------------
 # set species, spawn year and time stamp
-spp <- 'Steelhead'  # either Chinook or Steelhead
+species <- c('Steelhead', 'Chinook')  # either Chinook or Steelhead
 #yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
-year_range <- c(2010:2019)
+
+for(spp in species){
+  
+  if(spp == 'Steelhead'){
+    year_range <- c(2010:2019)
+  } else {
+    year_range <- c(2010:2018)
+  }
 
 for(yr in year_range){
   
@@ -134,16 +141,27 @@ for(yr in year_range){
                 mutate(popNum = sex_jagsData$popNum),
               by = 'popNum')
   
+  poss_ages <- modAgeDf %>%
+    filter(!is.na(TRT)) %>%
+    select(starts_with('age'))
+
+  poss_ages <- as_tibble(na.omit(as.numeric(
+    gsub('[[:alpha:]]','', names(poss_ages[,!colSums(poss_ages) == 0])))))  %>%
+    mutate(age_fct = as.integer(as.factor(value))) %>%
+    rename(age = value)
+
   age_post <- age_mod$sims.list$pi %>%
     as.data.frame.table() %>%
     as_tibble() %>%
     rename(iter = Var1,
            popNum = Var2,
-           age = Var3,
+           age_fct = Var3,
            ageProp = Freq) %>%
-    mutate_at(vars(iter, popNum, age),
+    mutate_at(vars(iter, popNum, age_fct),
               list(as.integer)) %>%
-    mutate(age = age + 1) %>%
+    left_join(poss_ages, by = 'age_fct') %>%
+    select(-age_fct) %>%
+    #mutate(age = age + 1) %>%
     left_join(modAgeDf %>%
                 filter(!is.na(TRT)) %>%
                 mutate(popNum = age_jagsData$popNum) %>%
@@ -196,35 +214,64 @@ for(yr in year_range){
     select(spawn_yr, species, everything())
   
   # summarize the age proportions
-  age_prop_summ = summarisePosterior(age_pop, age2, TRT, round = F) %>%
-    mutate(age = 2) %>%
-    bind_rows(summarisePosterior(age_pop, age3, TRT, round = F) %>%
-                mutate(age = 3)) %>%
-    bind_rows(summarisePosterior(age_pop, age4, TRT, round = F) %>%
-                mutate(age = 4)) %>%
-    bind_rows(summarisePosterior(age_pop, age5, TRT, round = F) %>%
-                mutate(age = 5)) %>%
-    bind_rows(summarisePosterior(age_pop, age6, TRT, round = F) %>%
-                mutate(age = 6)) %>%
-    mutate(spawn_yr = yr, 
+  
+  age_prop_summ <- age_post %>%
+    group_by(age) %>%
+    nest() %>%
+    mutate(sumPost = map(data,
+                         ~summarisePosterior(data = .x, ageProp, TRT, round = F)
+    )
+    ) %>%
+    select(age, sumPost) %>%
+    unnest(sumPost) %>%
+    mutate(spawn_yr = yr,
            species = spp) %>%
     select(spawn_yr, species, age, everything())
+  
+  # age_prop_summ = summarisePosterior(age_pop, age2, TRT, round = F) %>%
+  #   mutate(age = 2) %>%
+  #   bind_rows(summarisePosterior(age_pop, age3, TRT, round = F) %>%
+  #               mutate(age = 3)) %>%
+  #   bind_rows(summarisePosterior(age_pop, age4, TRT, round = F) %>%
+  #               mutate(age = 4)) %>%
+  #   bind_rows(summarisePosterior(age_pop, age5, TRT, round = F) %>%
+  #               mutate(age = 5)) %>%
+  #   bind_rows(summarisePosterior(age_pop, age6, TRT, round = F) %>%
+  #               mutate(age = 6)) %>%
+  #   mutate(spawn_yr = yr, 
+  #          species = spp) %>%
+  #   select(spawn_yr, species, age, everything())
   
   # summarize the escapement by age
-  age_summ <- summarisePosterior(pop_post, age2, TRT) %>%
-    mutate(age = 2) %>%
-    bind_rows(summarisePosterior(pop_post, age3, TRT) %>%
-                mutate(age = 3)) %>%
-    bind_rows(summarisePosterior(pop_post, age4, TRT) %>%
-                mutate(age = 4)) %>%
-    bind_rows(summarisePosterior(pop_post, age5, TRT) %>%
-                mutate(age = 5)) %>%
-    bind_rows(summarisePosterior(pop_post, age6, TRT) %>%
-                mutate(age = 6)) %>%
-    mutate(spawn_yr = yr, 
+  age_summ <- pop_post %>%
+    select(-N_females) %>%
+    gather(age, N_age, starts_with('age')) %>%
+    mutate(age = gsub('age','',age)) %>%
+    group_by(age) %>%
+    nest() %>%
+    mutate(sumPost = map(data,
+                         ~summarisePosterior(data = .x, N_age, TRT, round = F)
+    )
+    ) %>%
+    select(age, sumPost) %>%
+    unnest(sumPost) %>%
+    mutate(spawn_yr = yr,
            species = spp) %>%
-    select(spawn_yr, species, age, everything())
-  
+    select(spawn_yr, species, TRT, age, everything())
+  # age_summ <- summarisePosterior(pop_post, age2, TRT) %>%
+  #   mutate(age = 2) %>%
+  #   bind_rows(summarisePosterior(pop_post, age3, TRT) %>%
+  #               mutate(age = 3)) %>%
+  #   bind_rows(summarisePosterior(pop_post, age4, TRT) %>%
+  #               mutate(age = 4)) %>%
+  #   bind_rows(summarisePosterior(pop_post, age5, TRT) %>%
+  #               mutate(age = 5)) %>%
+  #   bind_rows(summarisePosterior(pop_post, age6, TRT) %>%
+  #               mutate(age = 6)) %>%
+  #   mutate(spawn_yr = yr, 
+  #          species = spp) %>%
+  #   select(spawn_yr, species, age, everything())
+
   # save posteriors
   save(N_pop, p_pop, age_pop,
        file = paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', yr, '.rda'))
@@ -233,6 +280,7 @@ for(yr in year_range){
   save(detect_summ, trans_summ, wk_trans_summ, trib_summ, N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ,
        file = paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', yr, '.rda'))
 
+  }
 }
 
 #------------------------------------------------------------------------------
@@ -278,7 +326,7 @@ age_prop_all = allSumm %>%
 age_all = allSumm %>%
   map_df(.id = NULL,
          .f = 'age_summ') %>%
-  mutate(brood_yr = spawn_yr - age) %>%
+  mutate(brood_yr = spawn_yr - as.numeric(age)) %>%
   select(spawn_yr, species, brood_yr, everything())
 
 #------------------------------------------------------------------------------
@@ -395,4 +443,4 @@ list('Pop Total Esc' = N_pop_all,
      'Pop Age Props' = age_prop_all,
      'Site Esc' = trib_all,
      'Site Detect Eff' = detect_all) %>%
-  WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries.xlsx'))
+  WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
