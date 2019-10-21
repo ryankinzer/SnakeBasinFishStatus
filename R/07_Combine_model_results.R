@@ -405,12 +405,12 @@ brood_table <- allBrYr %>%
   ungroup() %>%
   mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
   mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
-         lambda = ifelse(!is.na(S),R/S,""))
+         lambda = ifelse(!is.na(S) & R != 0,R/S,""))
 
 if(spp == 'Steelhead'){
-  prod_range = 2010:2016
+  prod_range = 2010:2013
 } else {
-  prod_range = 2010:2015
+  prod_range = 2010:2013
 }
 
 prod_df = as.list(prod_range) %>%
@@ -433,8 +433,8 @@ prod_df = as.list(prod_range) %>%
       mutate(brood_yr = x[1],
              species = spp,
              variable = 'lambda')
-    # 
-    # bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
+    
+    bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
     
   })
 
