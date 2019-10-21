@@ -405,9 +405,15 @@ brood_table <- allBrYr %>%
   ungroup() %>%
   mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
   mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
-         lambda = ifelse(nRyrs>=5 & !is.na(S),R/S,""))
+         lambda = ifelse(!is.na(S),R/S,""))
 
-prod_df = as.list(2010:2012) %>%
+if(spp == 'Steelhead'){
+  prod_range = 2010:2016
+} else {
+  prod_range = 2010:2015
+}
+
+prod_df = as.list(prod_range) %>%
   rlang::set_names() %>%
   map_df(.f = function(x) {
     

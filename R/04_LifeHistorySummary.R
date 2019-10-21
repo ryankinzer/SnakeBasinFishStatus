@@ -81,7 +81,8 @@ for(yr in 2010:2019) {
 
   
   # Calculate age (freshwater, saltwater, total & broody year)
-  tagSumm %<>%
+  #tagSumm %<>%
+  tmp <-
     mutate(BioScaleFinalAge = if_else(grepl('\\?', BioScaleFinalAge) | BioScaleFinalAge == 'N:A',
                                     as.character(NA),
                                     BioScaleFinalAge)) %>%
