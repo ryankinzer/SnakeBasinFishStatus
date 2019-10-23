@@ -17,7 +17,7 @@ load('./data/ConfigurationFiles/site_config.rda')
 config <- configuration %>%
   filter(SiteID %in% site_df$SiteID) %>%
   #filter(SiteID != 'GRA') %>%
-  select(SiteID, SiteType, SiteName, RKM, Latitude, Longitude, Node) %>%
+  select(SiteID, SiteType, SiteTypeName, SiteName, RKM, Latitude, Longitude) %>%
   distinct() %>%
   sf::st_as_sf(coords = c('Longitude', 'Latitude'),
                crs = 4326)
@@ -25,18 +25,18 @@ config <- configuration %>%
 # load polygons and lines
 load('./data/ConfigurationFiles/Snake_POP_metadata.rda')
 
-stream_sp <- as_Spatial(SR_streams)
-sites_sp <- as_Spatial(config)
+#stream_sp <- as_Spatial(SR_streams)
+#sites_sp <- as_Spatial(config)
 
-tmp <- maptools::snapPointsToLines(sites_sp, stream_sp)
-tmp2 <- st_as_sf(tmp)
+#tmp <- maptools::snapPointsToLines(sites_sp, stream_sp)
+#tmp2 <- st_as_sf(tmp)
 
 stream_d <- SR_streams %>%
   group_by(GNIS_ID, GNIS_NAME) %>%
   summarise_at(vars(LENGTHKM, AreaSqKM, TotDASqKM), sum) %>%
   filter(!is.na(GNIS_NAME))
 
-large_st <- filter(stream_d, AreaSqKM > 50)
+large_st <- filter(stream_d, AreaSqKM > 40)
 
 #tmp3 <- st_intersection(stream_d, tmp2)
 
@@ -70,6 +70,7 @@ ggplot() +
   coord_sf()
 
 library(leaflet)
+library(mapview)
 library(htmlwidgets)
 library(htmltools)
 
@@ -93,21 +94,43 @@ st_title <- tags$div(
   tag.map.title, HTML("ICTRT Steelhead Populations and DABOM Sites")
 )  
 
+poly <- as_Spatial(SR_st_pop)
+centers <- data.frame(rgeos::gCentroid(poly, byid = TRUE))
+centers$TRT <- SR_st_pop$TRT_POPID
+
 st_copop <- colorFactor(palette = 'viridis', domain = SR_st_pop$POP_NAME)
+
+pal <- colorFactor(
+  palette = "BuPu",
+  domain = config$SiteTypeName
+)
 
 steelhead_sites <- leaflet() %>%
   addProviderTiles(providers$Esri.WorldTopoMap) %>%
   addPolygons(data = SR_st_pop, group = "polys",
-              popup = ~as.character(TRT_POPID), layerId = SR_st_pop$POP_NAME,
+              popup = ~as.character(POP_NAME),
+              label = ~TRT_POPID,
+              layerId = SR_st_pop$POP_NAME,
               stroke = TRUE, color = 'black',
               fillColor = ~st_copop(POP_NAME), weight = 1, fillOpacity = .5) %>%
   addPolylines(data = large_st, weight = 1) %>%
   addCircleMarkers(data = config, radius = 5, popup = ~SiteID,
-                   popupOptions = popupOptions(noHide = T)) %>%
-  addControl(st_title, position = 'topleft', className = "map-title")
+                   color = ~pal(SiteTypeName),
+                  #clusterOptions = markerClusterOptions(),
+                  popupOptions = popupOptions(noHide = T)) %>%
+  addLabelOnlyMarkers(data = centers, lng = ~x, lat = ~y,
+                      label = ~as.character(TRT),
+                      labelOptions = labelOptions(noHide = T,
+                                                   direction = 'top', textOnly = T)) %>%
+  addControl(st_title, position = 'topleft', className = "map-title") %>%
+  addLegend(data = config, "bottomleft", pal = pal, values = ~SiteTypeName,
+          title = "Site Type",
+          #labFormat = labelFormat(prefix = "$"),
+          opacity = 1)
 
-saveWidget(steelhead_sites, file="steelhead_sites.html")
-mapshot(steelhead_sites, file = 'steelhead_sites.png')
+
+saveWidget(steelhead_sites, file = 'steelhead_sites.html')
+mapshot(steelhead_sites, file = './Figures/steelhead_sites.png')
 
 # Chinook
 ch_title <- tags$div(
