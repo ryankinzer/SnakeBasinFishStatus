@@ -1,0 +1,119 @@
+SiteID,DetectionType,Operational,BPA_Funding_OM,Funding_OM,Integrated_OM_Site,Agency_OM,DABOM_Branch,Abundance_Coverage,Steelhead_POP,STH_POP_Coverage,Chinook_POP,CHK_POP_Coverage
+LTR,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,WDFW,Tucannon,Population,SNTUC-s,60.05,SNTUC,
+MTR,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,WDFW,Tucannon,Population,SNTUC-s,,SNTUC,
+UTR,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,WDFW,Tucannon,Sub-Population,SNTUC-s,,SNTUC,
+TFH,Ladder Observation,TRUE,NA,NA,FALSE,WDFW,Tucannon,Sub-Population,SNTUC-s,,SNTUC,
+TUCH,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Tucannon,Sub-Population,SNTUC-s,,SNTUC,
+ALMOTC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Almota Cr,Sub-Population,SNASO-s,,SNASO,
+PENAWC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Penawawa,Sub-Population,SNASO-s,,SNASO,
+ALPOWC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Alpowa Creek,Sub-Population,SNASO-s,,SNASO,
+ACM,In-stream Array,TRUE,Non-BPA Funded,PSMFC,FALSE,WDFW,Asotin,Population,SNASO-s,52.64,SNASO,98.78
+ASOTIC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+GEORGC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+ACB,In-stream Array,TRUE,Non-BPA Funded,PSMFC,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+CCA,In-stream Array,TRUE,Non-BPA Funded,PSMFC,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+CHARLC,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+AFC,In-stream Array,TRUE,Non-BPA Funded,PSMFC,FALSE,WDFW,Asotin,Sub-Population,SNASO-s,,SNASO,
+TENMC2,Weir Scanning,TRUE,NA,NA,FALSE,WDFW,TENMC2,Sub-Population,SNASO-s,,SNASO,
+LAP,In-stream Array,TRUE,Non-BPA Funded,BOR,FALSE,NPT,Lapwai,Population,CRLMA-s,13.47,CRLAP,39.4
+SWT,In-stream Array,TRUE,Non-BPA Funded,BOR,FALSE,NPT,Lapwai,Sub-Population,CRLMA-s,,CRLAP,
+WEB,In-stream Array,TRUE,Non-BPA Funded,BOR,FALSE,NPT,Lapwai,Sub-Population,CRLMA-s,,CRLAP,
+MIS,In-stream Array,TRUE,Non-BPA Funded,BOR,FALSE,NPT,Lapwai,Sub-Population,CRLMA-s,,CRLAP,
+JUL,In-stream Array,FALSE,Non-BPA Funded,PCSRF,FALSE,IDFG,Potlatch,Not Functioning,CRLMA-s,24.85,CRPOT,85.4
+POTREF,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Potlatch,Sub-Population,CRLMA-s,,CRPOT,
+KHS,In-stream Array,FALSE,Non-BPA Funded,PCSRF,FALSE,IDFG,Potlatch,Not Functioning,CRLMA-s,,CRPOT,
+BBA,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,IDFG,Potlatch,Not Functioning,CRLMA-s,,CRPOT,
+BIGBEC,Weir Scanning,FALSE,NA,NA,FALSE,IDFG,Potlatch,Sub-Population,CRLMA-s,,CRPOT,
+LBEARC,Weir Scanning,FALSE,NA,NA,FALSE,IDFG,Potlatch,Sub-Population,CRLMA-s,,CRPOT,
+HLM,In-stream Array,FALSE,Non-BPA Funded,PCSRF,FALSE,IDFG,Potlatch,Not Functioning,CRLMA-s,,CRPOT,
+POTRWF,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Potlatch,Sub-Population,CRLMA-s,,CRPOT,
+PCM,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,IDFG,Potlatch,Sub-Population,CRLMA-s,,CRPOT,
+CLC,In-stream Array,FALSE,Non-BPA Funded,USFWS,FALSE,USFWS,Clear Creek,Not Functioning,CRLMA-s,6.17,SCLAW,23.99
+KOOS,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Clear Creek,Sub-Population,CRLMA-s,,SCLAW,
+LC1,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lolo,Population,CRLOL-s,95.46,CRLOL,53.68
+LC2,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lolo,Population,CRLOL-s,,CRLOL,
+SC1,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF_Clearwater,Population,CRSFC-s,11.12,SCUMA,36.16
+SC2,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF_Clearwater,Population,CRSFC-s,,SCUMA,
+AB_SC2,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,SF_Clearwater,Sub-Population,CRSFC-s,,SCUMA,
+LRL,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,IDFG,Lochsa,Population,CRLOC-s,99.84,CRLOC,99.6
+LRU,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,IDFG,Lochsa,Population,CRLOC-s,,CRLOC,
+FISTRP,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Lochsa,Sub-Population,CRLOC-s,,CRLOC,
+SW1,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Selway,Population,CRSEL-s,99.85,SEUMA/SEMOO /SEMEA,99.06
+SW2,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Selway,Population,CRSEL-s,,SEUMA/SEMOO /SEMEA,
+JOC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Joseph Creek,Population,GRJOS-s,98.96,,
+JOSEPC,Weir Scanning,FALSE,NA,NA,FALSE,NPT,Joseph Creek,Population,GRJOS-s,,,
+WEN,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,ODFW,Wenaha,Population,GRLMT-s,99,GRWEN,99
+LOOH,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Looking Glass,Population,GRUMA-s,,GRLOO,
+UGR,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Upper Grande Ronde,Population,GRUMA-s,88.15,GRUMA/GRCAT,
+CCU,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,ODFW,Upper Grande Ronde,Sub-Population,GRUMA-s,,GRCAT,
+CCW,In-stream Array,TRUE,Non-BPA Funded,LSRCP,FALSE,ODFW,Upper Grande Ronde,Population,GRUMA-s,,GRCAT,24.8
+CATHEW,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Upper Grande Ronde,Population,GRUMA-s,,GRCAT,
+UGS,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,ODFW,Upper Grande Ronde,Population,GRUMA-s,,GRUMA,31.95
+GRANDW,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Upper Grande Ronde,Sub-Population,GRUMA-s,,GRUMA,
+WR1,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Wallowa,Population,GRWAL-s,95.12,GRLOS/GRMIN,
+BCANF,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Wallowa,Sub-Population,GRWAL-s,,GRLOS,
+MR1,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Wallowa,Population,GRWAL-s,,GRMIN,99
+WR2,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Wallowa,Population,GRWAL-s,,GRLOS,99
+WALH,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Wallowa,Sub-Population,GRWAL-s,,GRLOS,
+LOSTIW,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Wallowa,Population,GRWAL-s,,GRLOS,
+COC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Cow Creek,Population,IRMAI-s,3.36,IRMAI,4.83
+IR1,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Imnaha,Population,IRMAI-s,96.02,IRMAI,94.95
+IR2,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Imnaha,Population,IRMAI-s,,IRMAI,
+HORS3C,Weir Scanning,FALSE,NA,NA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+CMP,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+BSC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Imnaha,Population,IRMAI-s,,IRBSH,51.7
+LSHEEF,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Imnaha,Sub-Population,IRMAI-s,,IRBSH,
+IR3,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Imnaha,Population,IRMAI-s,,IRMAI,
+FREEZC,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+CZY,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+MAHOGC,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+IR4,In-stream Array,TRUE,Non-BPA Funded,LSRCP,FALSE,ODFW,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+IML,Ladder Observation,TRUE,NA,NA,FALSE,ODFW,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+IMNAHW,Weir Scanning,TRUE,NA,NA,FALSE,ODFW,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+IR5,In-stream Array,TRUE,Non-BPA Funded,LSRCP,FALSE,ODFW,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+GUMBTC,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+DRY2C,Weir Scanning,TRUE,NA,NA,FALSE,NPT,Imnaha,Sub-Population,IRMAI-s,,IRMAI,
+RAPH,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Rapid River,Sub-Population,SRLSR-s,,SRLSR,
+ESS,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF Salmon,Population,SFMAI-s,45.89,SFEFS,98.07
+YPP,In-stream Array,TRUE,Non-BPA Funded,Midas,FALSE,IDFG,SF Salmon,Sub-Population,SFMAI-s,,SFEFS,
+JOHNSC,Weir Scanning,TRUE,NA,NA,FALSE,NPT,SF Salmon,Sub-Population,SFMAI-s,,SFEFS,
+KRS,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF Salmon,Population,SFMAI-s,38.67,SFMAI,64.89
+STR,Ladder Observation,TRUE,NA,NA,FALSE,IDFG,SF Salmon,Sub-Population,SFMAI-s,,SFMAI,
+SALSFW,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,SF Salmon,Sub-Population,SFMAI-s,,SFMAI,
+ZEN,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF Salmon,Population,SFSEC-s,99,SFSEC,99
+SFG,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,SF Salmon,Population,SFSEC-s/SFMAI-s,,SFMAI/SFSEC /SFEFS,
+TAY,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Big Creek,Population,MFBIG-s,37.91,MFBIG,99.88
+PCA,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,SBT,Panther_Cr,Population,SRPAN-s,76.74,SRPAN,95.8
+NFS,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,IDFG,NF Salmon,Population,SRNFS-s,78.91,SRNFS,83.28
+CRC,In-stream Array,FALSE,Non-BPA Funded,PCSRF,FALSE,Biomark,Carmen Cr,Population,SRLEM-s,3.33,SRLEM,1.99
+LLR,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Population,SRLEM-s,93.08,SRLEM,97
+BHC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+WPC,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+KEN,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+AGC,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+HYC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+LRW,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+LLS,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+LB8,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+LBS,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+LCL,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+BTC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+BTL,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+BTM,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+BTU,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+CAC,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+HEC,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+18M,In-stream Array,TRUE,Non-BPA Funded,PCSRF,FALSE,Biomark,Lemhi River,Sub-Population,SRLEM-s,,SRLEM,
+USE,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Upper Salmon,Population,SRUMA-s/SREFS-s/SRPAH-s,95.79,NOT SRPAN/ SRLEM/SRNFS,
+USI,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Upper Salmon,Population,SRUMA-s/SREFS-s/SRPAH-s,,NOT SRPAN/ SRLEM/SRNFS,
+SALEFT,Weir Scanning,FALSE,NA,NA,FALSE,IDFG,Upper Salmon,Population,SREFS-s,99,SREFS,
+PAHH,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Upper Salmon,Population,SRPAH-s,99,SRPAH,99
+RFL,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,IDFG,Upper Salmon,Sub-Population,SRUMA-s,,SRUMA,
+YFK,In-stream Array,TRUE,Non-BPA Funded,LSRCP,FALSE,SBT,Upper Salmon,Population,SRUMA-s,,SRYFS,98.27
+CEY,In-stream Array,FALSE,BPA FWP Funds,BPA,FALSE,SBT,Upper Salmon,Sub-Population,SRUMA-s,,SRYFS,
+VC2,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Upper Salmon,Population,SRUMA-s,16.63,SRVAL,100
+VC1,In-stream Array,TRUE,Integrated BPA Contract,BPA,TRUE,Biomark,Upper Salmon,Population,SRUMA-s,,SRVAL,
+STL,Ladder Observation,TRUE,NA,NA,FALSE,IDFG,Upper Salmon,Population,SRUMA-s,31.22,SRUMA,87.04
+SAWT,Weir Scanning,TRUE,NA,NA,FALSE,IDFG,Upper Salmon,Population,SRUMA-s,,SRUMA,
+BRC,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,SBT,Bear Valley,Population,MFUMA-s,,MFBEA,
+MAR,In-stream Array,TRUE,BPA FWP Funds,BPA,FALSE,IDFG,Marsh Creek,Population,MFUMA-s,,MFMAR,

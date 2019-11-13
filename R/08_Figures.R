@@ -8,8 +8,15 @@ library(lubridate)
 library(PITcleanr)
 source('./R/assign_POP_GSI.R')
 
-spp = 'Steelhead'
+load('./data/ConfigurationFiles/site_config.rda')
+
+spp = 'Chinook'
 yr_range = c(2010:2018)
+
+# TRT data
+pop_ls <- assign_POP_GSI(species = spp, configuration, site_df)
+grp_df <- pop_ls[[1]]
+map_df <- pop_ls[[2]]
 
 # Need GSI to PIT Comparisons!!!
 
@@ -51,12 +58,7 @@ ObsPred_detect_p <- allEffDf %>%
 
 ObsPred_detect_p
 
-ggsave('Figures/ObsVsPred_DetectProp.pdf',
-       ObsPred_detect_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/ObsVsPred_DetectProp.png',
+ggsave(paste0('Figures/ObsVsPred_DetectProp_',spp,'.png'),
        ObsPred_detect_p,
        width = 8,
        height = 8)
@@ -85,12 +87,7 @@ detect_p <- allEffDf %>%
 
 detect_p
 
-ggsave('Figures/DetectProp.pdf',
-       detect_p,
-       width = 8,
-       height = 10)
-
-ggsave('Figures/DetectProp.png',
+ggsave(paste0('Figures/DetectProp_',spp,'.png'),
        detect_p,
        width = 8,
        height = 10)
@@ -105,11 +102,11 @@ allAbundDf = as.list(yr_range) %>%
            load(paste0('data/DABOMready/LGR_',spp,'_',x[1],'.rda'))
            load(paste0('Abundance_results/LGR_Summary_', spp, '_', x[1], '.rda'))
            
-           trt_df <- site_trt_designations(spp, configuration, site_df)
+           #trt_df <- site_trt_designations(spp, configuration, site_df)
            
            N_pop_summ %>%
-           left_join(trt_df %>%
-                       select(MPG, TRT) %>% distinct(), by = 'TRT')
+           left_join(map_df %>%
+                       select(MPG, TRT_POPID), by = c('TRT' = 'TRT_POPID'))
          })
 
 pop_N <- allAbundDf %>%
@@ -133,12 +130,7 @@ pop_N <- allAbundDf %>%
 
 pop_N
 
-ggsave('Figures/PopAbund.pdf',
-       pop_N,
-       width = 8,
-       height = 10)
-
-ggsave('Figures/PopAbund.png',
+ggsave(paste0('Figures/PopAbund_',spp,'.png'),
        pop_N,
        width = 8,
        height = 10)
@@ -163,7 +155,7 @@ allSexDf = as.list(yr_range) %>%
              bind_rows(sex_mod$summary %>%
                          as_tibble(rownames = 'param') %>%
                          filter(param == 'mu_ilogit')) %>%
-             mutate_at(vars(MPG, TRT, modBranch),
+             mutate_at(vars(MPG, TRT, Group),
                        list(fct_explicit_na),
                        na_level = 'Overall') %>%
              mutate(TRT = fct_reorder(TRT, mean),
@@ -194,12 +186,7 @@ sex_ObsVsPred_p = allSexDf %>%
 
 sex_ObsVsPred_p
 
-ggsave('Figures/ObsVsPred_SexProp.pdf',
-       sex_ObsVsPred_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/ObsVsPred_SexProp.png',
+ggsave(paste0('Figures/ObsVsPred_SexProp_',spp,'.png'),
        sex_ObsVsPred_p,
        width = 8,
        height = 8)
@@ -230,12 +217,7 @@ sex_Pred <- allSexDf %>%
 
 sex_Pred
 
-ggsave('Figures/SexProp.pdf',
-       sex_Pred,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/SexProp.png',
+ggsave(paste0('Figures/SexProp_',spp,'.png'),
        sex_Pred,
        width = 8,
        height = 8)
@@ -289,12 +271,7 @@ age_ObsVsPred_p = allAgeDf %>%
 
 age_ObsVsPred_p
 
-ggsave('Figures/ObsVsPred_AgeProp.pdf',
-       age_ObsVsPred_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/ObsVsPred_AgeProp.png',
+ggsave(paste0('Figures/ObsVsPred_AgeProp_',spp,'.png'),
        age_ObsVsPred_p,
        width = 8,
        height = 8)
@@ -324,12 +301,7 @@ ageProp_p = allAgeDf %>%
 
 ageProp_p
 
-ggsave('Figures/AgePropEst.pdf',
-       ageProp_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/AgePropEst.png',
+ggsave(paste0('Figures/AgePropEst_',spp,'.png'),
        ageProp_p,
        width = 8,
        height = 8)
@@ -355,12 +327,7 @@ ageProp2_p = allAgeDf %>%
 
 ageProp2_p
 
-ggsave('Figures/AgePropEst2.pdf',
-       ageProp2_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/AgePropEst2.png',
+ggsave(paste0('Figures/AgePropEst2_',spp,'.png'),
        ageProp2_p,
        width = 8,
        height = 8)
@@ -410,12 +377,7 @@ muProp_p = muVecDf %>%
 
 muProp_p
 
-ggsave('Figures/AvgAgePropEst_mu.pdf',
-       muProp_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/AvgAgePropEst_mu.png',
+ggsave(paste0('Figures/AvgAgePropEst_mu_',spp,'.png'),
        muProp_p,
        width = 8,
        height = 8)
@@ -423,9 +385,8 @@ ggsave('Figures/AvgAgePropEst_mu.png',
 # Spawner-Recruits----
 library(readxl)
 
-allSR_Df <- read_excel('Abundance_results/LGR_AllSummaries.xlsx', sheet = 'Pop Stock Recruit') %>%
+allSR_Df <- read_excel(paste0('Abundance_results/LGR_AllSummaries_',spp,'.xlsx'), sheet = 'Pop Stock Recruit') %>%
   mutate(TRT = gsub('\"',"",TRT))
-
 
 lambda_p <- allSR_Df %>%
   filter(variable == 'lambda',
@@ -449,12 +410,7 @@ lambda_p <- allSR_Df %>%
 
 lambda_p  
 
-ggsave('Figures/lambda.pdf',
-       lambda_p,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/lambda.png',
+ggsave(paste0('Figures/lambda_',spp,'.png'),
        lambda_p,
        width = 8,
        height = 8)
@@ -466,9 +422,8 @@ SR_df <- allSR_Df %>%
               filter(variable == 'Recruits') %>%
               select(brood_yr, species, TRT, recruits = median, r_lower = lowerCI, r_upper = upperCI))
 
-
 SR_plot <- SR_df %>%
-  filter(brood_yr <= 2012) %>%
+  #filter(brood_yr <= 2012) %>%
   ggplot(aes(x = spawners,
              y = recruits,
              colour = TRT)) +
@@ -490,12 +445,7 @@ SR_plot <- SR_df %>%
 
 SR_plot
 
-ggsave('Figures/stock_recruit.pdf',
-       SR_plot,
-       width = 8,
-       height = 8)
-
-ggsave('Figures/stock_recruit.png',
+ggsave(paste0('Figures/stock_recruit_',spp,'.png'),
        SR_plot,
        width = 8,
        height = 8)
