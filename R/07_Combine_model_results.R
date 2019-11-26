@@ -311,6 +311,12 @@ for(spp in species){
 #------------------------------------------------------------------------------
 for(spp in species) {
   
+  if(spp == 'Steelhead'){
+    year_range <- c(2010:2019)
+  } else {
+    year_range <- c(2010:2018)
+  }
+
   # combine summaries by year
   allSumm = as.list(year_range) %>%
     rlang::set_names() %>%
