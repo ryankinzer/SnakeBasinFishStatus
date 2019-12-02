@@ -11,6 +11,10 @@ library(tidyverse)
 library(sf)
 library(scales)
 library(ggmap)
+library(maps)
+
+# Get states
+states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
 
 # load sites and metadata
 
@@ -19,6 +23,11 @@ site_meta <- read_csv('./data/ConfigurationFiles/site_metadata.csv')
 
 # load polygons and lines
 load('./data/ConfigurationFiles/Snake_POP_metadata.rda')
+
+# Aggregate snake basin
+
+SR_basin <- raster::aggregate(as_Spatial(SR_st_pop))
+SR_basin <- st_as_sf(SR_basin)
 
 # select only DABOM sites
 config <- configuration %>%
@@ -41,8 +50,8 @@ stream_d <- SR_streams %>%
 # filter for maps
 large_st <- filter(stream_d, AreaSqKM > 40)
 
-test_st <- stream_d %>%
-  filter(GNIS_NAME %in% c('Snake River', 'Salmon River', 'Tucannon River', 'Imnaha River', 'Grande Ronde River', 'South Fork Salmon River', 'Middle Fork Salmon River', 'Clearwater River', 'Potlatch River', 'Lapwai Creek', 'Lochsa River', 'Selway River', 'South Fork Clearwater River', 'Wallowa River', 'Wenaha River', 'Big Creek', 'Lemhi River', 'Lolo Creek', 'Asotin Creek', 'Pahsimeroi River', 'East Fork South Fork Salmon River', 'Panther Creek', 'North Fork Salmon River', 'Yankee Fork Salmon River', 'Little Salmon River'))
+# test_st <- stream_d %>%
+#   filter(GNIS_NAME %in% c('Snake River', 'Salmon River', 'Tucannon River', 'Imnaha River', 'Grande Ronde River', 'South Fork Salmon River', 'Middle Fork Salmon River', 'Clearwater River', 'Potlatch River', 'Lapwai Creek', 'Lochsa River', 'Selway River', 'South Fork Clearwater River', 'Wallowa River', 'Wenaha River', 'Big Creek', 'Lemhi River', 'Lolo Creek', 'Asotin Creek', 'Pahsimeroi River', 'East Fork South Fork Salmon River', 'Panther Creek', 'North Fork Salmon River', 'Yankee Fork Salmon River', 'Little Salmon River'))
 
 # Get Google basemap
 #register_google(key = "hidden", write = TRUE)
@@ -55,11 +64,6 @@ p <- ggmap(get_googlemap(center = map_center, #c(lon = -122.335167, lat = 47.608
                          zoom = 7, scale = 2,
                          maptype ='terrain',
                          color = 'color'))
-
-# get center point for TRT_POPID labels
-poly <- as_Spatial(SR_st_pop)
-centers <- data.frame(rgeos::gCentroid(poly, byid = TRUE))
-centers$TRT_POPID <- SR_st_pop$TRT_POPID
 
 # Steelhead POPs and O&M Sites
 
@@ -75,14 +79,17 @@ arrays <- bind_cols(arrays,
 labs <- arrays %>% group_by(BPA_Funding_OM) %>% summarise(n = n()) %>% transmute(labs = paste0(BPA_Funding_OM, ' (n = ',n,')')) %>% pull(labs)
 
 steelhead_gg <- p +
-  geom_sf(data = SR_st_pop, aes(fill = TRT_POPID), inherit.aes = FALSE) +
+  #ggplot() +
+  #geom_sf(data = states, fill = 'white') +
+  geom_sf(data = SR_basin, alpha = .5, inherit.aes = FALSE) +
+  #geom_sf(data = SR_st_pop, aes(fill = TRT_POPID), inherit.aes = FALSE) +
   geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
   geom_point(data = arrays, aes(x = lng, y = lat,
-                             colour = BPA_Funding_OM), size = 3, inherit.aes = FALSE) +
+                            colour = BPA_Funding_OM), size = 3, inherit.aes = FALSE) +
   #geom_label(data = centers, aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
   scale_fill_viridis_d(alpha = .35, direction = -1, option = "D", guide = FALSE) +
-  scale_colour_manual(values = topo.colors(4)[1:3], labels = labs) +
-  #scale_colour_viridis_d(option = "E", labels = labs) +
+  #scale_colour_manual(values = topo.colors(4)[1:3], labels = labs) +
+  scale_colour_viridis_d(option = "C", end = .8, labels = labs) +
   #scale_colour_brewer(palette = 'PuRd', labels = labs) +
   theme_void() +
   theme(text = element_text(family = 'serif'),
@@ -90,15 +97,28 @@ steelhead_gg <- p +
         plot.subtitle = element_text(colour = 'grey35'),
         legend.position = c(.18,.12),
         legend.background = element_rect(fill = alpha('grey75', .5))) +
-  labs(title = "Snake Basin Steelhead Populations",
-       subtitle = "Sixty-seven in-stream PIT-tag detection systems are deployed across the basin to monitor abundance,\n life history and productivity of adults returning to twenty-two ICTRT steelhead populations.",
-       colour = 'Operation and Maintenance')
-  #coord_sf()
-steelhead_gg
-ggsave(steelhead_gg,filename = './Figures/IPTDS_sites_map.png', height = 9, width = 9)
+  labs(title = "Snake River Basin In-stream PIT-tag Detection Systems",
+       subtitle = "Sixty-seven IPTDS are deployed across the basin to monitor abundance,\n life history and productivity of Steelhead and spring/summer Chinook salmon.",
+       colour = 'Operation and Maintenance')# +
+  #coord_sf(xlim = c(-112,-120), ylim = c(43,48))
 
+steelhead_gg
+
+ggsave(steelhead_gg, filename = './Figures/IPTDS_sites_map.png', height = 9, width = 9)
 
 # Steelhead POPs and DABOM sites
+source('./R/definePopulations.R')
+pop_names <- definePopulations('Steelhead') %>%
+  distinct(TRT) %>%
+  mutate(est = TRUE)
+
+# get center point for TRT_POPID labels
+poly <- as_Spatial(SR_st_pop)
+centers <- data.frame(rgeos::gCentroid(poly, byid = TRUE))
+centers$TRT_POPID <- SR_st_pop$TRT_POPID
+
+st_centers <- left_join(centers, pop_names, by = c('TRT_POPID' = 'TRT')) %>%
+  mutate(est = ifelse(is.na(est), FALSE, est))
 
 config <- bind_cols(config, 
                     st_coordinates(config) %>%
@@ -113,7 +133,7 @@ steelhead_dabom <- p +
   geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
   geom_point(data = config, aes(x = lng, y = lat,
                                 colour = SiteTypeName), size = 3, inherit.aes = FALSE) +
-  geom_label(data = centers, aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
+  geom_label(data = st_centers[st_centers$est,], aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
   scale_fill_viridis_d(alpha = .5, direction = -1, option = "D", guide = FALSE) +
   scale_colour_brewer(palette = 'PuRd', labels = labs) +
   theme_void() +
@@ -123,21 +143,40 @@ steelhead_dabom <- p +
         legend.position = c(.22,.2),
         legend.background = element_rect(fill = alpha('grey75', .5))) +
   labs(title = "Snake Basin Steelhead Populations",
-       subtitle = "Abundance is estimated for twenty-two steelhead populations with the DABOM model using \n 114 PIT-tag observation sites.",
+       subtitle = "Adult escapement is estimated for fish returning to tributaries located within twenty-two populations using the DABOM model and \n 114 distinct PIT-tag observation sites.",
        colour = 'Detection Type')
 
 steelhead_dabom
 ggsave(steelhead_dabom,filename = './Figures/steelhead_dabom_sites.png', height = 9, width = 9)
 
-
 # Chinook POPs and DABOM sites
+
+pop_names <- definePopulations('Chinook') %>%
+  distinct(TRT) %>%
+  mutate(est = TRUE)
+
+# get center point for TRT_POPID labels
+poly <- as_Spatial(SR_ch_pop)
+centers <- data.frame(rgeos::gCentroid(poly, byid = TRUE))
+centers$TRT_POPID <- SR_ch_pop$TRT_POPID
+
+ch_centers <- left_join(centers, pop_names, by = c('TRT_POPID' = 'TRT')) %>%
+  mutate(est = ifelse(is.na(est), FALSE, est))
+
+config <- bind_cols(config, 
+                    st_coordinates(config) %>%
+                      as_tibble() %>%
+                      rename(lng = X, lat = Y))
+
+labs <- config %>% group_by(SiteTypeName) %>% summarise(n = n()) %>% transmute(labs = paste0(SiteTypeName, ' (n = ',n,')')) %>% pull(labs)
+
 
 chinook_dabom <- p +
   geom_sf(data = SR_ch_pop, aes(fill = TRT_POPID), inherit.aes = FALSE) +
   geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
   geom_point(data = config, aes(x = lng, y = lat,
                                 colour = SiteTypeName), size = 3, inherit.aes = FALSE) +
-  geom_label(data = centers, aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
+  geom_label(data = ch_centers[ch_centers$est,], aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
   scale_fill_viridis_d(alpha = .5, direction = -1, option = "D", guide = FALSE) +
   scale_colour_brewer(palette = 'PuRd', labels = labs) +
   theme_void() +
@@ -146,8 +185,8 @@ chinook_dabom <- p +
         plot.subtitle = element_text(colour = 'grey35'),
         legend.position = c(.22,.2),
         legend.background = element_rect(fill = alpha('grey75', .5))) +
-  labs(title = "Snake Basin Chinook Populations",
-       subtitle = "Abundance is estimated for X chinook populations with the DABOM model using \n 114 PIT-tag observation sites.",
+  labs(title = "Snake Basin Spring/Summer Chinook Salmon Populations",
+       subtitle = "Adult escapement is estimated for fish returning to tributaries located within thirty-one populations using the DABOM model and \n 114 distinct PIT-tag observation sites.",
        colour = 'Detection Type')
 
 chinook_dabom

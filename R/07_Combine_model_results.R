@@ -285,6 +285,8 @@ for(yr in year_range){
 
 #------------------------------------------------------------------------------
 # combine summaries by year
+spp <- 'Steelhead'
+
 allSumm = as.list(year_range) %>%
   rlang::set_names() %>%
   map(.f = function(x) {
@@ -408,9 +410,9 @@ brood_table <- allBrYr %>%
          lambda = ifelse(!is.na(S) & R != 0,R/S,""))
 
 if(spp == 'Steelhead'){
-  prod_range = 2010:2013
+  prod_range = 2010:2014
 } else {
-  prod_range = 2010:2013
+  prod_range = 2010:2014
 }
 
 prod_df = as.list(prod_range) %>%
