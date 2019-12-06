@@ -118,7 +118,7 @@ for(yr in year_range){
     mutate(spawn_yr = yr,
            species = spp) %>%
     select(spawn_yr, species, everything())
-  
+
   #------------------------------------------------------------------------------
   ## Gather Population Group Estimates -- NEED TO WORK ON!!!!!
   #------------------------------------------------------------------------------
@@ -309,7 +309,7 @@ for(yr in year_range){
 #------------------------------------------------------------------------------
 # combine summaries by year
 #------------------------------------------------------------------------------
-spp <- 'Chinook'
+spp <- 'Steelhead'
 
 if(spp == 'Steelhead'){
   year_range <- c(2010:2019)
@@ -466,9 +466,61 @@ prod_df = as.list(prod_range) %>%
     
   })
 
+# STADEM Estimates
+# Lower Granite Estimates
+
+allLGR <- as.list(year_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x){
+           
+           load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',x[1],'.rda'))
+           
+           stadem_mod$summary %>% as_tibble(rownames = 'param') %>%
+             filter(grepl('X.tot.new.wild',param)) %>%
+             mutate(species = spp) %>%
+             select(species,
+                    estimate = `50%`,
+                    lowerCI = `2.5%`,
+                    upperCI = `97.5%`,
+                    mean,
+                    sd)
+           
+         })
+
+allLGRtags <- as.list(year_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x){
+           load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
+           
+           tag_dat <- proc_list$ValidTrapData %>%
+             summarise(valid_tags = n_distinct(LGDNumPIT))
+         })
+
+stadem_df <- left_join(allLGR, allLGRtags, by = 'spawn_year') %>%
+  select(spawn_year, species, valid_tags, everything())
+
+
+# Get unique tags per site......should be moved to DABOM tribCalcEstimate fnc.
+site_tags <- as.list(year_range) %>%
+  rlang::set_names() %>%
+  map_df(.id = 'spawn_year',
+         .f = function(x){
+           load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
+
+  proc_list$proc_ch %>%
+    filter(UserProcStatus) %>%
+    group_by(SiteID) %>%
+    summarise(n_tags = n_distinct(TagID)) %>%
+    mutate(species = spp) %>%
+    select(species, everything())
+  
+  })
 
 #Save all data as .xlsx
-list('Pop Total Esc' = N_pop_all,
+list('LGR Wild Esc' = stadem_df, 
+     'Pop Total Esc' = N_pop_all,
      'Pop Female Esc' = N_f_all,
      'Pop Age Esc' = age_all,
      'Pop Brood Table' = brood_table,
@@ -476,5 +528,6 @@ list('Pop Total Esc' = N_pop_all,
      'Pop Female Props' = p_all,
      'Pop Age Props' = age_prop_all,
      'Site Esc' = trib_all,
-     'Site Detect Eff' = detect_all) %>%
+     'Site Unique Tags' = site_tags,
+     'Node Detect Eff' = detect_all) %>%
   WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
