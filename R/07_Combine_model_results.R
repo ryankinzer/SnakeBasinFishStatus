@@ -309,225 +309,227 @@ for(yr in year_range){
 #------------------------------------------------------------------------------
 # combine summaries by year
 #------------------------------------------------------------------------------
-spp <- 'Steelhead'
-
-if(spp == 'Steelhead'){
-  year_range <- c(2010:2019)
-  prod_range <- 2010:2014
-} else {
-  year_range <- c(2010:2018)
-  prod_range <- 2010:2014
-}
-
-allSumm = as.list(year_range) %>%
-  rlang::set_names() %>%
-  map(.f = function(x) {
-    load(paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', x[1], '.rda'))
-    list(detect_summ = detect_summ,
-         trib_summ = trib_summ,
-         N_pop_summ = N_pop_summ,
-         p_f = p_f, 
-         N_f_summ = N_f_summ, 
-         age_prop_summ = age_prop_summ, 
-         age_summ = age_summ)
-  })
-
-
-detect_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'detect_summ')
-
-trib_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'trib_summ')
-
-N_pop_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'N_pop_summ')
-
-p_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'p_f')
-
-N_f_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'N_f_summ')
-
-age_prop_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'age_prop_summ')
-
-age_all = allSumm %>%
-  map_df(.id = NULL,
-         .f = 'age_summ') %>%
-  mutate(brood_yr = spawn_yr - as.numeric(age)) %>%
-  select(spawn_yr, species, brood_yr, everything())
-
-#------------------------------------------------------------------------------
-# Build brood year tables
-# Still need to figure out how to best filter out years where we don't have complete brood year returns
-
-# combine posteriors by year
-allBrYr = as.list(year_range) %>%
-  rlang::set_names() %>%
-  map_df(.f = function(x) {
-    load(paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', x[1], '.rda'))
-    N_pop %>%
-      left_join(age_pop %>%
-                  gather(age, ageProp, starts_with('age'))) %>%
-      filter(!is.na(age)) %>%
-      mutate(brood_yr = spawn_yr - as.integer(str_remove(age, 'age')),
-             Nage = N * ageProp) %>%
-       #group_by(spawn_yr, TRT) %>%
-       #select(spawn_yr, species, TRT, iter, brood_yr, N, Nage) %>%
-       ungroup()
-  })
-
-allBrYr %>%
-  group_by(species, TRT, spawn_yr) %>%
-  summarise(nBrYrs = n_distinct(brood_yr),
-            minBrYr = min(brood_yr),
-            maxBrYr = max(brood_yr))
-
-allBrYr %>%
-  group_by(species, TRT, brood_yr) %>%
-  summarise(nSpYrs = n_distinct(spawn_yr),
-            minSpYr = min(spawn_yr),
-            maxSpYr = max(spawn_yr))
-
-spawnRec_post = allBrYr %>%
-  group_by(iter, species, TRT, brood_yr) %>%
-  summarise_at(vars(R = Nage),
-               list(sum)) %>%
-  left_join(allBrYr %>%
-              select(spawn_yr:iter, N) %>%
-              distinct() %>%
-              rename(brood_yr = spawn_yr,
-                     S = N)) %>%
-  select(iter:brood_yr, S, R) %>%
-  mutate(lambda = R / S) %>%
-  ungroup()
-
-spawnRec_summ = spawnRec_post %>%
-  gather(var, value, S:lambda) %>%
-  group_by(species, TRT, brood_yr, var) %>%
-  summarise_at(vars(value),
-               list(mean = mean, 
-                    median = median,
-                    # mode = estMode,
-                    SE = sd),
-               na.rm = T) %>%
-  select(-median, -SE) %>%
-  spread(var, mean) %>%
-  select(species, brood_yr, TRT, S, R, lambda) %>%
-  filter(!is.na(lambda))
-
-#-----------------------------------------------------------------------------
-# RK test
-brood_table <- allBrYr %>%
-  select(spawn_yr:iter, N) %>%
-  distinct() %>%
-  group_by(spawn_yr, species, TRT) %>%
-  summarise(S = median(N, na.rm=TRUE)) %>%
-  full_join(allBrYr %>%
-              group_by(brood_yr, species, TRT, age) %>%
-              summarise(Nage = median(Nage, na.rm=TRUE)) %>%
-              spread(age, Nage), 
-            by = c('spawn_yr' = 'brood_yr', 'species', 'TRT')) %>%
-  rename(brood_yr = spawn_yr) %>%
-  arrange(species, TRT, brood_yr) %>%
-  ungroup() %>%
-  mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
-  mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
-         lambda = ifelse(!is.na(S) & R != 0,R/S,""))
-
-prod_df = as.list(prod_range) %>%
-  rlang::set_names() %>%
-  map_df(.f = function(x) {
-    
-    tmp <- spawnRec_post %>% filter(species == spp,
-                                    brood_yr == x[1])
-    
-    
-    Sdf <- summarisePosterior(tmp, S, TRT, round = T) %>%
-      mutate(brood_yr = x[1],
-             species = spp,
-             variable = 'Spawners')
-    Rdf <- summarisePosterior(tmp, R, TRT, round = T) %>%
-      mutate(brood_yr = x[1],
-             species = spp,
-             variable = 'Recruits')
-    Ldf <- summarisePosterior(tmp, lambda, TRT, round = F) %>%
-      mutate(brood_yr = x[1],
-             species = spp,
-             variable = 'lambda')
-    
-    bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
-    
-  })
-
-# STADEM Estimates
-# Lower Granite Estimates
-
-allLGR <- as.list(year_range) %>%
-  rlang::set_names() %>%
-  map_df(.id = 'spawn_year',
-         .f = function(x){
-           
-           load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',x[1],'.rda'))
-           
-           stadem_mod$summary %>% as_tibble(rownames = 'param') %>%
-             filter(grepl('X.tot.new.wild',param)) %>%
-             mutate(species = spp) %>%
-             select(species,
-                    estimate = `50%`,
-                    lowerCI = `2.5%`,
-                    upperCI = `97.5%`,
-                    mean,
-                    sd)
-           
-         })
-
-allLGRtags <- as.list(year_range) %>%
-  rlang::set_names() %>%
-  map_df(.id = 'spawn_year',
-         .f = function(x){
-           load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-           
-           tag_dat <- proc_list$ValidTrapData %>%
-             summarise(valid_tags = n_distinct(LGDNumPIT))
-         })
-
-stadem_df <- left_join(allLGR, allLGRtags, by = 'spawn_year') %>%
-  select(spawn_year, species, valid_tags, everything())
-
-
-# Get unique tags per site......should be moved to DABOM tribCalcEstimate fnc.
-site_tags <- as.list(year_range) %>%
-  rlang::set_names() %>%
-  map_df(.id = 'spawn_year',
-         .f = function(x){
-           load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-
-  proc_list$proc_ch %>%
-    filter(UserProcStatus) %>%
-    group_by(SiteID) %>%
-    summarise(n_tags = n_distinct(TagID)) %>%
-    mutate(species = spp) %>%
-    select(species, everything())
+for(spp in species){
   
-  })
-
-#Save all data as .xlsx
-list('LGR Wild Esc' = stadem_df, 
-     'Pop Total Esc' = N_pop_all,
-     'Pop Female Esc' = N_f_all,
-     'Pop Age Esc' = age_all,
-     'Pop Brood Table' = brood_table,
-     'Pop Stock Recruit' = prod_df,
-     'Pop Female Props' = p_all,
-     'Pop Age Props' = age_prop_all,
-     'Site Esc' = trib_all,
-     'Site Unique Tags' = site_tags,
-     'Node Detect Eff' = detect_all) %>%
-  WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
+  if(spp == 'Steelhead'){
+    year_range <- c(2010:2019)
+    prod_range <- 2010:2014
+  } else {
+    year_range <- c(2010:2018)
+    prod_range <- 2010:2014
+  }
+  
+  allSumm = as.list(year_range) %>%
+    rlang::set_names() %>%
+    map(.f = function(x) {
+      load(paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', x[1], '.rda'))
+      list(detect_summ = detect_summ,
+           trib_summ = trib_summ,
+           N_pop_summ = N_pop_summ,
+           p_f = p_f, 
+           N_f_summ = N_f_summ, 
+           age_prop_summ = age_prop_summ, 
+           age_summ = age_summ)
+    })
+  
+  
+  detect_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'detect_summ')
+  
+  trib_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'trib_summ')
+  
+  N_pop_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'N_pop_summ')
+  
+  p_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'p_f')
+  
+  N_f_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'N_f_summ')
+  
+  age_prop_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'age_prop_summ')
+  
+  age_all = allSumm %>%
+    map_df(.id = NULL,
+           .f = 'age_summ') %>%
+    mutate(brood_yr = spawn_yr - as.numeric(age)) %>%
+    select(spawn_yr, species, brood_yr, everything())
+  
+  #------------------------------------------------------------------------------
+  # Build brood year tables
+  # Still need to figure out how to best filter out years where we don't have complete brood year returns
+  
+  # combine posteriors by year
+  allBrYr = as.list(year_range) %>%
+    rlang::set_names() %>%
+    map_df(.f = function(x) {
+      load(paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', x[1], '.rda'))
+      N_pop %>%
+        left_join(age_pop %>%
+                    gather(age, ageProp, starts_with('age'))) %>%
+        filter(!is.na(age)) %>%
+        mutate(brood_yr = spawn_yr - as.integer(str_remove(age, 'age')),
+               Nage = N * ageProp) %>%
+        #group_by(spawn_yr, TRT) %>%
+        #select(spawn_yr, species, TRT, iter, brood_yr, N, Nage) %>%
+        ungroup()
+    })
+  
+  allBrYr %>%
+    group_by(species, TRT, spawn_yr) %>%
+    summarise(nBrYrs = n_distinct(brood_yr),
+              minBrYr = min(brood_yr),
+              maxBrYr = max(brood_yr))
+  
+  allBrYr %>%
+    group_by(species, TRT, brood_yr) %>%
+    summarise(nSpYrs = n_distinct(spawn_yr),
+              minSpYr = min(spawn_yr),
+              maxSpYr = max(spawn_yr))
+  
+  spawnRec_post = allBrYr %>%
+    group_by(iter, species, TRT, brood_yr) %>%
+    summarise_at(vars(R = Nage),
+                 list(sum)) %>%
+    left_join(allBrYr %>%
+                select(spawn_yr:iter, N) %>%
+                distinct() %>%
+                rename(brood_yr = spawn_yr,
+                       S = N)) %>%
+    select(iter:brood_yr, S, R) %>%
+    mutate(lambda = R / S) %>%
+    ungroup()
+  
+  spawnRec_summ = spawnRec_post %>%
+    gather(var, value, S:lambda) %>%
+    group_by(species, TRT, brood_yr, var) %>%
+    summarise_at(vars(value),
+                 list(mean = mean, 
+                      median = median,
+                      # mode = estMode,
+                      SE = sd),
+                 na.rm = T) %>%
+    select(-median, -SE) %>%
+    spread(var, mean) %>%
+    select(species, brood_yr, TRT, S, R, lambda) %>%
+    filter(!is.na(lambda))
+  
+  #-----------------------------------------------------------------------------
+  # RK test
+  brood_table <- allBrYr %>%
+    select(spawn_yr:iter, N) %>%
+    distinct() %>%
+    group_by(spawn_yr, species, TRT) %>%
+    summarise(S = median(N, na.rm=TRUE)) %>%
+    full_join(allBrYr %>%
+                group_by(brood_yr, species, TRT, age) %>%
+                summarise(Nage = median(Nage, na.rm=TRUE)) %>%
+                spread(age, Nage), 
+              by = c('spawn_yr' = 'brood_yr', 'species', 'TRT')) %>%
+    rename(brood_yr = spawn_yr) %>%
+    arrange(species, TRT, brood_yr) %>%
+    ungroup() %>%
+    mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
+    mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
+           lambda = ifelse(!is.na(S) & R != 0,R/S,""))
+  
+  prod_df = as.list(prod_range) %>%
+    rlang::set_names() %>%
+    map_df(.f = function(x) {
+      
+      tmp <- spawnRec_post %>% filter(species == spp,
+                                      brood_yr == x[1])
+      
+      
+      Sdf <- summarisePosterior(tmp, S, TRT, round = T) %>%
+        mutate(brood_yr = x[1],
+               species = spp,
+               variable = 'Spawners')
+      Rdf <- summarisePosterior(tmp, R, TRT, round = T) %>%
+        mutate(brood_yr = x[1],
+               species = spp,
+               variable = 'Recruits')
+      Ldf <- summarisePosterior(tmp, lambda, TRT, round = F) %>%
+        mutate(brood_yr = x[1],
+               species = spp,
+               variable = 'lambda')
+      
+      bind_rows(Sdf, bind_rows(Rdf, Ldf)) %>% select(brood_yr, species, TRT, variable, everything()) %>% arrange(species, TRT, brood_yr)
+      
+    })
+  
+  # STADEM Estimates
+  # Lower Granite Estimates
+  
+  allLGR <- as.list(year_range) %>%
+    rlang::set_names() %>%
+    map_df(.id = 'spawn_year',
+           .f = function(x){
+             
+             load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',x[1],'.rda'))
+             
+             stadem_mod$summary %>% as_tibble(rownames = 'param') %>%
+               filter(grepl('X.tot.new.wild',param)) %>%
+               mutate(species = spp) %>%
+               select(species,
+                      estimate = `50%`,
+                      lowerCI = `2.5%`,
+                      upperCI = `97.5%`,
+                      mean,
+                      sd)
+             
+           })
+  
+  allLGRtags <- as.list(year_range) %>%
+    rlang::set_names() %>%
+    map_df(.id = 'spawn_year',
+           .f = function(x){
+             load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
+             
+             tag_dat <- proc_list$ValidTrapData %>%
+               summarise(valid_tags = n_distinct(LGDNumPIT))
+           })
+  
+  stadem_df <- left_join(allLGR, allLGRtags, by = 'spawn_year') %>%
+    select(spawn_year, species, valid_tags, everything())
+  
+  
+  # Get unique tags per site......should be moved to DABOM tribCalcEstimate fnc.
+  site_tags <- as.list(year_range) %>%
+    rlang::set_names() %>%
+    map_df(.id = 'spawn_year',
+           .f = function(x){
+             load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
+             
+             proc_list$proc_ch %>%
+               filter(UserProcStatus) %>%
+               group_by(SiteID) %>%
+               summarise(n_tags = n_distinct(TagID)) %>%
+               mutate(species = spp) %>%
+               select(species, everything())
+             
+           })
+  
+  #Save all data as .xlsx
+  list('LGR Wild Esc' = stadem_df, 
+       'Pop Total Esc' = N_pop_all,
+       'Pop Female Esc' = N_f_all,
+       'Pop Age Esc' = age_all,
+       'Pop Brood Table' = brood_table,
+       'Pop Stock Recruit' = prod_df,
+       'Pop Female Props' = p_all,
+       'Pop Age Props' = age_prop_all,
+       'Site Esc' = trib_all,
+       'Site Unique Tags' = site_tags,
+       'Node Detect Eff' = detect_all) %>%
+    WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
+  
+}
