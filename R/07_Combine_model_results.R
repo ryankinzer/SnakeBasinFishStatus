@@ -15,6 +15,10 @@ library(DABOM)
 library(WriteXLS)
 source('./R/definePopulations.R')
 source('./R/summarisePosterior.R')
+source('./R/assign_POP_GSI.R')
+
+# load configuration file
+load('./data/ConfigurationFiles/site_config.rda')
 
 # set up folder structure
 AbundanceFolder = 'Abundance_results' # for processed files
@@ -30,7 +34,6 @@ if(!dir.exists(AbundanceFolder)) {
 species <- c('Steelhead', 'Chinook')  # either Chinook or Steelhead
 #yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
 #timestp <- gsub('[^0-9]','', Sys.Date())
-
 
 for(spp in species){
   
@@ -51,6 +54,23 @@ for(yr in year_range){
   
   load(paste0('./Sex_results/Population_SexProp_',spp,'_',yr,'.rda'))
   load(paste0('./Age_results/Population_AgeProp_',spp,'_',yr,'.rda'))
+  
+  #------------------------------------------------------------------------------
+  ## summarise tag information
+  #------------------------------------------------------------------------------
+  # get which population each site is assigned to
+  site_pop = assign_POP_GSI(species = spp, 
+                            configuration = configuration,
+                            site_df = site_df)[[1]] %>%
+    as_tibble() %>%
+    select(SiteID:SiteName, Node, ESU_DPS:TRT)
+  
+  
+  tag_summ = summariseTagData(capHist_proc = proc_list$proc_ch,
+                              trap_data = proc_list$ValidTrapData) %>%
+    left_join(site_pop %>%
+                select(Node, MPG, POP_NAME, TRT),
+              by = c('AssignSpawnNode' = 'Node'))
   
   #------------------------------------------------------------------------------
   ## Gather Detection Probabilities
@@ -201,7 +221,10 @@ for(yr in year_range){
   N_pop_summ <- summarisePosterior(pop_post, N, TRT) %>%
     mutate(spawn_yr = yr, 
            species = spp) %>%
-    select(spawn_yr, species, everything())
+    left_join(tag_summ %>%
+                group_by(TRT) %>%
+                summarise(n_tags = n_distinct(TagID))) %>%
+    select(spawn_yr, species, TRT, n_tags, everything())
   # summarize proportion female
   p_f <- summarisePosterior(pop_post, p, TRT, round = F) %>%
     mutate(spawn_yr = yr, 
@@ -285,7 +308,16 @@ for(yr in year_range){
 
 #------------------------------------------------------------------------------
 # combine summaries by year
-spp <- 'Steelhead'
+#------------------------------------------------------------------------------
+spp <- 'Chinook'
+
+if(spp == 'Steelhead'){
+  year_range <- c(2010:2019)
+  prod_range <- 2010:2014
+} else {
+  year_range <- c(2010:2018)
+  prod_range <- 2010:2014
+}
 
 allSumm = as.list(year_range) %>%
   rlang::set_names() %>%
@@ -408,12 +440,6 @@ brood_table <- allBrYr %>%
   mutate(nRyrs = rowSums(!is.na(select(., contains('age'))))) %>%
   mutate(R = rowSums(select(.,contains('age')),na.rm = TRUE),
          lambda = ifelse(!is.na(S) & R != 0,R/S,""))
-
-if(spp == 'Steelhead'){
-  prod_range = 2010:2014
-} else {
-  prod_range = 2010:2014
-}
 
 prod_df = as.list(prod_range) %>%
   rlang::set_names() %>%
