@@ -9,6 +9,8 @@ assign_POP_GSI <- function(species, configuration, site_df){
   #load('./data/ConfigurationFiles/DABOM_map_data.rda')
   load('./data/ConfigurationFiles/Snake_POP_metadata.rda')
 
+  SR_ch_pop <- sf::st_as_sf(SR_ch_pop)
+  
   config <- configuration %>%
     filter(SiteID %in% site_df$SiteID) %>%
     filter(SiteID != 'GRA') %>%

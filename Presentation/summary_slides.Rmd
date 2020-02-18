@@ -1,0 +1,237 @@
+---
+title: "Snake Basin IPTDS - 10 Years of Monitoring"
+author: "Ryan N. Kinzer"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: ioslides_presentation
+---
+
+```{r settings, echo = FALSE}
+library(knitr)
+library(pander)
+opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+# figs <- list.files(path = '../Figures/',full.names=TRUE)
+# st_figs <- figs[grepl('Steelhead',figs)]
+# ch_figs <- figs[grepl('Chinook', figs)]
+```
+
+## IPTDS Locations
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/IPTDS_sites_map.png')
+```
+
+# Steelhead
+
+## Lower Granite - STADEM Model
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_win_abundSteelhead.png')
+```
+
+## Lower Granite - Escapement
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_unique_abundSteelhead.png')
+```
+
+## Lower Granite - Arrival
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/LGR_run_timingSteelhead.png')
+```
+
+## Lower Granite - Passage
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_passageSteelhead.png')
+```
+
+## Lower Grante - Tag Rate
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_tag_rateSteelhead.png')
+```
+
+## Steelhead Populations
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/steelhead_dabom_sites.png')
+```
+
+## Population Abundance
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/POPAbund_POP_Steelhead.png')
+```
+
+## Population Abundance
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/POPAbund_MGP_Steelhead.png')
+```
+
+## Population Female Proportion
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/SexPropSteelhead.png')
+```
+
+## Population Female Proportion
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/SexProp2Steelhead.png')
+```
+
+## Population Age Structure
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/AgePropEst_Steelhead.png')
+```
+
+## Population Age Structure
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/AgePropEst2_Steelhead.png')
+```
+
+## Population Age Structure
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/ageProp3Steelhead.png')
+```
+
+## Population Age Structure
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/AvgAgePropEst_mu_Steelhead.png')
+```
+
+## Population Productivity
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/stock_recruit_Steelhead.png')
+```
+
+## Population Productivity
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/lambda_Steelhead.png')
+```
+
+## Population Productivity
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/adult_recruits_Steelhead.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/DetectProp_Steelhead.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_DetectProp_Steelhead.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_SexProp_Steelhead.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_AgeProp_Steelhead.png')
+```
+
+# Chinook
+
+## Lower Granite - STADEM Model
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_win_abundChinook.png')
+```
+
+## Lower Granite - Escapement
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_unique_abundChinook.png')
+```
+
+## Lower Granite - Arrival
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/LGR_run_timingChinook.png')
+```
+
+## Lower Granite - Passage
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_passageChinook.png')
+```
+
+## Lower Grante - Tag Rate
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/LGR_tag_rateChinook.png')
+```
+
+## Chinook Populations
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/Chinook_dabom_sites.png')
+```
+
+## Population Abundance
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/POPAbund_POP_Chinook.png')
+```
+
+## Population Abundance
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/POPAbund_MGP_Chinook.png')
+```
+
+## Population Female Proportion
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/SexPropChinook.png')
+```
+
+## Population Female Proportion
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/SexProp2Chinook.png')
+```
+
+## Population Age Structure
+```{r, out.width= "400px"}
+knitr::include_graphics('../Figures/AgePropEst_Chinook.png')
+```
+
+## Population Age Structure
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/AgePropEst2_Chinook.png')
+```
+
+## Population Age Structure
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/ageProp3Chinook.png')
+```
+
+## Population Age Structure
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/AvgAgePropEst_mu_Chinook.png')
+```
+
+## Population Productivity
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/stock_recruit_Chinook.png')
+```
+
+## Population Productivity
+```{r, out.width= "750px"}
+knitr::include_graphics('../Figures/lambda_Chinook.png')
+```
+
+## Population Productivity
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/adult_recruits_Chinook.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/DetectProp_Chinook.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_DetectProp_Chinook.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_SexProp_Chinook.png')
+```
+
+## Model Diagnostics
+```{r, out.width= "500px"}
+knitr::include_graphics('../Figures/ObsVsPred_AgeProp_Chinook.png')
+```
