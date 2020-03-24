@@ -1,0 +1,56 @@
+# Author: Kevin See
+# Purpose: pull out select results
+# Created: 3/24/20
+# Last Modified: 3/24/20
+# Notes: Marika Dobos asked for these
+
+#-----------------------------------------------------------------
+# load needed libraries
+library(tidyverse)
+library(readxl)
+library(WriteXLS)
+
+#-----------------------------------------------------------------
+# which sites do we want to pull out?
+my_sites = c("BBA",
+             "KHS",
+             "LRL",
+             "LRU",
+             "TAY",
+             "LLR",
+             "NFS",
+             "SFG",
+             "KRS",
+             "LRW",
+             "HYC")
+
+#-----------------------------------------------------------------
+excel_sheets('Abundance_results/LGR_AllSummaries_Steelhead.xlsx')
+
+# pull out selected results
+res_list = list('Pop Total Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
+                                             sheet = 'Pop Total Esc') %>%
+                  filter(valid_est == 1) %>%
+                  rename(estimate = median) %>%
+                  mutate_at(vars(cv),
+                            list(as.numeric)) %>%
+                  select(-valid_est, -mean, -mode),
+                'Site Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
+                                        sheet = 'Site Esc') %>%
+                  mutate_at(vars(cv),
+                            list(as.numeric)) %>%
+                  filter(site %in% my_sites),
+                'Node Detect Eff' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
+                                               sheet = 'Node Detect Eff') %>%
+                  mutate_at(vars(cv),
+                            list(as.numeric)) %>%
+                  mutate(site = str_remove(Node, 'A0$'),
+                         site = str_remove(site, 'B0$')) %>%
+                  filter(site %in% my_sites) %>%
+                  select(-site))
+
+WriteXLS(x = res_list,
+         ExcelFileName = paste0('outgoing/Sthd_Dobos_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
+         AdjWidth = T,
+         BoldHeaderRow = T,
+         FreezeRow = 1)
