@@ -1,8 +1,9 @@
 # Author: Kevin See
 # Purpose: pull out select results
 # Created: 3/24/20
-# Last Modified: 3/24/20
-# Notes: Marika Dobos asked for these
+# Last Modified: 3/31/20
+# Notes: Marika Dobos originally made this request (IDFG). 
+# On 3/30, Ian Tattam (ODFW) asked for UGR results
 
 #-----------------------------------------------------------------
 # load needed libraries
@@ -24,6 +25,8 @@ my_sites = c("BBA",
              "LRW",
              "HYC")
 
+my_sites = c('UGR')
+
 #-----------------------------------------------------------------
 excel_sheets('Abundance_results/LGR_AllSummaries_Steelhead.xlsx')
 
@@ -31,6 +34,7 @@ excel_sheets('Abundance_results/LGR_AllSummaries_Steelhead.xlsx')
 res_list = list('Pop Total Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
                                              sheet = 'Pop Total Esc') %>%
                   filter(valid_est == 1) %>%
+                  filter(grepl('Grande Ronde', MPG)) %>%
                   rename(estimate = median) %>%
                   mutate_at(vars(cv),
                             list(as.numeric)) %>%
@@ -50,7 +54,8 @@ res_list = list('Pop Total Esc' = read_excel('Abundance_results/LGR_AllSummaries
                   select(-site))
 
 WriteXLS(x = res_list,
-         ExcelFileName = paste0('outgoing/Sthd_Dobos_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
+         # ExcelFileName = paste0('outgoing/Sthd_Dobos_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
+         ExcelFileName = paste0('outgoing/Sthd_GrandeRonde_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
          AdjWidth = T,
          BoldHeaderRow = T,
          FreezeRow = 1)
