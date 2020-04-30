@@ -4,6 +4,7 @@
 # Last Modified: 3/31/20
 # Notes: Marika Dobos originally made this request (IDFG). 
 # On 3/30, Ian Tattam (ODFW) asked for UGR results
+# On 4/30, Dan Rawding (WDFW) asked for Asotin results, abundance and by sex
 
 #-----------------------------------------------------------------
 # load needed libraries
@@ -27,6 +28,16 @@ my_sites = c("BBA",
 
 my_sites = c('UGR')
 
+# my_sites = c('ACM')
+# my_sites = c('ACB')
+my_sites = c('ACM',
+             'ASOTIC',
+             'ACB',
+             'GEORGC',
+             'CHARLC',
+             'CCA',
+             'AFC')
+
 #-----------------------------------------------------------------
 excel_sheets('Abundance_results/LGR_AllSummaries_Steelhead.xlsx')
 
@@ -34,11 +45,17 @@ excel_sheets('Abundance_results/LGR_AllSummaries_Steelhead.xlsx')
 res_list = list('Pop Total Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
                                              sheet = 'Pop Total Esc') %>%
                   filter(valid_est == 1) %>%
-                  filter(grepl('Grande Ronde', MPG)) %>%
-                  rename(estimate = median) %>%
-                  mutate_at(vars(cv),
-                            list(as.numeric)) %>%
-                  select(-valid_est, -mean, -mode),
+                  # filter(grepl('Grande Ronde', MPG)) %>%
+                  filter(TRT == 'SNASO-s'),# %>%
+                  # rename(estimate = median) %>%
+                  # mutate_at(vars(cv),
+                  #           list(as.numeric)) %>%
+                  # select(-valid_est, -mean, -mode),
+                'Pop Female Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
+                                              sheet = 'Pop Female Esc') %>%
+                  filter(valid_est == 1) %>%
+                  # filter(grepl('Grande Ronde', MPG)) %>%
+                  filter(TRT == 'SNASO-s'),
                 'Site Esc' = read_excel('Abundance_results/LGR_AllSummaries_Steelhead.xlsx',
                                         sheet = 'Site Esc') %>%
                   mutate_at(vars(cv),
@@ -55,7 +72,8 @@ res_list = list('Pop Total Esc' = read_excel('Abundance_results/LGR_AllSummaries
 
 WriteXLS(x = res_list,
          # ExcelFileName = paste0('outgoing/Sthd_Dobos_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
-         ExcelFileName = paste0('outgoing/Sthd_GrandeRonde_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
+         # ExcelFileName = paste0('outgoing/Sthd_GrandeRonde_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
+         ExcelFileName = paste0('outgoing/Sthd_Asotin_', format(Sys.Date(), '%Y%m%d'), '.xlsx'),
          AdjWidth = T,
          BoldHeaderRow = T,
          FreezeRow = 1)
