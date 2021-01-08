@@ -46,9 +46,15 @@ if(.Platform$OS.type == 'unix') {
   trap_dbase = readLGRtrapDB(trap_filepath)
 }
 
+# save .csv of dbase for later use
+write_csv(trap_dbase, file = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
+
 # set species and spawn year
 species = c('Chinook', 'Steelhead')  # either Chinook or Steelhead
-year = 2010:2018        # tagging operations started at Lower Granite with spawn year 2009.
+
+# running only a single year to keep previous estimates the same
+#year = 2010:2018        # tagging operations started at Lower Granite with spawn year 2009.
+year = 2020
 
 # Loop through species and years
 for(i in 1:length(species)){
