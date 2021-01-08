@@ -60,11 +60,54 @@ pop_sp <- as_Spatial(SR_st_pop)
 b <- sp::bbox(pop_sp) # get bounding box
 
 map_center <- apply(b,1,mean)
-p <- ggmap(get_googlemap(center = map_center, #c(lon = -122.335167, lat = 47.608013),
+
+p <- ggmap(get_googlemap(center = map_center, #c(lon = -122.335167, lat = 47.608013), #center = map_center,
                          zoom = 7, scale = 2,
                          maptype ='terrain',
                          color = 'color'))
 
+#---------------------------------------------
+# Map for Rick 
+p <- ggmap(get_googlemap(center = "Lapwai, Idaho",
+                         zoom = 10, scale = 2,
+                         maptype = 'terrain',
+                         color = 'color'))
+
+arrays <- config %>% filter(DABOM_Branch == 'Lapwai')
+
+arrays <- bind_cols(arrays, 
+                    st_coordinates(arrays) %>%
+                      as_tibble() %>%
+                      rename(lng = X, lat = Y))
+
+labs <- arrays %>% group_by(BPA_Funding_OM) %>% summarise(n = n()) %>% transmute(labs = paste0(BPA_Funding_OM, ' (n = ',n,')')) %>% pull(labs)
+
+lapwai_gg <- p +
+  #ggplot() +
+  #geom_sf(data = states, fill = 'white') +
+  geom_sf(data = SR_basin, alpha = .5, inherit.aes = FALSE) +
+  #geom_sf(data = SR_st_pop, aes(fill = TRT_POPID), inherit.aes = FALSE) +
+  geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
+  geom_point(data = arrays, aes(x = lng, y = lat), size = 3, inherit.aes = FALSE) +
+  ggrepel::geom_label_repel(data = arrays, aes(x = lng, y = lat, label = SiteID), size = 6) +
+  #scale_fill_viridis_d(alpha = .35, direction = -1, option = "D", guide = FALSE) +
+  #scale_colour_manual(values = topo.colors(4)[1:3], labels = labs) +
+  #scale_colour_viridis_d(option = "C", end = .8, labels = labs) +
+  #scale_colour_brewer(palette = 'PuRd', labels = labs) +
+  theme_void() +
+  theme(text = element_text(family = 'serif'),
+        plot.title = element_text(face = 'bold'),
+        plot.subtitle = element_text(colour = 'grey35'),
+        legend.position = c(.18,.12),
+        legend.background = element_rect(fill = alpha('grey75', .5))) +
+  labs(title = "In-stream PIT-tag Detection Systems within the Lapwai Creek Watershed",
+       subtitle = "")# +
+#coord_sf(xlim = c(-112,-120), ylim = c(43,48))
+lapwai_gg
+
+ggsave(lapwai_gg, filename = './Figures/lapwai_sites_map.png', height = 9, width = 9)
+
+#-------------------------------------------
 # Steelhead POPs and O&M Sites
 
 arrays <- config %>%
@@ -78,6 +121,37 @@ arrays <- bind_cols(arrays,
 
 labs <- arrays %>% group_by(BPA_Funding_OM) %>% summarise(n = n()) %>% transmute(labs = paste0(BPA_Funding_OM, ' (n = ',n,')')) %>% pull(labs)
 
+#---------------------------------------------------------------------------
+# Sites with labels
+#---------------------------------------------------------------------------
+steelhead_gg <- p +
+  #ggplot() +
+  #geom_sf(data = states, fill = 'white') +
+  geom_sf(data = SR_basin, alpha = .5, inherit.aes = FALSE) +
+  #geom_sf(data = SR_st_pop, aes(fill = TRT_POPID), inherit.aes = FALSE) +
+  geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
+  geom_point(data = arrays, aes(x = lng, y = lat), size = 3, inherit.aes = FALSE) +
+  ggrepel::geom_label_repel(data = arrays, aes(x = lng, y = lat, label = SiteID), size = 2) +
+  #scale_fill_viridis_d(alpha = .35, direction = -1, option = "D", guide = FALSE) +
+  #scale_colour_manual(values = topo.colors(4)[1:3], labels = labs) +
+  #scale_colour_viridis_d(option = "C", end = .8, labels = labs) +
+  #scale_colour_brewer(palette = 'PuRd', labels = labs) +
+  theme_void() +
+  theme(text = element_text(family = 'serif'),
+        plot.title = element_text(face = 'bold'),
+        plot.subtitle = element_text(colour = 'grey35'),
+        legend.position = c(.18,.12),
+        legend.background = element_rect(fill = alpha('grey75', .5))) +
+  labs(title = "Snake River Basin In-stream PIT-tag Detection Systems",
+       subtitle = "Sixty-seven IPTDS are deployed across the basin to monitor abundance,\n life history and productivity of Steelhead and spring/summer Chinook salmon.")# +
+#coord_sf(xlim = c(-112,-120), ylim = c(43,48))
+steelhead_gg
+
+ggsave(steelhead_gg, filename = './Figures/IPTDS_sites_labels_map.png', height = 9, width = 9)
+
+#-------------------------------------------------------------------
+# Funding arrays.
+#-------------------------------------------------------------------
 steelhead_gg <- p +
   #ggplot() +
   #geom_sf(data = states, fill = 'white') +
@@ -86,6 +160,7 @@ steelhead_gg <- p +
   geom_sf(data = large_st, colour = 'blue', inherit.aes = FALSE) +
   geom_point(data = arrays, aes(x = lng, y = lat,
                             colour = BPA_Funding_OM), size = 3, inherit.aes = FALSE) +
+  #ggrepel::geom_label_repel(data = arrays, aes(x = lng, y = lat, label = SiteID), size = 2) +
   #geom_label(data = centers, aes(x = x, y = y, label = TRT_POPID), size = 3, inherit.aes = FALSE) +
   scale_fill_viridis_d(alpha = .35, direction = -1, option = "D", guide = FALSE) +
   #scale_colour_manual(values = topo.colors(4)[1:3], labels = labs) +
@@ -116,6 +191,7 @@ pop_names <- definePopulations('Steelhead') %>%
 poly <- as_Spatial(SR_st_pop)
 centers <- data.frame(rgeos::gCentroid(poly, byid = TRUE))
 centers$TRT_POPID <- SR_st_pop$TRT_POPID
+
 
 st_centers <- left_join(centers, pop_names, by = c('TRT_POPID' = 'TRT')) %>%
   mutate(est = ifelse(is.na(est), FALSE, est))
@@ -224,6 +300,7 @@ st_copop <- colorFactor(palette = 'viridis', domain = SR_st_pop$POP_NAME)
 array <- filter(config, DetectionType == 'In-stream Array')
 weirs <- filter(config, DetectionType == 'Weir Scanning')
 ladder <- filter(config, DetectionType == 'Ladder Observation')
+
 tmp_config <- filter(config, !is.na(DetectionType))
 
 pal <- colorFactor(

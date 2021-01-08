@@ -11,8 +11,8 @@ library(PITcleanr)
 
 # Script Variables----
 spp <- 'Steelhead'
-yr_range <- as.list(2010:2019)
-names(yr_range) <- 2010:2019
+yr_range <- as.list(2019)
+names(yr_range) <- 2019
 
 # Combine all observation data---------------------------------------
 PBTobs <- map_df(.x = yr_range,

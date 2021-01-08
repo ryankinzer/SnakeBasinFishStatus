@@ -241,6 +241,84 @@ ggsave(paste0('Figures/LGR_passage',spp,'.png'),
        width = 7,
        height = 5)
 
+lgr_passage_p <- allLGR %>%
+  #filter(grepl('X.night.wild', param) | grepl('X.reasc.wild', param)) %>%
+  #filter(grepl('day.true', param) | grepl('reasc.true', param)) %>%
+  filter(grepl('day.true', param)) %>% 
+  mutate(week = as.integer(str_extract(param, '\\d+')),
+         night_p = 1 - `50%`,
+         grp = case_when(
+           str_detect(param, 'day') ~ 'Night Passage',
+           str_detect(param, 'reasc') ~ 'Reascension'
+         ),
+         night_p = ifelse(night_p == 1, NA, night_p)) %>%
+  #filter(`50%` >= 0.01) %>%
+  left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
+  filter(spawn_year != 2019) %>%
+  ggplot(aes(x = Start_Date, y = night_p)) +
+  geom_line(aes(colour = grp, group = grp)) +
+  scale_colour_viridis_d(end = .75) +
+  scale_x_date(date_labels = format("%b-%d")) +
+  facet_wrap(~ spawn_year, scales = 'free_x') +
+  theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'none') +
+  labs(title = paste0(spp, ' Weekly Night-time Passage'),
+       x = 'Date',
+       y = 'Abundance',
+       colour = '')
+
+lgr_passage_p
+
+axis_scale = 50000
+
+lgr_esc_night <- allLGR %>%
+  #filter(grepl('X.night.wild', param) | grepl('X.reasc.wild', param)) %>%
+  filter(grepl('day.true', param) | grepl('X.new.tot', param)) %>%
+  #filter(grepl('X.new.tot', param)) %>% 
+  mutate(week = as.integer(str_extract(param, '\\d+')),
+         grp = case_when(
+           str_detect(param, 'new.tot') ~ 'Unique Passage',
+           str_detect(param, 'day.true') ~ 'Day Passage')) %>%
+  #filter(`50%` >= 0.01) %>%
+  left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
+  filter(spawn_year != 2019) %>%
+  select(spawn_year, Start_Date, week, grp, `50%`) %>%
+  pivot_wider(names_from = 'grp', values_from = `50%`) %>%
+  mutate(night_p = 1 - `Day Passage`,
+         night_p = ifelse(night_p == 1, NA, night_p),
+         night_N = night_p * `Unique Passage`) 
+
+lgr_night_sum <- lgr_esc_night %>%
+  group_by(spawn_year) %>%
+  summarise_at(vars(`Unique Passage`, `night_N`), sum, na.rm = TRUE) %>%
+  mutate(night_p = round(night_N/`Unique Passage`,3),
+         `Unique Passage` = round(`Unique Passage`)) %>%
+  select(spawn_year, `Unique Passage`, `Night Passage` = night_p)
+
+lgr_night <- lgr_esc_night %>%
+  ggplot(aes(x = Start_Date)) +
+  geom_col(aes(y = `Unique Passage`), colour = 'darkblue', fill = 'lightblue') +
+  geom_line(aes(y = night_p*axis_scale), colour = 'darkred', size = 1) +
+  scale_colour_viridis_d(end = .75) +
+  scale_x_date(date_labels = format("%b-%d")) +
+  scale_y_continuous(sec.axis = sec_axis(~./axis_scale, breaks = seq(0,1,.10),
+                                         labels = seq(0,1, .10),
+                                         name = "Night-time Passage")) +
+  facet_wrap(~ spawn_year, scales = 'free') +
+  theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'none') +
+  labs(title = paste0(spp, ' Unique Passage and Night-time Passage Rate'),
+       x = 'Date',
+       y = 'Abundance',
+       colour = '')
+
+lgr_night
+
+
+
+
 #------------------------------------------------------------------------------
 # Tributary and Population Estimates
 #------------------------------------------------------------------------------
@@ -440,8 +518,10 @@ allAbundDf = as.list(yr_range) %>%
          })
 
 allAbundDf <- allAbundDf %>%
-  mutate(MPG = ifelse(TRT == 'GRLOS/GRMIN', 'Grande Ronde / Imnaha', MPG),
+  mutate(TRT = ifelse(TRT == 'SFSMA', 'SFMAI', TRT),
+         MPG = ifelse(TRT == 'GRLOS/GRMIN', 'Grande Ronde / Imnaha', MPG),
          MPG = ifelse(TRT == 'SFMAI', 'South Fork Salmon River', MPG),
+         MPG = ifelse(TRT == 'SEUMA/SEMEA/SEMOO', 'Wet Clearwater', MPG),
          TRT = ifelse(TRT == 'SEMEA', 'SEUMA/SEMEA/SEMOO', TRT))
 
 valid_est <- read_csv('./data/ConfigurationFiles/valid_trt_estimates.csv')
@@ -476,7 +556,7 @@ pop_N <- allAbundDf %>%
   geom_line(aes(colour = MPG)) +
   geom_point(aes(colour = MPG), size = 2) +#, position = position_dodge(width = .5)) +
   scale_colour_viridis_d(direction = -1) +
-  scale_y_continuous(sec.axis = sec_axis(~ ., breaks = ts_names)) +
+  #scale_y_continuous(sec.axis = sec_axis(~ ., breaks = ts_names)) +
   # coord_flip() +
   expand_limits(y = 0) +
   scale_y_continuous(expand = c(0,0)) +
@@ -496,7 +576,8 @@ pop_N_MPG <- pop_N +
 pop_N_MPG
 
 pop_N_POP <- pop_N +
-  facet_wrap(~ TRT, ncol = 4, scales = 'free_y')
+  facet_wrap(~ TRT, ncol = 4, scales = 'free_y') +
+  guides(colour = guide_legend(nrow = 3))
 
 pop_N_POP
 
@@ -540,7 +621,8 @@ allSexDf = as.list(yr_range) %>%
 
 allSexDf <- allSexDf %>%
   filter(!(TRT %in% c('SCLAW', 'SNASO', 'CRPOT'))) %>%
-  mutate(MPG = ifelse(TRT == 'GRLOS/GRMIN', 'Grande Ronde / Imnaha', MPG),
+  mutate(MPG = as.character(MPG),
+         MPG = ifelse(TRT == 'GRLOS/GRMIN', 'Grande Ronde / Imnaha', MPG),
          MPG = ifelse(TRT == 'SFMAI', 'South Fork Salmon River', MPG),
          TRT = ifelse(TRT == 'SEMEA', 'SEUMA/SEMEA/SEMOO', TRT))
 
@@ -575,7 +657,7 @@ ggsave(paste0('Figures/ObsVsPred_SexProp_',spp,'.png'),
 sex_Pred <- allSexDf %>%
   #mutate(MPG = factor(MPG, levels = c(mpg_ord,'Overall'))) %>%
   filter(TRT != 'Overall') %>%
-  #filter(spawn_year == '2018') %>%
+#  filter(spawn_year == '2018') %>%
  # filter(spawn_year <= 2014) %>%
   ggplot(aes(x = MPG,
              y = `50%`,
@@ -598,7 +680,8 @@ sex_Pred <- allSexDf %>%
   labs(x = '',
        y = 'Female Proportion',
        #title = paste0('Natural-Origin ',spp, ' Female Proportions'),
-       color = 'Major Population Group')
+       color = 'Major Population Group') +
+  guides(color = guide_legend(nrow = 4))
 
 sex_Pred
 # library(patchwork)
