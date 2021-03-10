@@ -20,6 +20,7 @@ library(PITcleanr)
 # build configuration table (requires internet connection)
 org_config = buildConfig()
 
+
 # customize some nodes based on DABOM framework
 configuration = org_config %>%
   mutate(Node = ifelse(SiteID %in% c('VC2', 'VC1', 'LTR', 'MTR', 'UTR'),
@@ -100,6 +101,12 @@ configuration = org_config %>%
                        Node),
          Node = ifelse(SiteID == '18M',
                        str_replace(Node, '18M', 'HEC'),
+                       Node),
+         Node = ifelse(Node == 'LAP',
+                       'LAPB0',
+                       Node),
+         Node = ifelse(SiteID == 'KRS',
+                       'KRS',
                        Node)) %>%
   distinct()
 

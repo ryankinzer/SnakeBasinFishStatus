@@ -23,7 +23,7 @@ if(!dir.exists(tagsFolder)) {
   dir.create(tagsFolder)
 }
 
-yr_range <- 2019
+yr_range <- 2020
 #-----------------------------------------------------------------
 # pull out valid tags from trap database, and save them in a file to upload to PTAGIS
 validTags = tibble(Year = yr_range) %>%

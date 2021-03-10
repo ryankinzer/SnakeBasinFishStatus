@@ -157,11 +157,7 @@ for(yr in 2010:2019) {
        SexRatio = modSexDf,
        AgeFreq = modAgeDf,
        BroodYear = modBrdYrDf) %>%
-    WriteXLS(paste0(LifeHistory,'/LGR_', spp, '_', yr, '.xlsx'),
-             AdjWidth = F,
-             BoldHeaderRow = T,
-             AutoFilter = F,
-             FreezeRow = 1)
+    writexl::write_xlsx(paste0(LifeHistory,'/LGR_', spp, '_', yr, '.xlsx'))
   
 #  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df)
   

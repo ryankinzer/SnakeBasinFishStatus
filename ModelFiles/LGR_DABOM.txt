@@ -21,6 +21,8 @@ model{
   MTR_p ~ dbeta(1,1)
   UTR_p ~ dbeta(1,1)
   TUCH_p <- 1 # assume perfect detection
+  #TPJB0_p ~ dbeta(1,1)
+  #TPJA0_p ~ dbeta(1,1)
 
   ALMOTC_p <- 1 # assume perfect detection
   ALPOWC_p <- 1 # assume perfect detection
@@ -42,7 +44,10 @@ model{
   JUL_p ~ dbeta(1,1)
   HLMA0_p ~ dbeta(1,1)
   HLMB0_p ~ dbeta(1,1)
-  POTREF_p <- 1 # assume perfect detection
+  POTREF_p <- dbeta(1,1) # 1 assume perfect detection
+  EFPW_p ~ dbeta(1,1)
+  EPRB0_p ~ dbeta(1,1)
+  EPRA0_p ~ dbeta(1,1)
   POTRWF_p <- 1 # assume perfect detection
   KHSA0_p ~ dbeta(1,1)
   KHSB0_p ~ dbeta(1,1)
@@ -76,6 +81,8 @@ model{
   JOSEPC_p ~ dbeta(1,1)
 
   WR1_p ~ dbeta(1,1)
+  MR1B0_p ~ dbeta(1,1)
+  MR1A0_p ~ dbeta(1,1)
   BCANF_p <- 1 # assume perfect detection
   WR2B0_p ~ dbeta(1,1)
   WR2A0_p ~ dbeta(1,1)
@@ -86,6 +93,8 @@ model{
   LOOKGC_p <- 1 # assume perfect detection
 
   UGR_p ~ dbeta(1,1)
+  CCUA0_p ~ dbeta(1,1)
+  CCUB0_p ~ dbeta(1,1)
   CCWA0_p ~ dbeta(1,1)
   CCWB0_p ~ dbeta(1,1)
   CATHEW_p ~ dbeta(1,1)
@@ -110,6 +119,8 @@ model{
   CZYA0_p ~ dbeta(1,1)
   CZYB0_p ~ dbeta(1,1)
   FREEZC_p <- 1 # assume perfect detection
+  GCMA0_p ~ dbeta(1,1)
+  GCMB0_p ~ dbeta(1,1)
   IR4A0_p ~ dbeta(1,1)
   IR4B0_p ~ dbeta(1,1)
   MAHOGC_p <- 1 # assume perfect detection
@@ -147,6 +158,9 @@ model{
   TAYA0_p ~ dbeta(1,1)
   TAYB0_p ~ dbeta(1,1)
 
+  MARA0_p ~ dbeta(1,1)
+  MARB0_p ~ dbeta(1,1)
+
   NFSA0_p ~ dbeta(1,1)
   NFSB0_p ~ dbeta(1,1)
 
@@ -155,6 +169,12 @@ model{
 
   LLRA0_p ~ dbeta(1,1)
   LLRB0_p ~ dbeta(1,1)
+
+  #EVUA0_p ~ dbeta(1,1)
+  #EVUB0_p ~ dbeta(1,1)
+  #EVLA0_p ~ dbeta(1,1)
+  #EVLB0_p ~ dbeta(1,1)
+
   AGCA0_p ~ dbeta(1,1)
   AGCB0_p ~ dbeta(1,1)
   KENA0_p ~ dbeta(1,1)
@@ -203,7 +223,7 @@ model{
   ##################################################################
   # Set up initial branching structure after leaving Lower Granite
   ##################################################################
-  # 27 bins: 	Tucannon (1), Penawawa (2), Almota (3), Alpowa (4), Asotin (5), Ten Mile Cr. (6), Lapwai (7), Potlatch (8), Joseph Creek (9), Cow Creek (10), Imnaha (11), Lolo (12), SF Clearwater (13), Wenaha River (14), Clear Creek (15), Lochsa (16), Selway (17), Lookingglass Creek (18), Wallowa (19),  Grande Ronde (20), Rapid River (21), South Fork Salmon (22), Panther Creek (23), Big Creek (24), North Fork Salmon (25), Carmen Creek (26), Lemhi (27), Upper Salmon (28), Bear Valley (29) Not Seen (27)
+  # 31 bins: 	Tucannon (1), Penawawa (2), Almota (3), Alpowa (4), Asotin (5), Ten Mile Cr. (6), Lapwai (7), Potlatch (8), Joseph Creek (9), Cow Creek (10), Imnaha (11), Lolo (12), SF Clearwater (13), Wenaha River (14), Clear Creek (15), Lochsa (16), Selway (17), Lookingglass Creek (18), Wallowa (19),  Grande Ronde (20), Rapid River (21), South Fork Salmon (22), Panther Creek (23), Big Creek (24), North Fork Salmon (25), Carmen Creek (26), Lemhi (27), Upper Salmon (28), Bear Valley (29), Marsh Creek (30), Not Seen (31)
 
   # set probability to any main bin that saw NO fish to 0
 
@@ -272,6 +292,7 @@ model{
   phi_mtr ~ dbeta(1,1)  # probability of moving past MTR
   phi_utr ~ dbeta(1,1)  # probability of moving past UTR
   phi_tuch ~ dbeta(1,1)  # probability of moving past TUCH
+  #phi_tpj ~ dbeta(1,1) # probabilities of moving past TPJ
 
   for ( i in 1:n.fish ) {
     #----------------------------
@@ -286,6 +307,8 @@ model{
     # did the fish make it past TUCH & TFH?
     z_tuch[i] ~ dbern(z_utr[i] * phi_tuch)
 
+    #z_tpj[i] ~ dbern(z_tuch[i] * phi_tpj)
+
     #----------------------------
     # OBSERVATION part in Tucanon
     #----------------------------
@@ -297,6 +320,10 @@ model{
     Tucannon[i,3] ~ dbern(UTR_p * z_utr[i]) # did they go past UTR?
 
     Tucannon[i,4] ~ dbern(TUCH_p * z_tuch[i]) # did they go past TUCH & TFH?
+
+    #Tucannon[i,5] ~ dbern(TJPB0_p * z_tpj[i])
+
+    #Tucannon[i,6] ~ dbern(TJPA0_p * z_tpj[i])
 
   }  # ends the ifish loop started at the top of this section
 
@@ -390,8 +417,8 @@ model{
     Asotin[i,8] ~ dbern(CCAA0_p * catexp_AsoUp[i,2])
 
     # AFC
-    Asotin[i,9] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
-    Asotin[i,10] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
+    #Asotin[i,9] ~ dbern(AFCB0_p * catexp_AsoUp[i,3])
+    Asotin[i,9] ~ dbern(AFCA0_p * catexp_AsoUp[i,3])
 
   } # ends the ifish loop started at the top of this section
 
@@ -408,7 +435,7 @@ model{
   ####################################################
   #   Now we deal with Lapwai
   ####################################################
-  # 4 bins: mainstem (1), MIS (2), SWT (3), and not seen (4)
+  # 4 bins: mainstem (1), SWT(2), MIS (3), and not seen (4)
 
   p_pop_Lapwai[1:n.pops.Lapwai] ~ ddirch(lap_dirch_vec) # Dirichlet for probs for going to bins
 
@@ -486,6 +513,9 @@ model{
   pMat_HLM[2,1:n.pops.Potlatch[3]] <- p_pop_HLM # when in trib, >0 probs of being in sub areas
   pMat_HLM[2,(n.pops.Potlatch[3] + 1)] <- 0 #set the "not there" bin to prob = 0
 
+  phi_efpw ~ dbeta(1,1)  # probability of moving efpw
+  phi_epr ~ dbeta(1,1) # prob of moving past epr
+
   for (i in 1:n.fish) {
     #------------------------------------
     # TRUE STATE part in Potlatch
@@ -508,6 +538,9 @@ model{
       catexp_HLM[i,j] <- equals(a_HLM[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
 
+    z_efpw[i] ~ dbern(catexp_HLM[i,2] * phi_efpw)
+    z_epr[i] ~ dbern(z_efpw[i] * phi_epr)
+
   #------------------------------------
     # OBSERVATION part in Potlatch
     #------------------------------------
@@ -528,12 +561,16 @@ model{
     Potlatch[i,7] ~ dbern(PCMA0_p * catexp_Pot[i, 3])
 
     # Helmer array (HLM)
-    Potlatch[i,9] ~ dbern(HLMB0_p * catexp_Pot[i, 4])
-    Potlatch[i,10] ~ dbern(HLMA0_p * catexp_Pot[i, 4])
+    Potlatch[i,12] ~ dbern(HLMB0_p * catexp_Pot[i, 4])
+    Potlatch[i,13] ~ dbern(HLMA0_p * catexp_Pot[i, 4])
 
     # above HLM
     Potlatch[i,8] ~ dbern(POTREF_p * catexp_HLM[i, 2])
-    Potlatch[i,11] ~ dbern(POTRWF_p * catexp_HLM[i, 3])
+    Potlatch[i,9] ~ dbern(EFPW_p * z_efpw[i])
+    Potlatch[i,10] ~ dbern(EPRB0_p * z_epr[i])
+    Potlatch[i,11] ~ dbern(EPRA0_p * z_epr[i])
+
+    Potlatch[i,14] ~ dbern(POTRWF_p * catexp_HLM[i, 3])
 
   } #ends the ifish loop started at the top of this section
 
@@ -588,7 +625,7 @@ model{
   pMat_Imnaha[2,(n.pops.Imnaha[1]+1)] <- 0 #set the "not there" bin to prob = 0
 
   # upper Imnaha (above IR3)
-  # 7 bins: mainstem (1), FREEZC (2), CZY (3), MAHOGC (4), IR4 (5), and not seen (6)
+  # 7 bins: mainstem (1), FREEZC (2), GCM (3), CZY (4), MAHOGC (5), IR4 (6), and not seen (7)
   p_pop_UppImn[1:n.pops.Imnaha[2]] ~ ddirch(imnUp_dirch_vec)
 
   # set up a matrix that deals with yes/no in the tributary or not
@@ -628,7 +665,7 @@ model{
     }
 
   # past IML (IR4 -> IML)
-  z_iml[i] ~ dbern(catexp_ImnUp[i,5] * phi_iml)
+  z_iml[i] ~ dbern(catexp_ImnUp[i,6] * phi_iml)
 
   # past IR5 (IML -> IR5)
   z_ir5[i] ~ dbern(z_iml[i] * phi_ir5)
@@ -669,31 +706,35 @@ model{
   # Freezeout Creek weir
   ImnahaRiver[i,11] ~ dbern(FREEZC_p * catexp_ImnUp[i, 2])
 
+  # Grouse Creek (GCM)
+  ImnahaRiver[i,12] ~ dbern(GCMB0_p * catexp_ImnUp[i, 3]) # change this and others
+  ImnahaRiver[i,13] ~ dbern(GCMA0_p * catexp_ImnUp[i, 3])
+
   # Crazy Creek (CZY)
-  ImnahaRiver[i,12] ~ dbern(CZYB0_p * catexp_ImnUp[i, 3])
-  ImnahaRiver[i,13] ~ dbern(CZYA0_p * catexp_ImnUp[i, 3])
+  ImnahaRiver[i,14] ~ dbern(CZYB0_p * catexp_ImnUp[i, 4])
+  ImnahaRiver[i,15] ~ dbern(CZYA0_p * catexp_ImnUp[i, 4])
 
   # Mahogany Creek weir
-  ImnahaRiver[i,14] ~ dbern(MAHOGC_p * catexp_ImnUp[i, 4])
+  ImnahaRiver[i,16] ~ dbern(MAHOGC_p * catexp_ImnUp[i, 5])
 
   # IR4
-  ImnahaRiver[i,15] ~ dbern(IR4B0_p * catexp_ImnUp[i, 5])
-  ImnahaRiver[i,16] ~ dbern(IR4A0_p * catexp_ImnUp[i, 5])
+  ImnahaRiver[i,17] ~ dbern(IR4B0_p * catexp_ImnUp[i, 6])
+  ImnahaRiver[i,18] ~ dbern(IR4A0_p * catexp_ImnUp[i, 6])
 
   # Imnaha weir
-  ImnahaRiver[i,17] ~ dbern(IMLB0_p * z_iml[i])
-  ImnahaRiver[i,18] ~ dbern(IMLA0_p * z_iml[i])
-  ImnahaRiver[i,19] ~ dbern(IMNAHW_p * z_iml[i])
+  ImnahaRiver[i,19] ~ dbern(IMLB0_p * z_iml[i])
+  ImnahaRiver[i,20] ~ dbern(IMLA0_p * z_iml[i])
+  ImnahaRiver[i,21] ~ dbern(IMNAHW_p * z_iml[i])
 
   # IR5
-  ImnahaRiver[i,20] ~ dbern(IR5B0_p * z_ir5[i])
-  ImnahaRiver[i,21] ~ dbern(IR5A0_p * z_ir5[i])
+  ImnahaRiver[i,22] ~ dbern(IR5B0_p * z_ir5[i])
+  ImnahaRiver[i,23] ~ dbern(IR5A0_p * z_ir5[i])
 
   # Gumboot Creek weir
-  ImnahaRiver[i,22] ~ dbern(GUMBTC_p * catexp_ImnWeir[i, 2])
+  ImnahaRiver[i,24] ~ dbern(GUMBTC_p * catexp_ImnWeir[i, 2])
 
   # Dry Creek
-  ImnahaRiver[i,23] ~ dbern(DRY2C_p * catexp_ImnWeir[i, 3])
+  ImnahaRiver[i,25] ~ dbern(DRY2C_p * catexp_ImnWeir[i, 3])
 
 
   } #ends the ifish loop started at the top of this section
@@ -802,7 +843,7 @@ model{
   ####################################################
   #   Now we deal with Wallowa
   ####################################################
-  # 5 bins: mainstem (1), BCANF (2), WR2 (3) and not seen (4)
+  # 5 bins: mainstem (1), MR1 (2), BCANF (3), WR2 (4) and not seen (5)
 
   p_pop_Wallowa[1:n.pops.Wallowa[1]] ~ ddirch(wal_dirch_vec) # Dirichlet for probs for going to bins
 
@@ -833,7 +874,7 @@ model{
     }
 
      # above WR2
-    a_WalUp[i] ~ dcat( pMat_WalUp[(catexp_Wal[i,3]+1),1:(n.pops.Wallowa[2]+1)] ) # the row number acts as on/off switch
+    a_WalUp[i] ~ dcat( pMat_WalUp[(catexp_Wal[i,4]+1),1:(n.pops.Wallowa[2]+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.Wallowa[2]+1))  { # now expand the dcat into matrix of zeros and ones
       catexp_WalUp[i,j] <- equals(a_WalUp[i],j) #equals(x,y) is a test for equality, returns [1,0]
     }
@@ -845,18 +886,22 @@ model{
     #first array (WR1)
     Wallowa[i,1] ~ dbern(WR1_p * max(catexp_Wal[i,1:(n.pops.Wallowa[1])]))
 
+    #MR1
+    Wallowa[i,2] ~ dbern(MR1B0_p * catexp_Wal[i,2])
+    Wallowa[i,3] ~ dbern(MR1A0_p * catexp_Wal[i,2])
+
     # BCANF
-    Wallowa[i,2] ~ dbern(BCANF_p * catexp_Wal[i, 2])
+    Wallowa[i,4] ~ dbern(BCANF_p * catexp_Wal[i, 3])
 
     # WR2
-    Wallowa[i,3] ~ dbern(WR2B0_p * catexp_Wal[i,3])
-    Wallowa[i,4] ~ dbern(WR2A0_p * catexp_Wal[i,3])
+    Wallowa[i,5] ~ dbern(WR2B0_p * catexp_Wal[i,4])
+    Wallowa[i,6] ~ dbern(WR2A0_p * catexp_Wal[i,4])
 
     # LOSTIW
-    Wallowa[i,5] ~ dbern(LOSTIW_p * catexp_WalUp[i, 2])
+    Wallowa[i,7] ~ dbern(LOSTIW_p * catexp_WalUp[i, 2])
 
     # WALH
-    Wallowa[i,6] ~ dbern(WALH_p * catexp_WalUp[i, 3])
+    Wallowa[i,8] ~ dbern(WALH_p * catexp_WalUp[i, 3])
 
 }
 
@@ -873,6 +918,9 @@ model{
   pMat_UppGR[2,1:n.pops.UppGR] <- p_pop_UppGR # when in trib, >0 probs of being in sub areas
   pMat_UppGR[2,(n.pops.UppGR+1)] <- 0 #set the "not there" bin to prob = 0
 
+
+  phi_ccw ~ dbeta(1,1) # prob for passing/reaching ccw or weir
+
   for (i in 1:n.fish) {
     #------------------------------------
     # TRUE STATE part in Upper Grande Ronde
@@ -881,7 +929,10 @@ model{
     a_UGR[i] ~ dcat( pMat_UppGR[(catexp[i,20]+1),1:(n.pops.UppGR+1)] ) # the row number acts as on/off switch
     for (j in 1:(n.pops.UppGR+1))  { # now expand the dcat into matrix of zeros and ones
       catexp_UGR[i,j] <- equals(a_UGR[i],j) #equals(x,y) is a test for equality, returns [1,0]
+
     }
+
+    z_ccw[i] ~ dbern(catexp_UGR[i,2] * phi_ccw)
 
     #------------------------------------
     # OBSERVATION part in Upper Grande Ronde
@@ -891,14 +942,18 @@ model{
     GrandeRonde[i,1] ~ dbern(UGR_p * max(catexp_UGR[i,1:(n.pops.UppGR)]))
 
     # Catherine Creek
-    GrandeRonde[i,2] ~ dbern(CCWB0_p * catexp_UGR[i, 2])
-    GrandeRonde[i,3] ~ dbern(CCWA0_p * catexp_UGR[i, 2])
-    GrandeRonde[i,4] ~ dbern(CATHEW_p * catexp_UGR[i, 2])
+    GrandeRonde[i,2] ~ dbern(CCUB0_p * catexp_UGR[i, 2])
+    GrandeRonde[i,3] ~ dbern(CCUA0_p * catexp_UGR[i, 2])
+
+
+    GrandeRonde[i,4] ~ dbern(CCWB0_p * z_ccw[i])
+    GrandeRonde[i,5] ~ dbern(CCWA0_p * z_ccw[i])
+    GrandeRonde[i,6] ~ dbern(CATHEW_p * z_ccw[i])
 
     # GRANDW
-    GrandeRonde[i,7] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
-    GrandeRonde[i,5] ~ dbern(UGSB0_p * catexp_UGR[i,3])
-    GrandeRonde[i,6] ~ dbern(UGSA0_p * catexp_UGR[i,3])
+    GrandeRonde[i,9] ~ dbern(GRANDW_p * catexp_UGR[i, 3])
+    GrandeRonde[i,7] ~ dbern(UGSB0_p * catexp_UGR[i,3])
+    GrandeRonde[i,8] ~ dbern(UGSA0_p * catexp_UGR[i,3])
 
   }
 
@@ -930,7 +985,7 @@ model{
   # upstream migration parameters
   phi_lakec ~ dbeta(1,1)
   #phi_johnsc ~ dbeta(1,1)
-  phi_str ~ dbeta(1,1)
+  #phi_str ~ dbeta(1,1)
 
   # set up a matrix that deals with yes/no in the tributary or not
   pMat_ESS[1,1:n.pops.SFS[2]] <- zero_vec[1:(n.pops.SFS[2])] # when not in trib, 0 prob of being in sub areas
@@ -957,7 +1012,7 @@ model{
     # on/off for whether fish moved to end of each branch
     z_lakec[i] ~ dbern(catexp_SFS[i,2] * phi_lakec)
     #z_johnsc[i] ~ dbern(catexp_SFS[i,3] * phi_johnsc)
-    z_str[i] ~ dbern(catexp_SFS[i,4] * phi_str)
+    #z_str[i] ~ dbern(catexp_SFS[i,4] * phi_str)
 
     #------------------------------------
     # OBSERVATION part in South Fork Salmon
@@ -983,7 +1038,7 @@ model{
     # Krassel Creek array (KRS)
     SFSalmon[i,10] ~ dbern( KRS_p * catexp_SFS[i, 4] )
     # upstream of KRS, at McCall hatchery (STR)
-    SFSalmon[i,11] ~ dbern( STR_p * z_str[i] )
+    #SFSalmon[i,11] ~ dbern( STR_p * z_str[i] )
 
   } #ends the ifish loop started at the top of this section
 
@@ -1070,29 +1125,37 @@ model{
     Lemhi[i,1] ~ dbern(LLRB0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
     Lemhi[i,2] ~ dbern(LLRA0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
 
+    # EVL...
+    #Lemhi[i,3] ~ dbern(EVLB0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
+    #Lemhi[i,4] ~ dbern(EVLA0_p * max(catexp_LowLem[i,1:(n.pops.Lemhi[1])]))
+
     # Bohannon array (BHC)...
-    Lemhi[i,3] ~ dbern(BHCB0_p * catexp_LowLem[i, 2])
-    Lemhi[i,4] ~ dbern(BHCA0_p * catexp_LowLem[i, 2])
+    Lemhi[i,5] ~ dbern(BHCB0_p * catexp_LowLem[i, 2])
+    Lemhi[i,6] ~ dbern(BHCA0_p * catexp_LowLem[i, 2])
+
+    # EVU...
+    #Lemhi[i,7] ~ dbern(EVUB0_p * catexp_LowLem[i, 2])
+    #Lemhi[i,8] ~ dbern(EVUA0_p * catexp_LowLem[i, 2])
 
     # Wimpy array (WPC)...
-    Lemhi[i,5] ~ dbern(WPCB0_p * catexp_LowLem[i, 3])
-    Lemhi[i,6] ~ dbern(WPCA0_p * catexp_LowLem[i, 3])
+    Lemhi[i,9] ~ dbern(WPCB0_p * catexp_LowLem[i, 3])
+    Lemhi[i,10] ~ dbern(WPCA0_p * catexp_LowLem[i, 3])
 
     # Kenney array (KEN)...
-    Lemhi[i,7] ~ dbern(KENB0_p * catexp_LowLem[i, 4])
-    Lemhi[i,8] ~ dbern(KENA0_p * catexp_LowLem[i, 4])
+    Lemhi[i,11] ~ dbern(KENB0_p * catexp_LowLem[i, 4])
+    Lemhi[i,12] ~ dbern(KENA0_p * catexp_LowLem[i, 4])
 
     # Agency array (AGC)...
-    Lemhi[i,9] ~ dbern(AGCB0_p * catexp_LowLem[i, 5])
-    Lemhi[i,10] ~ dbern(AGCA0_p * catexp_LowLem[i, 5])
+    Lemhi[i,13] ~ dbern(AGCB0_p * catexp_LowLem[i, 5])
+    Lemhi[i,14] ~ dbern(AGCA0_p * catexp_LowLem[i, 5])
 
     # Hayden array (HYC)...
-    Lemhi[i,11] ~ dbern(HYCB0_p * catexp_LowLem[i, 6])
-    Lemhi[i,12] ~ dbern(HYCA0_p * catexp_LowLem[i, 6])
+    Lemhi[i,15] ~ dbern(HYCB0_p * catexp_LowLem[i, 6])
+    Lemhi[i,16] ~ dbern(HYCA0_p * catexp_LowLem[i, 6])
 
     # Upper Lemhi (LRW)
-    Lemhi[i,13] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
-    Lemhi[i,14] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
+    Lemhi[i,17] ~ dbern(LRWB0_p * catexp_LowLem[i, 7])
+    Lemhi[i,18] ~ dbern(LRWA0_p * catexp_LowLem[i, 7])
 
   } # ends the ifish loop started at the top of this section
 
@@ -1137,38 +1200,38 @@ model{
     #first do main stem (if it is seen anywhere in mainstem OR tribs in Upper Lemhi -- thus the max statement)
 
     # Little Springs array (LLS)...
-    Lemhi[i,15] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
-    Lemhi[i,16] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
+    Lemhi[i,19] ~ dbern(LLSB0_p * catexp_UpLem[i, 2])
+    Lemhi[i,20] ~ dbern(LLSA0_p * catexp_UpLem[i, 2])
 
     # Big Eightmile (LB8)
-    Lemhi[i,17] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
-    Lemhi[i,18] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
+    Lemhi[i,21] ~ dbern(LB8B0_p * catexp_UpLem[i, 3])
+    Lemhi[i,22] ~ dbern(LB8A0_p * catexp_UpLem[i, 3])
 
     # Big Springs (LBS)
-    Lemhi[i,19] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
-    Lemhi[i,20] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
+    Lemhi[i,23] ~ dbern(LBSB0_p * catexp_UpLem[i, 4])
+    Lemhi[i,24] ~ dbern(LBSA0_p * catexp_UpLem[i, 4])
 
     # Lee Creek (LCL)
-    Lemhi[i,21] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
-    Lemhi[i,22] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
+    Lemhi[i,25] ~ dbern(LCLB0_p * catexp_UpLem[i, 5])
+    Lemhi[i,26] ~ dbern(LCLA0_p * catexp_UpLem[i, 5])
 
     # Big Timber array (BTC)...
-    Lemhi[i,23] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
-    Lemhi[i,24] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
+    Lemhi[i,27] ~ dbern(BTLB0_p * catexp_UpLem[i, 6])
+    Lemhi[i,28] ~ dbern(BTLA0_p * catexp_UpLem[i, 6])
 
-    Lemhi[i,25] ~ dbern(BTMB0_p * z_btm[i])
-    Lemhi[i,26] ~ dbern(BTMA0_p * z_btm[i])
+    Lemhi[i,29] ~ dbern(BTMB0_p * z_btm[i])
+    Lemhi[i,30] ~ dbern(BTMA0_p * z_btm[i])
 
-    Lemhi[i,27] ~ dbern(BTUB0_p * z_btu[i])
-    Lemhi[i,28] ~ dbern(BTUA0_p * z_btu[i])
+    Lemhi[i,31] ~ dbern(BTUB0_p * z_btu[i])
+    Lemhi[i,32] ~ dbern(BTUA0_p * z_btu[i])
 
     # Canyon array (CAC)...
-    Lemhi[i,29] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
-    Lemhi[i,30] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
+    Lemhi[i,33] ~ dbern(CACB0_p * catexp_UpLem[i, 7])
+    Lemhi[i,34] ~ dbern(CACA0_p * catexp_UpLem[i, 7])
 
     # Hawley (HEC)
-    Lemhi[i,31] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
-    Lemhi[i,32] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
+    Lemhi[i,35] ~ dbern(HECB0_p * catexp_UpLem[i, 8])
+    Lemhi[i,36] ~ dbern(HECA0_p * catexp_UpLem[i, 8])
 
   } # ends the ifish loop started at the top of this section
 
@@ -1249,5 +1312,17 @@ model{
     BearValley[i,1] ~ dbern( BRC_p * catexp[i,29] )
 
   }
+
+  ####################################################
+  #   Now we deal with Marsh Creek
+  ####################################################
+  # only have to worry about observation piece
+  for (i in 1:n.fish) {
+
+    # first site (MAR)
+    MarshCreek[i,1] ~ dbern( MARB0_p * catexp[i,30] )
+    MarchCreek[i,2] ~ dbern( MARA0_p * catexp[i,30] )
+  }
+
 
 } # ends model file

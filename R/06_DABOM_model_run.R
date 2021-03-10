@@ -22,7 +22,7 @@ if(!dir.exists(dabomFolder)) {
 # Set species and year of interest
 #------------------------------------------------------------------------------
 spp <- 'Steelhead'
-yr <- 2018 
+yr <- 2020 
 
 timestp <- gsub('[^0-9]','', Sys.Date())
 
@@ -57,7 +57,7 @@ if(spp == 'Chinook') {
 # Switch Potlatch detections - move POTREF and POTRWF to HLMA0 with det = 1.0
 #------------------------------------------------------------------------------
 proc_ch <- proc_ch %>%
-  mutate(Node = ifelse(Node %in% c('POTREF', 'POTRWF'), 'HLMA0', Node))
+  mutate(Node = ifelse(Node %in% c('POTREF', 'POTRWF', 'EFPW', 'EPRA0', 'EPRB0'), 'HLMA0', Node))
 
 #------------------------------------------------------------------------------
 # In 2010 and 2011, the Asotin Creek weir was upstream of ACB. For those years, 
@@ -69,6 +69,10 @@ if(spp == 'Steelhead' & yr %in% c(2010, 2011)) {
                           'ACBA0',
                           Node))
 }
+
+# Remove EVL and EVU detections for now
+proc_ch <- proc_ch %>%
+  filter(!SiteID %in% c('EVL', 'EVU'))
 
 #------------------------------------------------------------------------------
 # Create default LGR branch occupancy JAGs model code.
@@ -94,6 +98,8 @@ writeDABOM_LGD(file_name = basic_modNm,
 mod_path = paste0('ModelFiles/LGR_DABOM_', spp, '_', yr, '.txt')
 
 #writes species and year specific jags code
+
+### we should build the final model off the capHist data and not proc_ch!!!!
 fixNoFishNodes(basic_modNm,
                mod_path,
                proc_ch,
@@ -106,12 +112,18 @@ fixNoFishNodes(basic_modNm,
 dabom_list = createDABOMcapHist(proc_ch,
                                 proc_list$NodeOrder,
                                 split_matrices = T)
+
+# dabom_list$Potlatch <- dabom_list$Potlatch %>%
+#   mutate(HLMB0 = ifelse(HLMA0 == 1, 1, 0))
+
 #------------------------------------------------------------------------------
 # Only Used to Debug
 #------------------------------------------------------------------------------
-# full_dabom = createDABOMcapHist(proc_ch,
-#                                proc_list$NodeOrder,
-#                                split_matrices = F)
+tmp <- lapply(dabom_list,apply,2,sum)
+
+full_dabom = createDABOMcapHist(proc_ch,
+                               proc_list$NodeOrder,
+                               split_matrices = F)
 #------------------------------------------------------------------------------
 
 # Creates a function to spit out initial values for MCMC chains
@@ -161,17 +173,20 @@ jags_params = setSavedParams_LGD(time_varying = time_varying)
 
 library(jagsUI)
 set.seed(12)
-dabom_mod <- jags.basic(data = jags_data,
-                        inits = init_fnc,
-                        parameters.to.save = jags_params,
-                        model.file = mod_path,
-                        n.chains = 4,
-                        n.iter = 5000,
-                        n.burnin = 2500,
-                        n.thin = 10,
-                        DIC = T)
 
+system.time({
+  dabom_mod <- jags.basic(data = jags_data,
+                          inits = init_fnc,
+                          parameters.to.save = jags_params,
+                          model.file = mod_path,
+                          n.chains = 1,
+                          n.iter = 20,
+                          n.burnin = 10,
+                          n.thin = 2,
+                          DIC = T)
+  })
 
+detach('package:jagsUI')
 
 #--------------------------------------------------------------------------------
 # Save the results
@@ -180,5 +195,3 @@ proc_list[["proc_ch"]] <- proc_ch
 
 save(dabom_mod, dabom_list, proc_list,
      file = paste0(dabomFolder,'/LGR_DABOM_Bio_', spp, '_', yr,'_',timestp,'.rda'))
-
-detach('package:jagsUI')

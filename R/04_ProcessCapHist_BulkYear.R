@@ -31,7 +31,7 @@ load('./data/ConfigurationFiles/site_config.rda')
 #-----------------------------------------------------------------
 # read observations from PTAGIS and process with PITcleanr
 # set species
-spp = 'Chinook'
+spp = 'Steelhead'
 # have the processed capture history files been cleaned by the 
 # biologist and are they ready for DABOM
 bio_cleaned = TRUE
@@ -99,4 +99,3 @@ for(yr in 2010:2019) {
   rm(startDate, parent_child, observations, proc_list)
   
 }
-

@@ -1,3 +1,8 @@
+#------------------------------------------------------------------------------
+# Function to connect to LGTrapping Database
+#
+# Author: Ryan Kinzer
+#------------------------------------------------------------------------------
 
 loadLGTrappingDBase <- function(trapDB_filepath)  {
 
