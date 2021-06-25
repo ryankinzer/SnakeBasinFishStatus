@@ -26,11 +26,11 @@ if(!dir.exists(AgeFolder)) {
 filepath <- './data/LifeHistoryData/'
 
 # Set species
-spp = 'Chinook'
+spp = 'Steelhead'
 
 # Set year range based on spp.
 if(spp == 'Steelhead'){
-  year_range = 2010:2019
+  year_range = 2020 #2010:2019
 } else {
   year_range = 2010:2019
 }

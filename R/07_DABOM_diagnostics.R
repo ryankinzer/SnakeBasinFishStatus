@@ -17,8 +17,8 @@ theme_set(theme_bw())
 
 #---------------------------------------
 # choose species and year combination
-spp = c('Chinook', 'Steelhead')[1]
-yr = 2019
+spp = c('Chinook', 'Steelhead')[2]
+yr = 2020
 
 #---------------------------------------
 # where are results stored?

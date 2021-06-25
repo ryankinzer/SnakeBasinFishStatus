@@ -12,7 +12,7 @@ source('./R/assign_POP_GSI.R')
 spp = 'Steelhead'
 
 if(spp == 'Steelhead'){
-  yr_range = c(2010:2019)
+  yr_range = c(2010:2020)
 } else {
   yr_range = c(2010:2019)
 }
@@ -337,6 +337,9 @@ allproc_ch <- as.list(yr_range) %>%
              left_join(distinct(configuration, SiteID, RKMTotal), by = 'SiteID')
            
          })
+
+#save(allproc_ch, file = './data/DABOMready/LGR_Steelhead_allproc_ch.rda')
+#save(allproc_ch, file = './data/DABOMready/LGR_Chinook_allproc_ch.rda')
 
 trt_arrival_df <- allproc_ch %>%
   filter(!is.na(TRT)) %>%

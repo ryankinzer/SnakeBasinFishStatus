@@ -179,10 +179,10 @@ system.time({
                           inits = init_fnc,
                           parameters.to.save = jags_params,
                           model.file = mod_path,
-                          n.chains = 1,
-                          n.iter = 20,
-                          n.burnin = 10,
-                          n.thin = 2,
+                          n.chains = 4,
+                          n.iter = 5000,
+                          n.burnin = 2500,
+                          n.thin = 10,
                           DIC = T)
   })
 

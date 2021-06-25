@@ -10,7 +10,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2010,Chinook,Grande Ronde/Imnaha,IRBSH,0
 2010,Chinook,Grande Ronde/Imnaha,IRMAI,0
 2010,Chinook,Lower Snake,SNASO,0
-2010,Chinook,Lower Snake,SNTUC,1
+2010,Chinook,Lower Snake,SNTUC,0
 2010,Chinook,Middle Fork Salmon,MFBEA,0
 2010,Chinook,Middle Fork Salmon,MFBIG,0
 2010,Chinook,South Fork Salmon River,SFEFS,1
@@ -30,6 +30,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2010,Chinook,Wet Clearwater,CRLOL,0
 2010,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2010,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,0
+2010,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2011,Chinook,Dry Clearwater,CRLAP,0
 2011,Chinook,Dry Clearwater,CRPOT,0
 2011,Chinook,Dry Clearwater,SCUMA,0
@@ -41,7 +42,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2011,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2011,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2011,Chinook,Lower Snake,SNASO,0
-2011,Chinook,Lower Snake,SNTUC,1
+2011,Chinook,Lower Snake,SNTUC,0
 2011,Chinook,Middle Fork Salmon,MFBEA,0
 2011,Chinook,Middle Fork Salmon,MFBIG,1
 2011,Chinook,South Fork Salmon River,SFEFS,1
@@ -61,6 +62,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2011,Chinook,Wet Clearwater,CRLOL,0
 2011,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2011,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,0
+2011,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2012,Chinook,Dry Clearwater,CRLAP,0
 2012,Chinook,Dry Clearwater,CRPOT,0
 2012,Chinook,Dry Clearwater,SCUMA,1
@@ -72,7 +74,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2012,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2012,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2012,Chinook,Lower Snake,SNASO,0
-2012,Chinook,Lower Snake,SNTUC,1
+2012,Chinook,Lower Snake,SNTUC,0
 2012,Chinook,Middle Fork Salmon,MFBEA,0
 2012,Chinook,Middle Fork Salmon,MFBIG,1
 2012,Chinook,South Fork Salmon River,SFEFS,1
@@ -92,6 +94,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2012,Chinook,Wet Clearwater,CRLOL,1
 2012,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2012,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,0
+2012,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2013,Chinook,Dry Clearwater,CRLAP,0
 2013,Chinook,Dry Clearwater,CRPOT,0
 2013,Chinook,Dry Clearwater,SCUMA,1
@@ -103,7 +106,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2013,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2013,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2013,Chinook,Lower Snake,SNASO,0
-2013,Chinook,Lower Snake,SNTUC,1
+2013,Chinook,Lower Snake,SNTUC,0
 2013,Chinook,Middle Fork Salmon,MFBEA,0
 2013,Chinook,Middle Fork Salmon,MFBIG,1
 2013,Chinook,South Fork Salmon River,SFEFS,1
@@ -123,6 +126,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2013,Chinook,Wet Clearwater,CRLOL,1
 2013,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2013,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,0
+2013,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2014,Chinook,Dry Clearwater,CRLAP,0
 2014,Chinook,Dry Clearwater,CRPOT,0
 2014,Chinook,Dry Clearwater,SCUMA,1
@@ -134,7 +138,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2014,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2014,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2014,Chinook,Lower Snake,SNASO,0
-2014,Chinook,Lower Snake,SNTUC,1
+2014,Chinook,Lower Snake,SNTUC,0
 2014,Chinook,Middle Fork Salmon,MFBEA,0
 2014,Chinook,Middle Fork Salmon,MFBIG,1
 2014,Chinook,South Fork Salmon River,SFEFS,1
@@ -154,6 +158,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2014,Chinook,Wet Clearwater,CRLOL,1
 2014,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2014,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
+2014,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2015,Chinook,Dry Clearwater,CRLAP,0
 2015,Chinook,Dry Clearwater,CRPOT,0
 2015,Chinook,Dry Clearwater,SCUMA,1
@@ -165,7 +170,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2015,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2015,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2015,Chinook,Lower Snake,SNASO,0
-2015,Chinook,Lower Snake,SNTUC,1
+2015,Chinook,Lower Snake,SNTUC,0
 2015,Chinook,Middle Fork Salmon,MFBEA,1
 2015,Chinook,Middle Fork Salmon,MFBIG,1
 2015,Chinook,South Fork Salmon River,SFEFS,1
@@ -185,6 +190,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2015,Chinook,Wet Clearwater,CRLOL,1
 2015,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2015,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
+2015,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2016,Chinook,Dry Clearwater,CRLAP,0
 2016,Chinook,Dry Clearwater,CRPOT,0
 2016,Chinook,Dry Clearwater,SCUMA,1
@@ -196,7 +202,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2016,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2016,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2016,Chinook,Lower Snake,SNASO,0
-2016,Chinook,Lower Snake,SNTUC,1
+2016,Chinook,Lower Snake,SNTUC,0
 2016,Chinook,Middle Fork Salmon,MFBEA,1
 2016,Chinook,Middle Fork Salmon,MFBIG,1
 2016,Chinook,South Fork Salmon River,SFEFS,1
@@ -216,6 +222,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2016,Chinook,Wet Clearwater,CRLOL,1
 2016,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2016,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
+2016,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2017,Chinook,Dry Clearwater,CRLAP,0
 2017,Chinook,Dry Clearwater,CRPOT,0
 2017,Chinook,Dry Clearwater,SCUMA,1
@@ -227,7 +234,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2017,Chinook,Grande Ronde/Imnaha,IRBSH,1
 2017,Chinook,Grande Ronde/Imnaha,IRMAI,1
 2017,Chinook,Lower Snake,SNASO,0
-2017,Chinook,Lower Snake,SNTUC,1
+2017,Chinook,Lower Snake,SNTUC,0
 2017,Chinook,Middle Fork Salmon,MFBEA,1
 2017,Chinook,Middle Fork Salmon,MFBIG,1
 2017,Chinook,South Fork Salmon River,SFEFS,1
@@ -247,6 +254,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2017,Chinook,Wet Clearwater,CRLOL,1
 2017,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,0
 2017,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
+2017,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2018,Chinook,Dry Clearwater,CRLAP,0
 2018,Chinook,Dry Clearwater,CRPOT,0
 2018,Chinook,Dry Clearwater,SCUMA,1
@@ -278,218 +286,7 @@ spawn_yr,species,MPG,TRT,valid_est
 2018,Chinook,Wet Clearwater,CRLOL,1
 2018,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,1
 2018,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
-2010,Steelhead,Clearwater,CRLMA-s,1
-2010,Steelhead,Clearwater,CRLOC-s,0
-2010,Steelhead,Clearwater,CRLOL-s,0
-2010,Steelhead,Clearwater,CRSEL-s,0
-2010,Steelhead,Clearwater,CRSFC-s,0
-2010,Steelhead,Grande Ronde River,GRJOS-s,0
-2010,Steelhead,Grande Ronde River,GRLMT-s,0
-2010,Steelhead,Grande Ronde River,GRUMA-s,0
-2010,Steelhead,Grande Ronde River,GRWAL-s,0
-2010,Steelhead,Imnaha,IRMAI-s,0
-2010,Steelhead,Lower Snake,SNASO-s,1
-2010,Steelhead,Lower Snake,SNTUC-s,1
-2010,Steelhead,Salmon River,MFBIG-s,0
-2010,Steelhead,Salmon River,SFMAI-s,1
-2010,Steelhead,Salmon River,SFSEC-s,1
-2010,Steelhead,Salmon River,SREFS-s,0
-2010,Steelhead,Salmon River,SRLEM-s,1
-2010,Steelhead,Salmon River,SRLSR-s,1
-2010,Steelhead,Salmon River,SRNFS-s,0
-2010,Steelhead,Salmon River,SRPAH-s,0
-2010,Steelhead,Salmon River,SRUMA-s,1
-2011,Steelhead,Clearwater,CRLMA-s,1
-2011,Steelhead,Clearwater,CRLOC-s,0
-2011,Steelhead,Clearwater,CRLOL-s,0
-2011,Steelhead,Clearwater,CRSEL-s,0
-2011,Steelhead,Clearwater,CRSFC-s,0
-2011,Steelhead,Grande Ronde River,GRJOS-s,1
-2011,Steelhead,Grande Ronde River,GRLMT-s,0
-2011,Steelhead,Grande Ronde River,GRUMA-s,0
-2011,Steelhead,Grande Ronde River,GRWAL-s,0
-2011,Steelhead,Imnaha,IRMAI-s,1
-2011,Steelhead,Lower Snake,SNASO-s,1
-2011,Steelhead,Lower Snake,SNTUC-s,1
-2011,Steelhead,Salmon River,MFBIG-s,1
-2011,Steelhead,Salmon River,SFMAI-s,1
-2011,Steelhead,Salmon River,SFSEC-s,1
-2011,Steelhead,Salmon River,SREFS-s,0
-2011,Steelhead,Salmon River,SRLEM-s,1
-2011,Steelhead,Salmon River,SRLSR-s,1
-2011,Steelhead,Salmon River,SRNFS-s,0
-2011,Steelhead,Salmon River,SRPAH-s,1
-2011,Steelhead,Salmon River,SRUMA-s,1
-2012,Steelhead,Clearwater,CRLMA-s,1
-2012,Steelhead,Clearwater,CRLOC-s,0
-2012,Steelhead,Clearwater,CRLOL-s,1
-2012,Steelhead,Clearwater,CRSEL-s,0
-2012,Steelhead,Clearwater,CRSFC-s,1
-2012,Steelhead,Grande Ronde River,GRJOS-s,1
-2012,Steelhead,Grande Ronde River,GRLMT-s,0
-2012,Steelhead,Grande Ronde River,GRUMA-s,0
-2012,Steelhead,Grande Ronde River,GRWAL-s,0
-2012,Steelhead,Imnaha,IRMAI-s,1
-2012,Steelhead,Lower Snake,SNASO-s,1
-2012,Steelhead,Lower Snake,SNTUC-s,1
-2012,Steelhead,Salmon River,MFBIG-s,1
-2012,Steelhead,Salmon River,SFMAI-s,1
-2012,Steelhead,Salmon River,SFSEC-s,1
-2012,Steelhead,Salmon River,SREFS-s,1
-2012,Steelhead,Salmon River,SRLEM-s,1
-2012,Steelhead,Salmon River,SRLSR-s,1
-2012,Steelhead,Salmon River,SRNFS-s,0
-2012,Steelhead,Salmon River,SRPAH-s,1
-2012,Steelhead,Salmon River,SRUMA-s,1
-2013,Steelhead,Clearwater,CRLMA-s,1
-2013,Steelhead,Clearwater,CRLOC-s,0
-2013,Steelhead,Clearwater,CRLOL-s,1
-2013,Steelhead,Clearwater,CRSEL-s,0
-2013,Steelhead,Clearwater,CRSFC-s,1
-2013,Steelhead,Grande Ronde River,GRJOS-s,1
-2013,Steelhead,Grande Ronde River,GRLMT-s,0
-2013,Steelhead,Grande Ronde River,GRUMA-s,1
-2013,Steelhead,Grande Ronde River,GRWAL-s,0
-2013,Steelhead,Imnaha,IRMAI-s,1
-2013,Steelhead,Lower Snake,SNASO-s,1
-2013,Steelhead,Lower Snake,SNTUC-s,1
-2013,Steelhead,Salmon River,MFBIG-s,1
-2013,Steelhead,Salmon River,SFMAI-s,1
-2013,Steelhead,Salmon River,SFSEC-s,1
-2013,Steelhead,Salmon River,SREFS-s,1
-2013,Steelhead,Salmon River,SRLEM-s,1
-2013,Steelhead,Salmon River,SRLSR-s,1
-2013,Steelhead,Salmon River,SRNFS-s,0
-2013,Steelhead,Salmon River,SRPAH-s,0
-2013,Steelhead,Salmon River,SRUMA-s,1
-2014,Steelhead,Clearwater,CRLMA-s,1
-2014,Steelhead,Clearwater,CRLOC-s,0
-2014,Steelhead,Clearwater,CRLOL-s,1
-2014,Steelhead,Clearwater,CRSEL-s,0
-2014,Steelhead,Clearwater,CRSFC-s,1
-2014,Steelhead,Grande Ronde River,GRJOS-s,1
-2014,Steelhead,Grande Ronde River,GRLMT-s,0
-2014,Steelhead,Grande Ronde River,GRUMA-s,1
-2014,Steelhead,Grande Ronde River,GRWAL-s,1
-2014,Steelhead,Imnaha,IRMAI-s,1
-2014,Steelhead,Lower Snake,SNASO-s,1
-2014,Steelhead,Lower Snake,SNTUC-s,1
-2014,Steelhead,Salmon River,MFBIG-s,1
-2014,Steelhead,Salmon River,SFMAI-s,1
-2014,Steelhead,Salmon River,SFSEC-s,1
-2014,Steelhead,Salmon River,SREFS-s,0
-2014,Steelhead,Salmon River,SRLEM-s,1
-2014,Steelhead,Salmon River,SRLSR-s,1
-2014,Steelhead,Salmon River,SRNFS-s,0
-2014,Steelhead,Salmon River,SRPAH-s,1
-2014,Steelhead,Salmon River,SRUMA-s,1
-2015,Steelhead,Clearwater,CRLMA-s,1
-2015,Steelhead,Clearwater,CRLOC-s,0
-2015,Steelhead,Clearwater,CRLOL-s,1
-2015,Steelhead,Clearwater,CRSEL-s,0
-2015,Steelhead,Clearwater,CRSFC-s,1
-2015,Steelhead,Grande Ronde River,GRJOS-s,1
-2015,Steelhead,Grande Ronde River,GRLMT-s,0
-2015,Steelhead,Grande Ronde River,GRUMA-s,1
-2015,Steelhead,Grande Ronde River,GRWAL-s,1
-2015,Steelhead,Imnaha,IRMAI-s,1
-2015,Steelhead,Lower Snake,SNASO-s,1
-2015,Steelhead,Lower Snake,SNTUC-s,1
-2015,Steelhead,Salmon River,MFBIG-s,1
-2015,Steelhead,Salmon River,SFMAI-s,1
-2015,Steelhead,Salmon River,SFSEC-s,1
-2015,Steelhead,Salmon River,SREFS-s,1
-2015,Steelhead,Salmon River,SRLEM-s,1
-2015,Steelhead,Salmon River,SRLSR-s,1
-2015,Steelhead,Salmon River,SRNFS-s,0
-2015,Steelhead,Salmon River,SRPAH-s,1
-2015,Steelhead,Salmon River,SRUMA-s,1
-2016,Steelhead,Clearwater,CRLMA-s,1
-2016,Steelhead,Clearwater,CRLOC-s,0
-2016,Steelhead,Clearwater,CRLOL-s,1
-2016,Steelhead,Clearwater,CRSEL-s,0
-2016,Steelhead,Clearwater,CRSFC-s,1
-2016,Steelhead,Grande Ronde River,GRJOS-s,1
-2016,Steelhead,Grande Ronde River,GRLMT-s,0
-2016,Steelhead,Grande Ronde River,GRUMA-s,1
-2016,Steelhead,Grande Ronde River,GRWAL-s,1
-2016,Steelhead,Imnaha,IRMAI-s,1
-2016,Steelhead,Lower Snake,SNASO-s,1
-2016,Steelhead,Lower Snake,SNTUC-s,1
-2016,Steelhead,Salmon River,MFBIG-s,1
-2016,Steelhead,Salmon River,SFMAI-s,1
-2016,Steelhead,Salmon River,SFSEC-s,1
-2016,Steelhead,Salmon River,SREFS-s,0
-2016,Steelhead,Salmon River,SRLEM-s,1
-2016,Steelhead,Salmon River,SRLSR-s,1
-2016,Steelhead,Salmon River,SRNFS-s,1
-2016,Steelhead,Salmon River,SRPAH-s,1
-2016,Steelhead,Salmon River,SRUMA-s,1
-2017,Steelhead,Clearwater,CRLMA-s,1
-2017,Steelhead,Clearwater,CRLOC-s,0
-2017,Steelhead,Clearwater,CRLOL-s,1
-2017,Steelhead,Clearwater,CRSEL-s,0
-2017,Steelhead,Clearwater,CRSFC-s,1
-2017,Steelhead,Grande Ronde River,GRJOS-s,1
-2017,Steelhead,Grande Ronde River,GRLMT-s,0
-2017,Steelhead,Grande Ronde River,GRUMA-s,1
-2017,Steelhead,Grande Ronde River,GRWAL-s,1
-2017,Steelhead,Imnaha,IRMAI-s,1
-2017,Steelhead,Lower Snake,SNASO-s,1
-2017,Steelhead,Lower Snake,SNTUC-s,1
-2017,Steelhead,Salmon River,MFBIG-s,1
-2017,Steelhead,Salmon River,SFMAI-s,1
-2017,Steelhead,Salmon River,SFSEC-s,1
-2017,Steelhead,Salmon River,SREFS-s,0
-2017,Steelhead,Salmon River,SRLEM-s,1
-2017,Steelhead,Salmon River,SRLSR-s,1
-2017,Steelhead,Salmon River,SRNFS-s,0
-2017,Steelhead,Salmon River,SRPAH-s,1
-2017,Steelhead,Salmon River,SRUMA-s,1
-2018,Steelhead,Clearwater,CRLMA-s,1
-2018,Steelhead,Clearwater,CRLOC-s,1
-2018,Steelhead,Clearwater,CRLOL-s,1
-2018,Steelhead,Clearwater,CRSEL-s,1
-2018,Steelhead,Clearwater,CRSFC-s,1
-2018,Steelhead,Grande Ronde River,GRJOS-s,1
-2018,Steelhead,Grande Ronde River,GRLMT-s,0
-2018,Steelhead,Grande Ronde River,GRUMA-s,1
-2018,Steelhead,Grande Ronde River,GRWAL-s,1
-2018,Steelhead,Imnaha,IRMAI-s,1
-2018,Steelhead,Lower Snake,SNASO-s,1
-2018,Steelhead,Lower Snake,SNTUC-s,1
-2018,Steelhead,Salmon River,MFBIG-s,1
-2018,Steelhead,Salmon River,SFMAI-s,1
-2018,Steelhead,Salmon River,SFSEC-s,1
-2018,Steelhead,Salmon River,SREFS-s,0
-2018,Steelhead,Salmon River,SRLEM-s,1
-2018,Steelhead,Salmon River,SRLSR-s,1
-2018,Steelhead,Salmon River,SRNFS-s,1
-2018,Steelhead,Salmon River,SRPAH-s,1
-2018,Steelhead,Salmon River,SRPAN-s,1
-2018,Steelhead,Salmon River,SRUMA-s,1
-2019,Steelhead,Clearwater,CRLMA-s,1
-2019,Steelhead,Clearwater,CRLOC-s,1
-2019,Steelhead,Clearwater,CRLOL-s,0
-2019,Steelhead,Clearwater,CRSEL-s,1
-2019,Steelhead,Clearwater,CRSFC-s,1
-2019,Steelhead,Grande Ronde River,GRJOS-s,1
-2019,Steelhead,Grande Ronde River,GRLMT-s,1
-2019,Steelhead,Grande Ronde River,GRUMA-s,1
-2019,Steelhead,Grande Ronde River,GRWAL-s,1
-2019,Steelhead,Imnaha,IRMAI-s,1
-2019,Steelhead,Lower Snake,SNASO-s,1
-2019,Steelhead,Lower Snake,SNTUC-s,1
-2019,Steelhead,Salmon River,MFBIG-s,1
-2019,Steelhead,Salmon River,SFMAI-s,1
-2019,Steelhead,Salmon River,SFSEC-s,1
-2019,Steelhead,Salmon River,SREFS-s,1
-2019,Steelhead,Salmon River,SRLEM-s,1
-2019,Steelhead,Salmon River,SRLSR-s,1
-2019,Steelhead,Salmon River,SRNFS-s,1
-2019,Steelhead,Salmon River,SRPAH-s,1
-2019,Steelhead,Salmon River,SRPAN-s,1
-2019,Steelhead,Salmon River,SRUMA-s,1
+2018,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2019,Chinook,Dry Clearwater,CRLAP,0
 2019,Chinook,Dry Clearwater,CRPOT,0
 2019,Chinook,Dry Clearwater,SCUMA,1
@@ -521,13 +318,238 @@ spawn_yr,species,MPG,TRT,valid_est
 2019,Chinook,Wet Clearwater,CRLOL,0
 2019,Chinook,Wet Clearwater,SEUMA/SEMEA/SEMOO,1
 2019,Chinook,Grande Ronde/Imnaha,GRLOS/GRMIN,1
-2010,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2011,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2012,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2013,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2014,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2015,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2016,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2017,Chinook,Grande Ronde/Imnaha,GRLOS,0
-2018,Chinook,Grande Ronde/Imnaha,GRLOS,0
 2019,Chinook,Grande Ronde/Imnaha,GRLOS,1
+2010,Steelhead,Clearwater,CRLMA-s,1
+2010,Steelhead,Clearwater,CRLOC-s,0
+2010,Steelhead,Clearwater,CRLOL-s,0
+2010,Steelhead,Clearwater,CRSEL-s,0
+2010,Steelhead,Clearwater,CRSFC-s,0
+2010,Steelhead,Grande Ronde River,GRJOS-s,0
+2010,Steelhead,Grande Ronde River,GRLMT-s,0
+2010,Steelhead,Grande Ronde River,GRUMA-s,0
+2010,Steelhead,Grande Ronde River,GRWAL-s,0
+2010,Steelhead,Imnaha,IRMAI-s,0
+2010,Steelhead,Lower Snake,SNASO-s,1
+2010,Steelhead,Lower Snake,SNTUC-s,0
+2010,Steelhead,Salmon River,MFBIG-s,0
+2010,Steelhead,Salmon River,SFMAI-s,1
+2010,Steelhead,Salmon River,SFSEC-s,1
+2010,Steelhead,Salmon River,SREFS-s,0
+2010,Steelhead,Salmon River,SRLEM-s,1
+2010,Steelhead,Salmon River,SRLSR-s,1
+2010,Steelhead,Salmon River,SRNFS-s,0
+2010,Steelhead,Salmon River,SRPAH-s,0
+2010,Steelhead,Salmon River,SRUMA-s,1
+2011,Steelhead,Clearwater,CRLMA-s,1
+2011,Steelhead,Clearwater,CRLOC-s,0
+2011,Steelhead,Clearwater,CRLOL-s,0
+2011,Steelhead,Clearwater,CRSEL-s,0
+2011,Steelhead,Clearwater,CRSFC-s,0
+2011,Steelhead,Grande Ronde River,GRJOS-s,1
+2011,Steelhead,Grande Ronde River,GRLMT-s,0
+2011,Steelhead,Grande Ronde River,GRUMA-s,0
+2011,Steelhead,Grande Ronde River,GRWAL-s,0
+2011,Steelhead,Imnaha,IRMAI-s,1
+2011,Steelhead,Lower Snake,SNASO-s,1
+2011,Steelhead,Lower Snake,SNTUC-s,0
+2011,Steelhead,Salmon River,MFBIG-s,1
+2011,Steelhead,Salmon River,SFMAI-s,1
+2011,Steelhead,Salmon River,SFSEC-s,1
+2011,Steelhead,Salmon River,SREFS-s,0
+2011,Steelhead,Salmon River,SRLEM-s,1
+2011,Steelhead,Salmon River,SRLSR-s,1
+2011,Steelhead,Salmon River,SRNFS-s,0
+2011,Steelhead,Salmon River,SRPAH-s,1
+2011,Steelhead,Salmon River,SRUMA-s,1
+2012,Steelhead,Clearwater,CRLMA-s,1
+2012,Steelhead,Clearwater,CRLOC-s,0
+2012,Steelhead,Clearwater,CRLOL-s,1
+2012,Steelhead,Clearwater,CRSEL-s,0
+2012,Steelhead,Clearwater,CRSFC-s,1
+2012,Steelhead,Grande Ronde River,GRJOS-s,1
+2012,Steelhead,Grande Ronde River,GRLMT-s,0
+2012,Steelhead,Grande Ronde River,GRUMA-s,0
+2012,Steelhead,Grande Ronde River,GRWAL-s,0
+2012,Steelhead,Imnaha,IRMAI-s,1
+2012,Steelhead,Lower Snake,SNASO-s,1
+2012,Steelhead,Lower Snake,SNTUC-s,0
+2012,Steelhead,Salmon River,MFBIG-s,1
+2012,Steelhead,Salmon River,SFMAI-s,1
+2012,Steelhead,Salmon River,SFSEC-s,1
+2012,Steelhead,Salmon River,SREFS-s,1
+2012,Steelhead,Salmon River,SRLEM-s,1
+2012,Steelhead,Salmon River,SRLSR-s,1
+2012,Steelhead,Salmon River,SRNFS-s,0
+2012,Steelhead,Salmon River,SRPAH-s,1
+2012,Steelhead,Salmon River,SRUMA-s,1
+2013,Steelhead,Clearwater,CRLMA-s,1
+2013,Steelhead,Clearwater,CRLOC-s,0
+2013,Steelhead,Clearwater,CRLOL-s,1
+2013,Steelhead,Clearwater,CRSEL-s,0
+2013,Steelhead,Clearwater,CRSFC-s,1
+2013,Steelhead,Grande Ronde River,GRJOS-s,1
+2013,Steelhead,Grande Ronde River,GRLMT-s,0
+2013,Steelhead,Grande Ronde River,GRUMA-s,1
+2013,Steelhead,Grande Ronde River,GRWAL-s,0
+2013,Steelhead,Imnaha,IRMAI-s,1
+2013,Steelhead,Lower Snake,SNASO-s,1
+2013,Steelhead,Lower Snake,SNTUC-s,0
+2013,Steelhead,Salmon River,MFBIG-s,1
+2013,Steelhead,Salmon River,SFMAI-s,1
+2013,Steelhead,Salmon River,SFSEC-s,1
+2013,Steelhead,Salmon River,SREFS-s,1
+2013,Steelhead,Salmon River,SRLEM-s,1
+2013,Steelhead,Salmon River,SRLSR-s,1
+2013,Steelhead,Salmon River,SRNFS-s,0
+2013,Steelhead,Salmon River,SRPAH-s,0
+2013,Steelhead,Salmon River,SRUMA-s,1
+2014,Steelhead,Clearwater,CRLMA-s,1
+2014,Steelhead,Clearwater,CRLOC-s,0
+2014,Steelhead,Clearwater,CRLOL-s,1
+2014,Steelhead,Clearwater,CRSEL-s,0
+2014,Steelhead,Clearwater,CRSFC-s,1
+2014,Steelhead,Grande Ronde River,GRJOS-s,1
+2014,Steelhead,Grande Ronde River,GRLMT-s,0
+2014,Steelhead,Grande Ronde River,GRUMA-s,1
+2014,Steelhead,Grande Ronde River,GRWAL-s,1
+2014,Steelhead,Imnaha,IRMAI-s,1
+2014,Steelhead,Lower Snake,SNASO-s,1
+2014,Steelhead,Lower Snake,SNTUC-s,0
+2014,Steelhead,Salmon River,MFBIG-s,1
+2014,Steelhead,Salmon River,SFMAI-s,1
+2014,Steelhead,Salmon River,SFSEC-s,1
+2014,Steelhead,Salmon River,SREFS-s,0
+2014,Steelhead,Salmon River,SRLEM-s,1
+2014,Steelhead,Salmon River,SRLSR-s,1
+2014,Steelhead,Salmon River,SRNFS-s,0
+2014,Steelhead,Salmon River,SRPAH-s,1
+2014,Steelhead,Salmon River,SRUMA-s,1
+2015,Steelhead,Clearwater,CRLMA-s,1
+2015,Steelhead,Clearwater,CRLOC-s,0
+2015,Steelhead,Clearwater,CRLOL-s,1
+2015,Steelhead,Clearwater,CRSEL-s,0
+2015,Steelhead,Clearwater,CRSFC-s,1
+2015,Steelhead,Grande Ronde River,GRJOS-s,1
+2015,Steelhead,Grande Ronde River,GRLMT-s,0
+2015,Steelhead,Grande Ronde River,GRUMA-s,1
+2015,Steelhead,Grande Ronde River,GRWAL-s,1
+2015,Steelhead,Imnaha,IRMAI-s,1
+2015,Steelhead,Lower Snake,SNASO-s,1
+2015,Steelhead,Lower Snake,SNTUC-s,0
+2015,Steelhead,Salmon River,MFBIG-s,1
+2015,Steelhead,Salmon River,SFMAI-s,1
+2015,Steelhead,Salmon River,SFSEC-s,1
+2015,Steelhead,Salmon River,SREFS-s,1
+2015,Steelhead,Salmon River,SRLEM-s,1
+2015,Steelhead,Salmon River,SRLSR-s,1
+2015,Steelhead,Salmon River,SRNFS-s,0
+2015,Steelhead,Salmon River,SRPAH-s,1
+2015,Steelhead,Salmon River,SRUMA-s,1
+2016,Steelhead,Clearwater,CRLMA-s,1
+2016,Steelhead,Clearwater,CRLOC-s,0
+2016,Steelhead,Clearwater,CRLOL-s,1
+2016,Steelhead,Clearwater,CRSEL-s,0
+2016,Steelhead,Clearwater,CRSFC-s,1
+2016,Steelhead,Grande Ronde River,GRJOS-s,1
+2016,Steelhead,Grande Ronde River,GRLMT-s,0
+2016,Steelhead,Grande Ronde River,GRUMA-s,1
+2016,Steelhead,Grande Ronde River,GRWAL-s,1
+2016,Steelhead,Imnaha,IRMAI-s,1
+2016,Steelhead,Lower Snake,SNASO-s,1
+2016,Steelhead,Lower Snake,SNTUC-s,0
+2016,Steelhead,Salmon River,MFBIG-s,1
+2016,Steelhead,Salmon River,SFMAI-s,1
+2016,Steelhead,Salmon River,SFSEC-s,1
+2016,Steelhead,Salmon River,SREFS-s,0
+2016,Steelhead,Salmon River,SRLEM-s,1
+2016,Steelhead,Salmon River,SRLSR-s,1
+2016,Steelhead,Salmon River,SRNFS-s,1
+2016,Steelhead,Salmon River,SRPAH-s,1
+2016,Steelhead,Salmon River,SRUMA-s,1
+2017,Steelhead,Clearwater,CRLMA-s,1
+2017,Steelhead,Clearwater,CRLOC-s,0
+2017,Steelhead,Clearwater,CRLOL-s,1
+2017,Steelhead,Clearwater,CRSEL-s,0
+2017,Steelhead,Clearwater,CRSFC-s,1
+2017,Steelhead,Grande Ronde River,GRJOS-s,1
+2017,Steelhead,Grande Ronde River,GRLMT-s,0
+2017,Steelhead,Grande Ronde River,GRUMA-s,1
+2017,Steelhead,Grande Ronde River,GRWAL-s,1
+2017,Steelhead,Imnaha,IRMAI-s,1
+2017,Steelhead,Lower Snake,SNASO-s,1
+2017,Steelhead,Lower Snake,SNTUC-s,0
+2017,Steelhead,Salmon River,MFBIG-s,1
+2017,Steelhead,Salmon River,SFMAI-s,1
+2017,Steelhead,Salmon River,SFSEC-s,1
+2017,Steelhead,Salmon River,SREFS-s,0
+2017,Steelhead,Salmon River,SRLEM-s,1
+2017,Steelhead,Salmon River,SRLSR-s,1
+2017,Steelhead,Salmon River,SRNFS-s,0
+2017,Steelhead,Salmon River,SRPAH-s,1
+2017,Steelhead,Salmon River,SRUMA-s,1
+2018,Steelhead,Clearwater,CRLMA-s,1
+2018,Steelhead,Clearwater,CRLOC-s,1
+2018,Steelhead,Clearwater,CRLOL-s,1
+2018,Steelhead,Clearwater,CRSEL-s,1
+2018,Steelhead,Clearwater,CRSFC-s,1
+2018,Steelhead,Grande Ronde River,GRJOS-s,1
+2018,Steelhead,Grande Ronde River,GRLMT-s,0
+2018,Steelhead,Grande Ronde River,GRUMA-s,1
+2018,Steelhead,Grande Ronde River,GRWAL-s,1
+2018,Steelhead,Imnaha,IRMAI-s,1
+2018,Steelhead,Lower Snake,SNASO-s,1
+2018,Steelhead,Lower Snake,SNTUC-s,0
+2018,Steelhead,Salmon River,MFBIG-s,1
+2018,Steelhead,Salmon River,SFMAI-s,1
+2018,Steelhead,Salmon River,SFSEC-s,1
+2018,Steelhead,Salmon River,SREFS-s,0
+2018,Steelhead,Salmon River,SRLEM-s,1
+2018,Steelhead,Salmon River,SRLSR-s,1
+2018,Steelhead,Salmon River,SRNFS-s,1
+2018,Steelhead,Salmon River,SRPAH-s,1
+2018,Steelhead,Salmon River,SRPAN-s,1
+2018,Steelhead,Salmon River,SRUMA-s,1
+2019,Steelhead,Clearwater,CRLMA-s,1
+2019,Steelhead,Clearwater,CRLOC-s,1
+2019,Steelhead,Clearwater,CRLOL-s,0
+2019,Steelhead,Clearwater,CRSEL-s,1
+2019,Steelhead,Clearwater,CRSFC-s,1
+2019,Steelhead,Grande Ronde River,GRJOS-s,1
+2019,Steelhead,Grande Ronde River,GRLMT-s,1
+2019,Steelhead,Grande Ronde River,GRUMA-s,1
+2019,Steelhead,Grande Ronde River,GRWAL-s,1
+2019,Steelhead,Imnaha,IRMAI-s,1
+2019,Steelhead,Lower Snake,SNASO-s,1
+2019,Steelhead,Lower Snake,SNTUC-s,0
+2019,Steelhead,Salmon River,MFBIG-s,1
+2019,Steelhead,Salmon River,SFMAI-s,1
+2019,Steelhead,Salmon River,SFSEC-s,1
+2019,Steelhead,Salmon River,SREFS-s,1
+2019,Steelhead,Salmon River,SRLEM-s,1
+2019,Steelhead,Salmon River,SRLSR-s,1
+2019,Steelhead,Salmon River,SRNFS-s,1
+2019,Steelhead,Salmon River,SRPAH-s,1
+2019,Steelhead,Salmon River,SRPAN-s,1
+2019,Steelhead,Salmon River,SRUMA-s,1
+2020,Steelhead,Clearwater,CRLMA-s,1
+2020,Steelhead,Clearwater,CRLOC-s,1
+2020,Steelhead,Clearwater,CRLOL-s,1
+2020,Steelhead,Clearwater,CRSEL-s,1
+2020,Steelhead,Clearwater,CRSFC-s,1
+2020,Steelhead,Grande Ronde River,GRJOS-s,1
+2020,Steelhead,Grande Ronde River,GRLMT-s,1
+2020,Steelhead,Grande Ronde River,GRUMA-s,1
+2020,Steelhead,Grande Ronde River,GRWAL-s,1
+2020,Steelhead,Imnaha,IRMAI-s,1
+2020,Steelhead,Lower Snake,SNASO-s,1
+2020,Steelhead,Lower Snake,SNTUC-s,0
+2020,Steelhead,Salmon River,MFBIG-s,1
+2020,Steelhead,Salmon River,SFMAI-s,1
+2020,Steelhead,Salmon River,SFSEC-s,1
+2020,Steelhead,Salmon River,SREFS-s,1
+2020,Steelhead,Salmon River,SRLEM-s,1
+2020,Steelhead,Salmon River,SRLSR-s,0
+2020,Steelhead,Salmon River,SRNFS-s,1
+2020,Steelhead,Salmon River,SRPAH-s,1
+2020,Steelhead,Salmon River,SRPAN-s,1
+2020,Steelhead,Salmon River,SRUMA-s,1

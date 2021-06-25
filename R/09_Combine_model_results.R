@@ -31,8 +31,8 @@ if(!dir.exists(AbundanceFolder)) {
 
 #------------------------------------------------------------------------------
 # set species, spawn year and time stamp
-species <- c('Steelhead', 'Chinook')  # either Chinook or Steelhead
-#yr <- 2018        # tagging operations started at Lower Granite with spawn year 2009.
+species <- 'Steelhead' #c('Steelhead', 'Chinook')  # either Chinook or Steelhead
+yr <- 2020        # tagging operations started at Lower Granite with spawn year 2009.
 #timestp <- gsub('[^0-9]','', Sys.Date())
 
 for(spp in species){
@@ -314,8 +314,8 @@ valid_est <- read_csv('./data/ConfigurationFiles/valid_trt_estimates.csv')
 for(spp in species){
   
   if(spp == 'Steelhead'){
-    year_range <- c(2010:2019)
-    prod_range <- 2010:2014
+    year_range <- c(2010:2020)
+    prod_range <- 2010:2015
   } else {
     year_range <- c(2010:2019)
     prod_range <- 2010:2014
@@ -541,6 +541,6 @@ for(spp in species){
        'Site Esc' = trib_all,
        'Site Unique Tags' = site_tags,
        'Node Detect Eff' = detect_all) %>%
-    WriteXLS(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
+   writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
   
 }
