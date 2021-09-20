@@ -7,11 +7,8 @@
 
 # Download STADEM Package
 if(!require(STADEM)){
-  devtools::install_github('KevinSee/STADEM', ref = 'master', force = TRUE,
-                           upgrade = "always")
+  devtools::install_github('BiomarkABS/STADEM')
 }
-
-
 
 library(tidyverse)
 library(stringr)
@@ -31,30 +28,12 @@ if(!dir.exists(modelFolder)) {
   dir.create(modelFolder)
 }
 
-## Requires a copy of the Lower Granite Dam Trap Database and the odbc driver
-if(.Platform$OS.type != 'unix') {
-  source('./R/loadLGTrappingDBase.R')
-  trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
-  con <- loadLGTrappingDBase(trap_filepath)
-  trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
-}
-
-# this works for Mac, or any system really
-if(.Platform$OS.type == 'unix') {
-  # trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
-  trap_filepath <- './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv'
-  trap_dbase = readLGRtrapDB(trap_filepath)
-}
-
-# save .csv of dbase for later use
-write_csv(trap_dbase, file = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
-
 # set species and spawn year
-species = c('Chinook', 'Steelhead')  # either Chinook or Steelhead
+species = 'Steelhead'  # either Chinook or Steelhead
 
 # running only a single year to keep previous estimates the same
 #year = 2010:2018        # tagging operations started at Lower Granite with spawn year 2009.
-year = 2020
+year = 2021
 
 # Loop through species and years
 for(i in 1:length(species)){

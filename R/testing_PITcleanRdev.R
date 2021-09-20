@@ -1,5 +1,4 @@
 # Testing script to learn and debug new PITcleanR package.
-devtools::install_github("BiomarkABS/PITcleanr", ref = "develop", build_vignettes = T)
 
 library(tidyverse)
 library(PITcleanr)
@@ -15,8 +14,8 @@ browseVignettes("PITcleanr")
 
 
 # Set species and year
-spp <- 'Steelhead'
-yr = 2018
+spp <- 'Chinook'
+yr = 2021
 
 # load ptagis complete tag history file and prep for functions
 #ptagis_file <- read_csv(paste0('data/CompleteTagHistories/LGR_', spp, '_', yr, '.csv'))
@@ -38,131 +37,8 @@ yr = 2018
 #   mutate(mark_species_name = spp)
 
 
-
-
-# get configuration file
-array_configuration <- buildConfig()
-#ptagis_meta <- queryPtagisMeta()
-
-site_meta <- array_configuration %>%
-  select(contains('site'), contains('rkm'), latitude, longitude) %>%
-  distinct() %>%
-  mutate(detection_group = case_when(
-    as.numeric(str_extract(rkm, '\\d+')) <= 234 ~ 'Lower_C',
-    as.numeric(str_extract(rkm, '\\d+')) < 522 ~ 'Mid_C',
-    as.numeric(str_extract(rkm, '\\d+')) > 522 ~ 'Upper_C',
-    as.numeric(str_extract(rkm, '\\d+')) == 522 ~ 'Above_GRA')) %>%
-  mutate(detection_group = case_when(
-    detection_group == 'Above_GRA' & as.numeric(sub('.','',str_extract(rkm, '\\.\\d+'))) < 173 ~ 'Below_GRA',
-      TRUE ~ detection_group))
-
-configuration <- array_configuration %>%
-  left_join(site_meta %>%
-              select(site_code, detection_group),
-            by = 'site_code') %>%
-  mutate(node = ifelse(detection_group == 'Above_GRA', node, detection_group))
-
-# customize some nodes based on DABOM framework
-configuration = array_configuration %>%
-  mutate(node = ifelse(site_code %in% c('VC2', 'VC1'),
-                       site_code,
-                       node),
-         node = ifelse(site_code == 'SC2',
-                       'SC2B0',
-                       node),
-         node = ifelse(site_code %in% c('CROTRP',
-                                        'CRT',
-                                        'REDTRP',
-                                        'REDR',
-                                        'RRT'),
-                       'SC2A0',
-                       node),
-         node = ifelse(node == 'ACB',
-                       'ACBB0',
-                       node),
-         node = ifelse(node == 'CCA',
-                       'CCAB0',
-                       node),
-         node = ifelse(site_code == 'AFC',
-                       ifelse(grepl('MAINSTEM', antenna_group),
-                              'AFCB0',
-                              'AFCA0'),
-                       node),
-         node = ifelse(site_code == 'HBC',
-                       'HYCA0',
-                       node),
-         node = ifelse(site_code == 'MCCA',
-                       'STR',
-                       node),
-         node = ifelse(site_code == 'CARMEC',
-                       'CRCA0',
-                       node),
-         node = ifelse(site_code == 'BIG2C',
-                       'TAYA0',
-                       node),
-         node = ifelse(site_code == 'WIMPYC',
-                       'WPCA0',
-                       node),
-         node = ifelse(site_code == 'IML' & config_id == 130 & antenna_id == '09',
-                       'IMLA0',
-                       node),
-         node = str_replace(node, '^BTC', 'BTL'),
-         node = ifelse(site_code %in% c('YANKFK', 'CEY'),
-                       'YFKA0',
-                       node),
-         node = ifelse(site_code == 'SAWT',
-                       'STL',
-                       node),
-         node = ifelse(site_code == 'LOOH',
-                       'LOOKGC',
-                       node),
-         node = ifelse(site_code == 'RPDTRP',
-                       'RAPH',
-                       node),
-         node = ifelse(site_code == 'CHARLC',
-                       'CCAB0',
-                       node),
-         node = ifelse(node == 'KEN',
-                       'KENB0',
-                       node),
-         node = ifelse(node == 'HYC',
-                       'HYCB0',
-                       node),
-         node = ifelse(node == 'YFK',
-                       'YFKB0',
-                       node),
-         node = ifelse(node == 'LLR',
-                       'LLRB0',
-                       node),
-         node = ifelse(node == 'LRW',
-                       'LRWB0',
-                       node),
-         node = ifelse(site_code == '18M',
-                       str_replace(node, '18M', 'HEC'),
-                       node),
-         node = ifelse(node == 'LAP',
-                       'LAPB0',
-                       node),
-         node = ifelse(site_code == 'KRS',
-                       'KRS',
-                       node)) %>%
-  distinct()
-
-# get parent-child file
-# parent_child_file = system.file("extdata",
-#                                 "parent_child_GRA.csv",
-#                                 package = "PITcleanr",
-#                                 mustWork = TRUE)
-
-parent_child <- read_csv('./data/ConfigurationFiles/parent_child.csv')
-plotNodes(parent_child,
-          layout = "tree")
-
-parent_child_node = addParentChildNodes(parent_child,
-                                        configuration)
-plotNodes(parent_child_node,
-          layout = "tree")
-
+# load configuration and site_df data
+load('./data/ConfigurationFiles/site_config.rda')
 
 # Down load data from DART - includes complete tag history after fish was observed at LGR 
 comp_dart <- compressDART(
@@ -173,10 +49,17 @@ comp_dart <- compressDART(
 )
 
 comp_obs <- comp_dart$compress_obs
+dart_obs <- comp_dart$dart_obs
 
+lgrldr <-  dart_obs %>%
+  filter(mark_site == 'LGRLDR',
+         mark_rear_type_name == 'W') %>%
+  distinct(tag_code) %>% pull(tag_code)
 
+lgrldr_obs <- comp_obs %>%
+  filter(tag_code %in% lgrldr)
 
-
+tmp <- lgrldr_obs %>% group_by(node) %>% summarise(n = n_distinct(tag_code))
 
 
 # check the file for orphan and disown tags
