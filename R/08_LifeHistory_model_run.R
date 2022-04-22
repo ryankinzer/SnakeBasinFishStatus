@@ -12,28 +12,25 @@ library(jagsUI)
 
 # set up folder structure
 SexFolder = 'Sex_results' # for processed files
-if(!dir.exists(SexFolder)) {
-  dir.create(SexFolder)
-}
-
 AgeFolder = 'Age_results' # for biologist cleaned files and dabom data
-if(!dir.exists(AgeFolder)) {
-  dir.create(AgeFolder)
-}
+
 
 #------------------------------------------------------------------------------
 # File path to life history summaries
 filepath <- './data/LifeHistoryData/'
 
 # Set species
-spp = 'Steelhead'
+spp <- 'Chinook'
+yr <- 2021
 
 # Set year range based on spp.
-if(spp == 'Steelhead'){
-  year_range = 2020 #2010:2019
-} else {
-  year_range = 2010:2019
-}
+year_range <- yr
+
+# if(spp == 'Steelhead'){
+#   year_range = 2020 #2010:2019
+# } else {
+#   year_range = 2010:2019
+# }
 
 #------------------------------------------------------------------------------
 # Create JAGs model to estimate female proportion
@@ -76,8 +73,8 @@ for(yr in year_range){
   
   # pull out relevant bits for JAGS, and name them appropriately
   sex_jagsData = modSexDf %>%
-    filter(!is.na(TRT)) %>%
-    mutate(popNum = as.integer(as.factor(TRT))) %>%
+    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    mutate(popNum = as.integer(as.factor(TRT_POPID))) %>%
     select(f = F,
            tags = nSexed,
            popNum) %>%
@@ -187,7 +184,15 @@ cat(modelCode,
 # Run Age Model
 # set model as fixed population effect or random population with
 # A and B run groups for steelhead.
-model <- c('simple','hierarchical')[2]
+# should be hierarchical for steelhead
+
+if(spp == 'Chinook'){
+  model = 'simple'
+} else {
+  model = 'hierarchical'
+}
+
+#model <- c('simple','hierarchical')[2]
 
 if(model == 'simple'){
     ageModelNm = ageModel_simp
@@ -206,14 +211,14 @@ for(yr in year_range){
   
   # pull out relevant bits for JAGS, and name them appropriately
   age_jagsData = modAgeDf %>%
-    filter(!is.na(TRT)) %>%
-    mutate(popNum = as.integer(as.factor(TRT))) %>%
+    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    mutate(popNum = as.integer(as.factor(TRT_POPID))) %>%
     select(tags = nAged,
            popNum) %>%
     as.list()
   
   age_jagsData$ageMat = modAgeDf %>%
-    filter(!is.na(TRT)) %>%
+    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
     select(starts_with('age')) %>%
     as.matrix()
   
@@ -227,9 +232,9 @@ for(yr in year_range){
   
   # assign populations to groups (ex: A-run or B-run)
   age_jagsData$runType = modAgeDf %>%
-    filter(Group != 'NotObserved') %>%
-    select(TRT) %>%
-    mutate(Run = if_else(TRT %in% c('CRLMA-s',
+    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    select(TRT_POPID) %>%
+    mutate(Run = if_else(TRT_POPID %in% c('CRLMA-s',
                                     'CRLOC-s',
                                     'CRLOL-s',
                                     'CRSEL-s',

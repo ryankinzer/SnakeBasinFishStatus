@@ -9,7 +9,7 @@ library(tidyverse)
 library(sf)
 library(magrittr)
 library(readxl)
-library(WriteXLS)
+#library(WriteXLS)
 library(PITcleanr)
 
 # set up folder structure
@@ -19,7 +19,7 @@ if(!dir.exists(LifeHistory)) {
 }
 
 # load configuration and site_df data
-load('./data/ConfigurationFiles/site_config.rda')
+load('./data/ConfigurationFiles/site_config_BON.rda')
 
 # load function and assign group variables to all sites; TRT POPs and GSI
 source('./R/assign_POP_GSI.R')

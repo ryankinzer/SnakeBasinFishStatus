@@ -1,0 +1,237 @@
+site_code,n_nodes,node,matrix_col,parent_site,child_num,MPG,POP_NAME,TRT_POPID
+BON,1,BON,1,TDA,1,NA,NA,NA
+WindRiver,1,WindRiver,2,TDA,2,NA,NA,NA
+LittleWhite,1,LittleWhite,3,TDA,3,NA,NA,NA
+WhiteSalmon,1,WhiteSalmon,4,TDA,4,NA,NA,NA
+HoodRiver,1,HoodRiver,5,TDA,5,NA,NA,NA
+Klickitat,1,Klickitat,6,TDA,6,NA,NA,NA
+TDA,1,TDA,7,JDA,1,NA,NA,NA
+Deschutes,1,Deschutes,8,JDA,2,NA,NA,NA
+JDA,1,JDA,9,MCN,1,NA,NA,NA
+JohnDay,1,JohnDay,10,MCN,2,NA,NA,NA
+Umatilla,1,Umatilla,11,MCN,3,NA,NA,NA
+MCN,1,MCN,12,IHR,1,NA,NA,NA
+WallaWalla,1,WallaWalla,13,IHR,2,NA,NA,NA
+IHR,1,IHR,14,LMA,1,NA,NA,NA
+Yakima,1,Yakima,15,IHR,3,NA,NA,NA
+UpperColumbia,1,UpperColumbia,16,IHR,4,NA,NA,NA
+LMA,1,LMA,17,GOA,1,Lower Snake,Tucannon River,SNTUC-s
+LMA,1,LMA,17,GOA,1,NA,NA,NA
+LYFE,1,LYFE,18,GOA,2,Lower Snake,Tucannon River,SNTUC-s
+LTR,3,LTR_D,19,GOA,3,Lower Snake,Tucannon River,SNTUC-s
+LTR,3,LTR_M,20,GOA,3,Lower Snake,Tucannon River,SNTUC-s
+LTR,3,LTR_U,21,GOA,3,Lower Snake,Tucannon River,SNTUC-s
+GOA,1,GOA,22,GRS,1,Lower Snake,Tucannon River,SNTUC-s
+MTR,3,MTR_D,23,LTR,1,Lower Snake,Tucannon River,SNTUC-s
+MTR,3,MTR_M,24,LTR,1,Lower Snake,Tucannon River,SNTUC-s
+MTR,3,MTR_U,25,LTR,1,Lower Snake,Tucannon River,SNTUC-s
+PENAWC,1,PENAWC,26,GRS,2,Lower Snake,Tucannon River,SNTUC-s
+UTR,3,UTR_D,27,MTR,1,Lower Snake,Tucannon River,SNTUC-s
+UTR,3,UTR_M,28,MTR,1,Lower Snake,Tucannon River,SNTUC-s
+UTR,3,UTR_U,29,MTR,1,Lower Snake,Tucannon River,SNTUC-s
+TFH,2,TFH_D,30,UTR,1,Lower Snake,Tucannon River,SNTUC-s
+TFH,2,TFH_U,31,UTR,1,Lower Snake,Tucannon River,SNTUC-s
+ALMOTC,1,ALMOTC,32,GRS,3,Lower Snake,Asotin Creek,SNASO-s
+GRS,1,GRS,33,GRA,1,Lower Snake,Asotin Creek,SNASO-s
+GRS,1,GRS,33,GRA,1,Lower Snake,Tucannon River,SNTUC-s
+TPJ,2,TPJ_D,34,TFH,1,Lower Snake,Tucannon River,SNTUC-s
+TPJ,2,TPJ_U,35,TFH,1,Lower Snake,Tucannon River,SNTUC-s
+ALPOWC,1,ALPOWC,36,GRA,2,Lower Snake,Asotin Creek,SNASO-s
+ASOTIC,1,ASOTIC,37,ACM,1,Lower Snake,Asotin Creek,SNASO-s
+ACM,3,ACM_D,38,GRA,3,Lower Snake,Asotin Creek,SNASO-s
+ACM,3,ACM_M,39,GRA,3,Lower Snake,Asotin Creek,SNASO-s
+ACM,3,ACM_U,40,GRA,3,Lower Snake,Asotin Creek,SNASO-s
+ACB,2,ACB_D,41,ASOTIC,1,Lower Snake,Asotin Creek,SNASO-s
+ACB,2,ACB_U,42,ASOTIC,1,Lower Snake,Asotin Creek,SNASO-s
+GEORGC,1,GEORGC,43,ACM,2,Lower Snake,Asotin Creek,SNASO-s
+CCA,3,CCA_D,44,ACB,1,Lower Snake,Asotin Creek,SNASO-s
+CCA,3,CCA_M,45,ACB,1,Lower Snake,Asotin Creek,SNASO-s
+CCA,3,CCA_U,46,ACB,1,Lower Snake,Asotin Creek,SNASO-s
+AFC,2,AFC_D,47,ACB,2,Lower Snake,Asotin Creek,SNASO-s
+AFC,2,AFC_U,48,ACB,2,Lower Snake,Asotin Creek,SNASO-s
+TENMC2,1,TENMC2,49,GRA,4,Lower Snake,Asotin Creek,SNASO-s
+LAP,3,LAP_D,50,GRA,5,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+LAP,3,LAP_M,51,GRA,5,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+LAP,3,LAP_U,52,GRA,5,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+SWT,3,SWT_D,53,LAP,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+SWT,3,SWT_M,54,LAP,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+SWT,3,SWT_U,55,LAP,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+MIS,2,MIS_D,56,LAP,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+MIS,2,MIS_U,57,LAP,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+WEB,2,WEB_D,58,SWT,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+WEB,2,WEB_U,59,SWT,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+JUL,1,JUL,60,GRA,6,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+BIGBEC,1,BIGBEC,61,BBA,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+KHS,2,KHS_D,62,JUL,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+KHS,2,KHS_U,63,JUL,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+BBA,1,BBA,64,KHS,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+LBEARC,1,LBEARC,65,BBA,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+PCM,2,PCM_D,66,JUL,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+PCM,2,PCM_U,67,JUL,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+EFPW,1,EFPW,68,HLM,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+HLM,2,HLM_D,69,JUL,3,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+HLM,2,HLM_U,70,JUL,3,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+EPR,2,EPR_D,71,EFPW,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+EPR,2,EPR_U,72,EFPW,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+POTRWF,1,POTRWF,73,HLM,2,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+JA1,2,JA1_D,74,GRA,8,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+JA1,2,JA1_U,75,GRA,8,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+NPTH,1,NPTH,76,GRA,7,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+DWL,1,DWL,77,GRA,10,Clearwater River,North Fork Clearwater River,CRNFC-s
+LC1,1,LC1,78,GRA,14,Clearwater River,Lolo Creek,CRLOL-s
+LC2,1,LC2,79,LC1,1,Clearwater River,Lolo Creek,CRLOL-s
+SC1,1,SC1,80,GRA,15,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+SC2,1,SC2,81,SC1,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+SC2,1,SC2,81,SC1,1,Clearwater River,South Fork Clearwater River,CRSFC-s
+SC3,1,SC3,82,SC2,1,Clearwater River,South Fork Clearwater River,CRSFC-s
+SC4,2,SC4_D,83,SC3,1,Clearwater River,South Fork Clearwater River,CRSFC-s
+SC4,2,SC4_U,84,SC3,1,Clearwater River,South Fork Clearwater River,CRSFC-s
+CRT,1,CRT,85,SC4,1,Clearwater River,South Fork Clearwater River,CRSFC-s
+RRT,1,RRT,86,SC4,2,Clearwater River,South Fork Clearwater River,CRSFC-s
+CLC,1,CLC,87,GRA,17,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+KOOS,1,KOOS,88,CLC,1,Clearwater River,Clearwater River lower mainstem,CRLMA-s
+LRL,1,LRL,89,GRA,18,Clearwater River,Lochsa River,CRLOC-s
+LRU,1,LRU,90,LRL,1,Clearwater River,Lochsa River,CRLOC-s
+FISTRP,1,FISTRP,91,LRU,1,Clearwater River,Lochsa River,CRLOC-s
+SW1,1,SW1,92,GRA,19,Clearwater River,Selway River,CRSEL-s
+SW2,1,SW2,93,SW1,1,Clearwater River,Selway River,CRSEL-s
+JOSEPC,1,JOSEPC,94,JOC,1,Grande Ronde River,Joseph Creek,GRJOS-s
+JOC,2,JOC_D,95,GRA,9,Grande Ronde River,Joseph Creek,GRJOS-s
+JOC,2,JOC_U,96,GRA,9,Grande Ronde River,Joseph Creek,GRJOS-s
+WEN,2,WEN_D,97,GRA,16,Grande Ronde River,Grande Ronde River lower mainstem tributaries,GRLMT-s
+WEN,2,WEN_U,98,GRA,16,Grande Ronde River,Grande Ronde River lower mainstem tributaries,GRLMT-s
+LOOH,1,LOOH,99,GRA,21,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+WR1,1,WR1,100,GRA,22,Grande Ronde River,Wallowa River,GRWAL-s
+MR1,2,MR1_D,101,WR1,1,Grande Ronde River,Wallowa River,GRWAL-s
+MR1,2,MR1_U,102,WR1,1,Grande Ronde River,Wallowa River,GRWAL-s
+BCANF,1,BCANF,103,WR1,2,Grande Ronde River,Wallowa River,GRWAL-s
+WR2,2,WR2_D,104,WR1,3,Grande Ronde River,Wallowa River,GRWAL-s
+WR2,2,WR2_U,105,WR1,3,Grande Ronde River,Wallowa River,GRWAL-s
+LOSTIW,1,LOSTIW,106,WR2,1,Grande Ronde River,Wallowa River,GRWAL-s
+WALH,1,WALH,107,WR2,2,Grande Ronde River,Wallowa River,GRWAL-s
+UGR,1,UGR,108,GRA,23,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+CCU,2,CCU_D,109,UGR,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+CCU,2,CCU_U,110,UGR,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+CATHEW,1,CATHEW,111,CCW,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+CCW,2,CCW_D,112,CCU,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+CCW,2,CCW_U,113,CCU,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+UGS,3,UGS_D,114,UGR,2,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+UGS,3,UGS_M,115,UGR,2,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+UGS,3,UGS_U,116,UGR,2,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+GRANDW,1,GRANDW,117,UGS,1,Grande Ronde River,Grande Ronde River upper mainstem,GRUMA-s
+IR1,1,IR1,118,GRA,12,Imnaha River,Imnaha River,IRMAI-s
+IR2,1,IR2,119,IR1,1,Imnaha River,Imnaha River,IRMAI-s
+HORS3C,1,HORS3C,120,IR2,1,Imnaha River,Imnaha River,IRMAI-s
+CAMP4C,1,CAMP4C,121,CMP,1,Imnaha River,Imnaha River,IRMAI-s
+CMP,2,CMP_D,122,IR2,2,Imnaha River,Imnaha River,IRMAI-s
+CMP,2,CMP_U,123,IR2,2,Imnaha River,Imnaha River,IRMAI-s
+BSC,2,BSC_D,124,IR2,3,Imnaha River,Imnaha River,IRMAI-s
+BSC,2,BSC_U,125,IR2,3,Imnaha River,Imnaha River,IRMAI-s
+IR3,2,IR3_D,126,IR2,4,Imnaha River,Imnaha River,IRMAI-s
+IR3,2,IR3_U,127,IR2,4,Imnaha River,Imnaha River,IRMAI-s
+LSHEEF,1,LSHEEF,128,IR2,5,Imnaha River,Imnaha River,IRMAI-s
+FREEZC,1,FREEZC,129,IR3,1,Imnaha River,Imnaha River,IRMAI-s
+GCM,2,GCM_D,130,IR3,2,Imnaha River,Imnaha River,IRMAI-s
+GCM,2,GCM_U,131,IR3,2,Imnaha River,Imnaha River,IRMAI-s
+CZY,2,CZY_D,132,IR3,3,Imnaha River,Imnaha River,IRMAI-s
+CZY,2,CZY_U,133,IR3,3,Imnaha River,Imnaha River,IRMAI-s
+MAHOGC,1,MAHOGC,134,IR3,4,Imnaha River,Imnaha River,IRMAI-s
+IML,2,IML_D,135,IR4,1,Imnaha River,Imnaha River,IRMAI-s
+IML,2,IML_U,136,IR4,1,Imnaha River,Imnaha River,IRMAI-s
+IMNAHW,1,IMNAHW,137,IML,1,Imnaha River,Imnaha River,IRMAI-s
+IR4,2,IR4_D,138,IR3,5,Imnaha River,Imnaha River,IRMAI-s
+IR4,2,IR4_U,139,IR3,5,Imnaha River,Imnaha River,IRMAI-s
+IR5,2,IR5_D,140,IMNAHW,1,Imnaha River,Imnaha River,IRMAI-s
+IR5,2,IR5_U,141,IMNAHW,1,Imnaha River,Imnaha River,IRMAI-s
+GUMBTC,1,GUMBTC,142,IR5,1,Imnaha River,Imnaha River,IRMAI-s
+DRY2C,1,DRY2C,143,IR5,2,Imnaha River,Imnaha River,IRMAI-s
+COC,2,COC_D,144,GRA,11,Imnaha River,Imnaha River,IRMAI-s
+COC,2,COC_U,145,GRA,11,Imnaha River,Imnaha River,IRMAI-s
+OXBO,1,OXBO,146,GRA,13,Hells Canyon,Hells Canyon,SNHCT-s
+WB1,2,WB1_D,147,GRA,20,Salmon River,Little Salmon and Rapid River,SRLSR-s
+WB1,2,WB1_U,148,GRA,20,Salmon River,Little Salmon and Rapid River,SRLSR-s
+RAPH,1,RAPH,149,GRA,24,Salmon River,Little Salmon and Rapid River,SRLSR-s
+SFG,1,SFG,150,GRA,25,Salmon River,Secesh River,SFSEC-s
+SFG,1,SFG,150,GRA,25,Salmon River,South Fork Salmon River,SFMAI-s
+ZEN,2,ZEN_D,151,SFG,1,Salmon River,Secesh River,SFSEC-s
+ZEN,2,ZEN_U,152,SFG,1,Salmon River,Secesh River,SFSEC-s
+KRS,2,KRS_D,153,SFG,2,Salmon River,South Fork Salmon River,SFMAI-s
+KRS,2,KRS_U,154,SFG,2,Salmon River,South Fork Salmon River,SFMAI-s
+ESS,2,ESS_D,155,SFG,3,Salmon River,South Fork Salmon River,SFMAI-s
+ESS,2,ESS_U,156,SFG,3,Salmon River,South Fork Salmon River,SFMAI-s
+JOHNSC,1,JOHNSC,157,ESS,1,Salmon River,South Fork Salmon River,SFMAI-s
+YPP,2,YPP_D,158,ESS,2,Salmon River,South Fork Salmon River,SFMAI-s
+YPP,2,YPP_U,159,ESS,2,Salmon River,South Fork Salmon River,SFMAI-s
+SALSFW,1,SALSFW,160,STR,1,Salmon River,South Fork Salmon River,SFMAI-s
+STR,1,STR,161,KRS,1,Salmon River,South Fork Salmon River,SFMAI-s
+TAY,2,TAY_D,162,GRA,27,Salmon River,"Big, Camas, and Loon Creek",MFBIG-s
+TAY,2,TAY_U,163,GRA,27,Salmon River,"Big, Camas, and Loon Creek",MFBIG-s
+MAR,2,MAR_D,164,GRA,33,Salmon River,Middle Fork Salmon River upper mainstem,MFUMA-s
+MAR,2,MAR_U,165,GRA,33,Salmon River,Middle Fork Salmon River upper mainstem,MFUMA-s
+BRC,1,BRC,166,GRA,32,Salmon River,Middle Fork Salmon River upper mainstem,MFUMA-s
+PCA,2,PCA_D,167,GRA,26,Salmon River,Panther Creek,SRPAN-s
+PCA,2,PCA_U,168,GRA,26,Salmon River,Panther Creek,SRPAN-s
+NFS,2,NFS_D,169,GRA,28,Salmon River,North Fork Salmon River,SRNFS-s
+NFS,2,NFS_U,170,GRA,28,Salmon River,North Fork Salmon River,SRNFS-s
+CRC,3,CRC_D,171,GRA,29,Salmon River,Lemhi River,SRLEM-s
+CRC,3,CRC_M,172,GRA,29,Salmon River,Lemhi River,SRLEM-s
+CRC,3,CRC_U,173,GRA,29,Salmon River,Lemhi River,SRLEM-s
+LLR,2,LLR_D,174,GRA,30,Salmon River,Lemhi River,SRLEM-s
+LLR,2,LLR_U,175,GRA,30,Salmon River,Lemhi River,SRLEM-s
+EVL,2,EVL_D,176,LLR,1,Salmon River,Lemhi River,SRLEM-s
+EVL,2,EVL_U,177,LLR,1,Salmon River,Lemhi River,SRLEM-s
+BHC,3,BHC_D,178,EVL,1,Salmon River,Lemhi River,SRLEM-s
+BHC,3,BHC_M,179,EVL,1,Salmon River,Lemhi River,SRLEM-s
+BHC,3,BHC_U,180,EVL,1,Salmon River,Lemhi River,SRLEM-s
+EVU,2,EVU_D,181,EVL,2,Salmon River,Lemhi River,SRLEM-s
+EVU,2,EVU_U,182,EVL,2,Salmon River,Lemhi River,SRLEM-s
+WPC,3,WPC_D,183,EVU,1,Salmon River,Lemhi River,SRLEM-s
+WPC,3,WPC_M,184,EVU,1,Salmon River,Lemhi River,SRLEM-s
+WPC,3,WPC_U,185,EVU,1,Salmon River,Lemhi River,SRLEM-s
+KEN,2,KEN_D,186,EVU,2,Salmon River,Lemhi River,SRLEM-s
+KEN,2,KEN_U,187,EVU,2,Salmon River,Lemhi River,SRLEM-s
+AGC,3,AGC_D,188,EVU,3,Salmon River,Lemhi River,SRLEM-s
+AGC,3,AGC_M,189,EVU,3,Salmon River,Lemhi River,SRLEM-s
+AGC,3,AGC_U,190,EVU,3,Salmon River,Lemhi River,SRLEM-s
+HYC,2,HYC_D,191,EVU,4,Salmon River,Lemhi River,SRLEM-s
+HYC,2,HYC_U,192,EVU,4,Salmon River,Lemhi River,SRLEM-s
+LRW,2,LRW_D,193,EVU,5,Salmon River,Lemhi River,SRLEM-s
+LRW,2,LRW_U,194,EVU,5,Salmon River,Lemhi River,SRLEM-s
+LLS,2,LLS_D,195,LRW,1,Salmon River,Lemhi River,SRLEM-s
+LLS,2,LLS_U,196,LRW,1,Salmon River,Lemhi River,SRLEM-s
+LB8,2,LB8_D,197,LRW,2,Salmon River,Lemhi River,SRLEM-s
+LB8,2,LB8_U,198,LRW,2,Salmon River,Lemhi River,SRLEM-s
+LBS,3,LBS_D,199,LRW,3,Salmon River,Lemhi River,SRLEM-s
+LBS,3,LBS_M,200,LRW,3,Salmon River,Lemhi River,SRLEM-s
+LBS,3,LBS_U,201,LRW,3,Salmon River,Lemhi River,SRLEM-s
+LCL,3,LCL_D,202,LRW,4,Salmon River,Lemhi River,SRLEM-s
+LCL,3,LCL_M,203,LRW,4,Salmon River,Lemhi River,SRLEM-s
+LCL,3,LCL_U,204,LRW,4,Salmon River,Lemhi River,SRLEM-s
+BTL,3,BTL_D,205,LRW,5,Salmon River,Lemhi River,SRLEM-s
+BTL,3,BTL_M,206,LRW,5,Salmon River,Lemhi River,SRLEM-s
+BTL,3,BTL_U,207,LRW,5,Salmon River,Lemhi River,SRLEM-s
+CAC,2,CAC_D,208,LRW,6,Salmon River,Lemhi River,SRLEM-s
+CAC,2,CAC_U,209,LRW,6,Salmon River,Lemhi River,SRLEM-s
+18M,3,18M_D,210,LRW,7,Salmon River,Lemhi River,SRLEM-s
+18M,3,18M_M,211,LRW,7,Salmon River,Lemhi River,SRLEM-s
+18M,3,18M_U,212,LRW,7,Salmon River,Lemhi River,SRLEM-s
+BTM,3,BTM_D,213,BTL,1,Salmon River,Lemhi River,SRLEM-s
+BTM,3,BTM_M,214,BTL,1,Salmon River,Lemhi River,SRLEM-s
+BTM,3,BTM_U,215,BTL,1,Salmon River,Lemhi River,SRLEM-s
+BTU,2,BTU_D,216,BTM,1,Salmon River,Lemhi River,SRLEM-s
+BTU,2,BTU_U,217,BTM,1,Salmon River,Lemhi River,SRLEM-s
+USE,1,USE,218,GRA,31,Salmon River,Pahsimeroi River,SRPAH-s
+USI,1,USI,219,USE,1,Salmon River,East Fork Salmon River,SREFS-s
+USI,1,USI,219,USE,1,Salmon River,Pahsimeroi River,SRPAH-s
+USI,1,USI,219,USE,1,Salmon River,Salmon River upper mainstem,SRUMA-s
+PAHH,1,PAHH,220,USI,1,Salmon River,Pahsimeroi River,SRPAH-s
+SALEFT,1,SALEFT,221,USI,2,Salmon River,East Fork Salmon River,SREFS-s
+YFK,2,YFK_D,222,USI,3,Salmon River,Salmon River upper mainstem,SRUMA-s
+YFK,2,YFK_U,223,USI,3,Salmon River,Salmon River upper mainstem,SRUMA-s
+VC2,2,VC2_D,224,USI,4,Salmon River,Salmon River upper mainstem,SRUMA-s
+VC2,2,VC2_U,225,USI,4,Salmon River,Salmon River upper mainstem,SRUMA-s
+VC1,2,VC1_D,226,VC2,1,Salmon River,Salmon River upper mainstem,SRUMA-s
+VC1,2,VC1_U,227,VC2,1,Salmon River,Salmon River upper mainstem,SRUMA-s
+RFL,1,RFL,228,USI,5,Salmon River,Salmon River upper mainstem,SRUMA-s
+SAWT,1,SAWT,229,STL,1,Salmon River,Salmon River upper mainstem,SRUMA-s
+STL,1,STL,230,USI,6,Salmon River,Salmon River upper mainstem,SRUMA-s

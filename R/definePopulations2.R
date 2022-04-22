@@ -27,22 +27,23 @@ definePopulations = function(spp = c('Chinook', 'Steelhead')) {
                      'GRLOS' = 'WR2',
                      'GRLOS/GRMIN' = c('WR1_bb', 'WR2'),
                      'GRMIN' = 'MR1',
-                     'GRUMA' = 'GRANDW',
+                     'GRUMA' = 'UGS',
                      'GRWEN' = 'WEN',
                      'IRBSH' = c('CMP', 'BSC', 'LSHEEF'),
                      'IRMAI' = c('IR1_bb', 'IR3', 'CowCreek'),
                      'MFBEA' = 'BRC',
-                     'MFBIG' = 'TAY',                 
+                     'MFBIG' = 'TAY',
+                     'MFMAR' = 'MAR',
                      'SCUMA' = 'SC1',
                      'SEUMA/SEMEA/SEMOO' = 'SW1',
                      'SFEFS' = 'ESS',
                      'SFSEC' = 'ZEN',
-                     'SFSMA' = c('KRS', 'SFG_bb'),
+                     'SFMAI' = c('KRS', 'SFG_bb'),
                      'SNASO' = c('ACM', 'ALMOTC', 'ALPOWC', 'TENMC2'),
                      'SNTUC' = c('LTR', 'PENAWC'),
                      'SREFS' = 'SALEFT',
                      'SRLEM' = c('LLR','CRC'),
-                     'SRLSR' = 'RAPH',
+                     'SRLSR' = c('RAPH', 'WB1'),
                      'SRNFS' = 'NFS',
                      'SRPAH' = 'PAHH',
                      'SRPAN' = 'PCA',
@@ -51,8 +52,8 @@ definePopulations = function(spp = c('Chinook', 'Steelhead')) {
                      'SRVAL' = 'VC2',
                      'SRYFS' = 'YFK') %>%
       stack() %>%
-      tbl_df() %>%
-      select(TRT = ind,
+      as_tibble() %>%
+      select(TRT_POPID = ind,
              site = values)
   }
   
@@ -79,10 +80,11 @@ definePopulations = function(spp = c('Chinook', 'Steelhead')) {
                      'CRLMA-s' = c('JUL', 'LAP', 'CLC'),
                      'SNTUC-s' = 'LTR',
                      'MFBIG-s' = 'TAY',
-                     'SRLSR-s' = 'RAPH') %>%
+                     'MFUMA-s' = c('MAR', 'BRC'),
+                     'SRLSR-s' = c('RAPH','WB1')) %>%
       stack() %>%
-      tbl_df() %>%
-      select(TRT = ind,
+      as_tibble() %>%
+      select(TRT_POPID = ind,
              site = values)
     
   }

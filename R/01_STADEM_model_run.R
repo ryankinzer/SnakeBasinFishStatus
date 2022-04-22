@@ -28,8 +28,12 @@ if(!dir.exists(modelFolder)) {
   dir.create(modelFolder)
 }
 
+
+# load database
+trap_dbase <- read_csv(file = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
+
 # set species and spawn year
-species = 'Steelhead'  # either Chinook or Steelhead
+species = 'Chinook'  # either Chinook or Steelhead
 
 # running only a single year to keep previous estimates the same
 #year = 2010:2018        # tagging operations started at Lower Granite with spawn year 2009.

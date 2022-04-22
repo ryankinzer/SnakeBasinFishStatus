@@ -4,12 +4,15 @@
 # Author: Ryan Kinzer
 #------------------------------------------------------------------------------
 
+library(tidyverse)
+
 ## Requires a copy of the Lower Granite Dam Trap Database and the odbc driver
 if(.Platform$OS.type != 'unix') {
   source('./R/loadLGTrappingDBase.R')
   trap_filepath <- './data/TrappingDBase/LGTrappingExportJodyW.accdb'
   con <- loadLGTrappingDBase(trap_filepath)
   trap_dbase <- DBI::dbReadTable(con, 'tblLGDMasterCombineExportJodyW')
+  DBI::dbDisconnect(con)
 }
 
 # this works for Mac, or any system really

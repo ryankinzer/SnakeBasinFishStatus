@@ -4,7 +4,7 @@
 
 theme_rk <- function(){ 
   font <- "sans"   #assign font family up front
-  theme_classic() %+replace%    #replace elements we want to change
+  theme_bw() %+replace%    #replace elements we want to change
     theme(
       
       #grid elements
@@ -13,7 +13,7 @@ theme_rk <- function(){
       #axis.ticks = element_blank(),          #strip axis ticks
       legend.position = 'bottom',
       #strip.placement = 'outside',
-      strip.background = element_rect(colour = NA),
+      #strip.background = element_rect(colour = NA),
       axis.title=element_text(size=10),
       axis.text = element_text(size=10),
       strip.text = element_text(size=10),
