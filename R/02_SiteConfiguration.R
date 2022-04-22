@@ -2,21 +2,27 @@
 # Purpose: Download and configure IPTDS infrastructure for tag observation
 # processing and the DABOM model.
 # Created: 9/27/19
-# Last Modified: 
+# Last Modified: 4/22/22
 # Notes: 
 # The output and saved file from this script is used for processing tag
 # observations, with TRT population and GSI grouping designations
 # and for visualizing infrastructure and mapping tag detections.
+# 
+# Updates were made in SY2021 runs to include sites downstream of LGR
+# and to change node names to include _D, _M and _U.
 #-----------------------------------------------------------------
+
+# Install PITcleanr
+
+devtools::install_github('ryankinzer/PITcleanr', ref = 'snake_main')
 
 # load needed libraries
 library(tidyverse)
-#library(sf)
-#library(magrittr)
-#library(readxl)
-#library(WriteXLS)
 library(PITcleanr)
 
+library(ggraph)
+library(tidygraph)
+source('./R/buildNetwork_tbl.R')
 
 # download meta data for all ptagis INT and MRR sites
 ptagis_sites <- buildConfig()
@@ -135,15 +141,10 @@ configuration <- configuration %>%
   mutate(ch_TRT_POPID = ifelse(grepl('^SC1$|^SC2$', node), 'SCUMA', ch_TRT_POPID))
 
 
-# View(configuration %>% sf::st_set_geometry(NULL))
-configuration <- configuration %>% sf::st_set_geometry(NULL)
+View(configuration %>% sf::st_set_geometry(NULL))
 
 # Create parent/child table----
-
-library(ggraph)
-library(tidygraph)
-source('./R/buildNetwork_tbl.R')
-
+config <- configuration %>% sf::st_set_geometry(NULL) # for use with parent child table
 root_site <- 'GRA' #'noGRS' #'test' #GRA' #'BON'
 parent_child <- read_csv(paste0('./data/ConfigurationFiles/parent_child_',root_site,'.csv'))
 
@@ -153,13 +154,13 @@ parent_child <- parent_child[parent_child$child != 'CLWH',] # remove Clearwater 
 
 # add rkm
 parent_child <- parent_child %>%
-  left_join(configuration %>%
+  left_join(config %>%
               select(parent = site_code,
                      parent_rkm = rkm_total) %>%
               filter(!is.na(parent_rkm)) %>%
               distinct()
   ) %>%
-  left_join(configuration %>%
+  left_join(config %>%
               select(child = site_code,
                      child_rkm = rkm_total) %>%
               filter(!is.na(child_rkm)) %>%
@@ -188,7 +189,7 @@ parent_child <- parent_child %>%
 #plotNodes(parent_child)
 
 parent_child <- left_join(parent_child,
-                          configuration %>%
+                          config %>%
                             #sf::st_set_geometry(NULL) %>%
                             select(site_code, MPG = st_MPG, POP_NAME = st_POP_NAME, TRT_POPID = st_TRT_POPID) %>%
                             distinct(),
@@ -196,7 +197,7 @@ parent_child <- left_join(parent_child,
   arrange(MPG, POP_NAME, parent, child)
 
 node_attributes <- tibble(label = union(parent_child$child, parent_child$parent)) %>%
-  left_join(configuration %>%
+  left_join(config %>%
              #sf::st_set_geometry(NULL) %>%
              select(label = site_code, MPG = st_MPG, POP_NAME = st_POP_NAME,
                     TRT_POPID = st_TRT_POPID, site_type, site_type_name, rkm_total) %>%
@@ -240,20 +241,10 @@ ggsave(paste0('./Figures/site_network_',root_site,'.png'), site_network, width =
 
 
 # build network graphs for nodes
-pc_nodes <- addParentChildNodes(parent_child, configuration) # only works with rk_edits to PITcleanr
-
-# pc_nodes <- left_join(pc_nodes,
-#                       configuration %>%
-#                         filter(site_code != 'MCCA') %>%
-#                         sf::st_set_geometry(NULL) %>%
-#                         select(node, MPG = st_MPG, POP_NAME = st_POP_NAME, TRT_POPID = st_TRT_POPID) %>%
-#                         distinct(),
-#                       by = c('child' = 'node')) %>%
-#   arrange(MPG, POP_NAME, parent, child)
-
+pc_nodes <- addParentChildNodes(parent_child, config) # only works with rk_edits to PITcleanr
 
 node_attributes <- tibble(label = union(pc_nodes$child, pc_nodes$parent)) %>%
-  left_join(configuration %>%
+  left_join(config %>%
              # sf::st_set_geometry(NULL) %>%
               select(label = node, MPG = st_MPG, POP_NAME = st_POP_NAME,
                      TRT_POPID = st_TRT_POPID,
@@ -297,13 +288,6 @@ node_network <- ggraph(node_graph, layout = 'tree') +
 
 node_network
 
-# pc_node_plot <- plotNodes(pc_nodes,
-#                           layout = "tree",
-#                           point_size = 1,
-#                           label_size = 1)
-# 
-# pc_node_plot
-
 ggsave(paste0('./Figures/node_network_',root_site,'.png'), node_network, width = 14, height = 8.5)
 
 # Save file.
@@ -312,7 +296,6 @@ save(configuration, parent_child, pc_nodes, file = paste0('./data/ConfigurationF
 # Map sites and nodes.
 library(sf)
 library(maps)
-#library(mapdata)
 library(ggmap)
 library(ggspatial)
 library(cowplot)
@@ -337,17 +320,21 @@ pnw_map <- ggplot() +
   #geom_sf(data = pnw_rivers, colour = 'cyan', inherit.aes = FALSE) +
   theme_map()
 
-tmp_node <- node_attributes[!(node_attributes$label %in% c('MCN', 'JDA', 'TDA', 'BON', 'GRS')),]
+
+map_nodes <- tibble(site_code = union(parent_child$parent, parent_child$child)) %>%
+  inner_join(configuration %>% 
+               select(starts_with('site_')) %>%
+               distinct())
 
 snake_map <- ggplot() +
   geom_sf(data = pnw, fill = NA, inherit.aes = FALSE) +
   geom_sf(data = sth_pop, aes(fill = MPG), inherit.aes = TRUE) +
   geom_sf(data = pnw_rivers, colour = 'cyan', inherit.aes = FALSE) +
   geom_sf(data = snake_rivers, colour = 'cyan', inherit.aes = FALSE) +
-  geom_sf(data = tmp_node, aes(geometry = geometry), size = 2) +   #currently no geometry
-  ggrepel::geom_text_repel(data = tmp_node, aes(geometry = geometry, label = label),
-                           size = 2,
-                           stat = 'sf_coordinates') +
+  geom_sf(data = map_nodes, aes(geometry = geometry), size = 2) + 
+  # ggrepel::geom_text_repel(data = map_nodes, aes(geometry = geometry, label = site_code),
+  #                          size = 2,
+  #                          stat = 'sf_coordinates') +
   scale_fill_manual(values = plasma_pal,
                     breaks = c('Clearwater River', 'Hells Canyon', 'Grande Ronde River',
                                'Imnaha River', 'Salmon River', 'Lower Snake')) +

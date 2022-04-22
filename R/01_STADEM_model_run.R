@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
 # Script gathers data and runs the STADEM model.  A loop is built in to cycle
-# through Chinook and steelhead and all years begining in 2010.
+# through Chinook and steelhead and all years beginning in 2010.
 #
 # Author: Ryan Kinzer
 #------------------------------------------------------------------------------
 
 # Download STADEM Package
 if(!require(STADEM)){
-  devtools::install_github('BiomarkABS/STADEM')
+  devtools::install_github('KevinSee/STADEM')
 }
 
 library(tidyverse)
@@ -33,19 +33,26 @@ if(!dir.exists(modelFolder)) {
 trap_dbase <- read_csv(file = './data/TrappingDBase/tblLGDMasterCombineExportJodyW.csv')
 
 # set species and spawn year
-species = 'Chinook'  # either Chinook or Steelhead
+#species <- c('Chinook', 'Steelhead')  # either Chinook or steelhead
+
+# if(species == 'Steelhead'){
+#    year = 2010:2021
+#   } else {
+#    year = c(2010:2019, 2021)# tagging operations started at Lower Granite with spawn year 2009.
+#   }
+
+# If you want to loop through species and years the code above and direct below need to be
+# uncommented
+#for(i in 1:length(species)){
+#  for(j in 1:length(year)){
+    
+#    spp <- species[i]
+#    yr <- year[j]
 
 # running only a single year to keep previous estimates the same
-#year = 2010:2018        # tagging operations started at Lower Granite with spawn year 2009.
-year = 2021
+  spp <- 'Chinook'
+  yr <- 2021
 
-# Loop through species and years
-for(i in 1:length(species)){
-  for(j in 1:length(year)){
-    
-    spp <- species[i]
-    yr <- year[j]
-    
     if(spp == 'Chinook'){
       incl_jacks = TRUE
     } else{
