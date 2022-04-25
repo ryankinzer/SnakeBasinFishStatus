@@ -54,7 +54,7 @@ tag_list <- valid_df %>%
                 sep = '\t')
 
 # QA/QC Complete Tag History----
+# need to download complete tag history from PTAGIS first
 ptagis_file <- paste0('./data/CompleteTagHistories/LGR_',spp,'_',yr,'.csv')
-
 qc_detections <- qcTagHistory(ptagis_file)
 qc_detections
