@@ -141,11 +141,11 @@ configuration <- configuration %>%
   mutate(ch_TRT_POPID = ifelse(grepl('^SC1$|^SC2$', node), 'SCUMA', ch_TRT_POPID))
 
 
-View(configuration %>% sf::st_set_geometry(NULL))
+#View(configuration %>% sf::st_set_geometry(NULL))
 
 # Create parent/child table----
 config <- configuration %>% sf::st_set_geometry(NULL) # for use with parent child table
-root_site <- 'GRA' #'noGRS' #'test' #GRA' #'BON'
+root_site <- 'BON' #'GRA' #'noGRS' #'test' #GRA' #'BON'
 parent_child <- read_csv(paste0('./data/ConfigurationFiles/parent_child_',root_site,'.csv'))
 
 parent_child <- parent_child[parent_child$child != 'CLWH',] # remove Clearwater hatchery for now...causing problems with SC1 and SC2

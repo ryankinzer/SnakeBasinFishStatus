@@ -73,7 +73,7 @@ for(yr in year_range){
   
   # pull out relevant bits for JAGS, and name them appropriately
   sex_jagsData = modSexDf %>%
-    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
     mutate(popNum = as.integer(as.factor(TRT_POPID))) %>%
     select(f = F,
            tags = nSexed,
@@ -211,14 +211,14 @@ for(yr in year_range){
   
   # pull out relevant bits for JAGS, and name them appropriately
   age_jagsData = modAgeDf %>%
-    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
     mutate(popNum = as.integer(as.factor(TRT_POPID))) %>%
     select(tags = nAged,
            popNum) %>%
     as.list()
   
   age_jagsData$ageMat = modAgeDf %>%
-    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
     select(starts_with('age')) %>%
     as.matrix()
   
@@ -232,7 +232,7 @@ for(yr in year_range){
   
   # assign populations to groups (ex: A-run or B-run)
   age_jagsData$runType = modAgeDf %>%
-    filter(TRT_POPID != 'NotObserved') %>% #!is.na(TRT)) %>%
+    filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
     select(TRT_POPID) %>%
     mutate(Run = if_else(TRT_POPID %in% c('CRLMA-s',
                                     'CRLOC-s',

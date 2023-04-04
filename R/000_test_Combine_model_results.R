@@ -169,6 +169,7 @@ trt_df <- site_df %>%
     group_by(popNum) %>%
     mutate(iter = 1:n()) %>%
     left_join(modSexDf %>%
+                filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
                 filter(!is.na(TRT_POPID)) %>%
                 mutate(popNum = sex_jagsData$popNum),
               by = 'popNum') %>%
@@ -196,6 +197,7 @@ trt_df <- site_df %>%
     select(-age_fct) %>%
     #mutate(age = age + 1) %>%
     left_join(modAgeDf %>%
+                filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
                 filter(!is.na(TRT_POPID)) %>%
                 mutate(popNum = age_jagsData$popNum) %>%
                 select(popNum, species, spawn_year, MPG:TRT_POPID) %>%
