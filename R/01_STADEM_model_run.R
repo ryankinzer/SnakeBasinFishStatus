@@ -11,10 +11,8 @@ if(!require(STADEM)){
 }
 
 library(tidyverse)
-library(stringr)
-library(lubridate)
-library(magrittr)
-library(forcats)
+#library(magrittr)
+#library(forcats)
 library(STADEM)
 
 # set up folder structure
@@ -50,8 +48,8 @@ trap_dbase <- read_csv(file = './data/TrappingDBase/tblLGDMasterCombineExportJod
 #    yr <- year[j]
 
 # running only a single year to keep previous estimates the same
-  spp <- 'Chinook'
-  yr <- 2021
+  spp <- 'Steelhead'
+  yr <- 2022
 
     if(spp == 'Chinook'){
       incl_jacks = TRUE
