@@ -24,7 +24,7 @@ node_order <- buildNodeOrder(pc_nodes)
 
 # set spp and spawn year
 spp <- 'Chinook'
-yr <- 2021
+yr <- 2022
 sppCode <- ifelse(spp == 'Chinook', 1,
                  ifelse(spp == 'Steelhead', 3, NA))
 
@@ -66,6 +66,33 @@ fish_origin = trap_df %>%
   distinct()
 
 fish_origin %>% group_by(origin) %>% summarise(n = n_distinct(tag_code))
+
+# DABOM is capable of fitting a model with both H and W
+if(!inc_hatchery){
+  fish_origin <- filter(fish_origin, origin == 'W')
+  
+  filter_ch <- filter_ch %>%
+    filter(tag_code %in% fish_origin$tag_code)
+}
+
+# Final error check of passage routes, necessary b/c I'm using a mixed node order
+# starting with BON to develop the configuration file and PITcleanrR file, and then
+# a node order starting at GRA to build DABOM histories and models.
+
+bad_paths <- filter_ch %>%
+  group_by(tag_code) %>%
+  slice_max(slot) %>%
+  select(tag_code, final_path = path) %>%
+  right_join(filter_ch) %>%
+  ungroup() %>%
+  rowwise() %>%
+  mutate(bad_path = grepl(node, final_path)) %>%
+  group_by(tag_code) %>%
+  mutate(error = any(bad_path == FALSE))
+
+bad_tags <- bad_paths %>%
+  filter(error == TRUE) %>%
+  distinct(tag_code)
 
 # section used to create smaller models for debugging
 debug <- FALSE
@@ -140,13 +167,6 @@ cap_hist = createDABOMcapHist(filter_ch = filter_ch,
 #tmp_inits <- init_fnc() # init vectors containing location of each tag 
 }
 
-# DABOM is capable of fitting a model with both H and W
-if(!inc_hatchery){
-  fish_origin <- filter(fish_origin, origin == 'W')
-  
-  filter_ch <- filter_ch %>%
-    filter(tag_code %in% fish_origin$tag_code)
-}
 
 # file path to the default and initial model
 basic_mod_file = './ModelFiles/New_LGR_DABOM.txt'
@@ -200,10 +220,10 @@ jags_params = setSavedParams(model_file = final_mod_file)
 
 # set mcmc parameters
 n.chains <- 4
-n.adapt <- 100
-n.burn <- 1000 #2500 # I ran 1000 last time
-n.iter <- 5000 #5000
-n.thin <- 10 #10
+n.adapt <- 100#100
+n.burn <- 1000#1000 #2500 # I ran 1000 last time 1.33 minutes for 100
+n.iter <- 5000#5000 #5000 14.07 minutes for 1000, sth = 9.5 minutes
+n.thin <- 10
 
 # it took 20.2 hours to initialize the full steelhead model with 100 iterations
 # 30 hours to run the full 1000 burn and 5000 samps
@@ -250,10 +270,10 @@ dabom_output <- run_dabom_parallel_v2(model = final_mod_file,
 library(tidyverse)
 library(MCMCvis)
 
-spp <- 'Steelhead'
-yr <- 2021
+spp <- 'Chinook'
+yr <- 2022
 
-load(paste0('./DABOM_results_v2/LGR_DABOM_',spp, '_',yr,'_v2.rda'))
+load(paste0('./DABOM_results_v2/LGR_DABOM_',spp, '_',yr,'.rda'))
 dabom_mod <- dabom_output$dabom_mod
 
 load('./data/ConfigurationFiles/site_config_GRA.rda') #noGRS change to GRA
@@ -299,7 +319,7 @@ main_df %>%
 
 
 MCMCtrace(mcmc_samps, 
-          params = 'TAY_D_p', #c('beta\\[1\\]', 'beta\\[2\\]', 'beta\\[3\\]'),
+          params = 'SFG_D_p', #c('beta\\[1\\]', 'beta\\[2\\]', 'beta\\[3\\]'),
           ISB = FALSE,
           pdf = FALSE)
 

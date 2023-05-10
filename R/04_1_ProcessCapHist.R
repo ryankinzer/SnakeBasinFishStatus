@@ -20,8 +20,8 @@ if(!dir.exists(PITcleanrFolder)) {
 #-----------------------------------------------------------------
 # read observations from PTAGIS and process with PITcleanr
 # set species
-spp <- 'Chinook'
-yr_range <- 2010:2019
+spp <- 'Steelhead'
+yr_range <- 2022 #2010:2019
 root_site <- 'BON'  #'noGRS'#'test'# 'BON'# or 'GRA'
 
 # load configuration and site_df data

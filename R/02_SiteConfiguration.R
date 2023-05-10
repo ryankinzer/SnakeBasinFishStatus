@@ -24,6 +24,9 @@ library(ggraph)
 library(tidygraph)
 source('./R/buildNetwork_tbl.R')
 
+# set spawn year
+yr = 2022
+
 # download meta data for all ptagis INT and MRR sites
 ptagis_sites <- buildConfig()
 
@@ -145,7 +148,7 @@ configuration <- configuration %>%
 
 # Create parent/child table----
 config <- configuration %>% sf::st_set_geometry(NULL) # for use with parent child table
-root_site <- 'BON' #'GRA' #'noGRS' #'test' #GRA' #'BON'
+root_site <- 'GRA' #'GRA' #'noGRS' #'test' #GRA' #'BON'
 parent_child <- read_csv(paste0('./data/ConfigurationFiles/parent_child_',root_site,'.csv'))
 
 parent_child <- parent_child[parent_child$child != 'CLWH',] # remove Clearwater hatchery for now...causing problems with SC1 and SC2
@@ -237,7 +240,7 @@ site_network <- ggraph(node_graph, layout = 'tree') +
 
 site_network
 
-ggsave(paste0('./Figures/site_network_',root_site,'.png'), site_network, width = 14, height = 8.5)
+ggsave(paste0('./Figures/site_network_',root_site,'_sy',yr,'.png'), site_network, width = 14, height = 8.5)
 
 
 # build network graphs for nodes
@@ -288,7 +291,7 @@ node_network <- ggraph(node_graph, layout = 'tree') +
 
 node_network
 
-ggsave(paste0('./Figures/node_network_',root_site,'.png'), node_network, width = 14, height = 8.5)
+ggsave(paste0('./Figures/node_network_',root_site,'_sy',yr,'.png'), node_network, width = 14, height = 8.5)
 
 # Save file.
 save(configuration, parent_child, pc_nodes, file = paste0('./data/ConfigurationFiles/site_config_',root_site,'.rda'))
@@ -357,4 +360,4 @@ full_map <- ggdraw() +
 
 full_map
 
-ggsave('./figures/site_map.png', full_map, width = 8, height = 7)
+ggsave(paste0('./figures/site_map_sy',yr,'.png'), full_map, width = 8, height = 7)

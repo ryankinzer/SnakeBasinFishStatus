@@ -28,7 +28,7 @@ load('./data/ConfigurationFiles/site_config_GRA.rda')
 #------------------------------------------------------------------------------
 # set species, spawn year and develop metadata from configuration file
 spp <- 'Chinook' 
-yr <- 2021
+yr <- 2022
 
 if(spp == 'Chinook'){
   spp_prefix <- 'ch_'
@@ -41,7 +41,7 @@ node_order <- buildNodeOrder(parent_child) %>%
          branch = ifelse(path == 'GRA','Black-box',branch)) %>%
   select(site = node, branch)
 
-node_df <- configuration %>%
+node_df <- configuration %>% #SFSMA
   select(node, contains(spp_prefix)) %>%
   rename_with(~str_remove(.,spp_prefix)) %>%
   select(-ESU, -GSI_Group, TRT = TRT_POPID) %>%
@@ -51,21 +51,23 @@ node_df <- configuration %>%
   left_join(node_order)
 
 site_df <- node_df %>%
+  #sf::st_set_geometry(NULL) %>%
   #mutate(site = str_remove(node, '_U|_D|_M')) %>%
   select(-node) %>%
   arrange(site, MPG) %>%
   distinct(site, .keep_all = TRUE)
 
 trt_df <- site_df %>%
+  sf::st_set_geometry(NULL) %>%
   select(-site, -branch) %>%
   filter(!is.na(MPG)) %>%
-  distinct()
+  distinct(TRT, .keep_all = TRUE)
   
   # load data sets
 
   load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',yr,'.rda')) 
   
-  if(yr == 2021){
+  if(yr %in% c(2021, 2022)){
     load(paste0('./DABOM_results_v2/LGR_DABOM_',spp,'_',yr,'.rda'))
     dabom_mod <- dabom_output$dabom_mod
     filter_ch <- dabom_output$filter_ch
@@ -206,7 +208,7 @@ trt_df <- site_df %>%
     rename(spawn_yr = spawn_year, TRT = TRT_POPID)
 
   # Get random samples from each posterior and multiple
-  nSamps = 1000
+  nSamps = 2000
   
   N_pop <- N_post %>%
     group_by(TRT) %>%
@@ -235,16 +237,16 @@ trt_df <- site_df %>%
               by = c('TRT', 'iter', 'spawn_yr', 'species')) %>%
     mutate(N_females = N * p) %>%
     mutate_at(vars(starts_with('age')),
-              list(~ . * N))
+              list(~ . * N)) #SFMAI
 
   # summarize total escapement by population
-  N_pop_summ <- summarisePosterior(pop_post, N, TRT) %>%
+  N_pop_summ <- summarisePosterior(pop_post, N, TRT) %>% #SFMAI
     mutate(spawn_yr = yr, 
            species = spp) %>%
-    left_join(tag_summ %>%
+    left_join(tag_summ %>% #SFSMA
                 group_by(TRT = TRT_POPID) %>%
                 summarise(n_tags = n_distinct(tag_code))) %>%
-    left_join(trt_df) %>%
+    left_join(trt_df) %>% #SFSMA
     select(spawn_yr, species, MPG, POP_NAME, TRT, n_tags, mean, median, mode, sd, cv, lowerCI, upperCI)
   
   # summarize proportion female
@@ -320,24 +322,19 @@ save(N_pop, p_pop, age_pop,
 save(N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ, trib_summ, detect_summ, tag_summ, 
        file = paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', yr, '.rda'))
 
-  }
-}
-
 #------------------------------------------------------------------------------
-# combine summaries by year
+# combine summaries by year----
 #------------------------------------------------------------------------------
-valid_est <- read_csv('./data/ConfigurationFiles/valid_trt_estimates_SY21.csv')
+valid_est <- read_csv('./data/ConfigurationFiles/valid_trt_estimates.csv')
 
-for(spp in species){
-  
-  if(spp == 'Steelhead'){
-    year_range <- c(2010:2021)
-    prod_range <- 2010:2016
+if(spp == 'Steelhead'){
+    year_range <- c(2010:2022)
+    prod_range <- 2010:2022
   } else {
-    year_range <- c(2010:2019, 2021)
-    prod_range <- 2010:2015
+    year_range <- c(2010:2019, 2021, 2022)
+    prod_range <- 2010:2018
   }
-  
+
   allSumm = as.list(year_range) %>%
     rlang::set_names() %>%
     map(.f = function(x) {
@@ -353,29 +350,36 @@ for(spp in species){
   
   detect_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'detect_summ')
+           .f = 'detect_summ') %>%
+    select(-MPG, -POP_NAME)
+  # Doesn't work because site/node names were different prior to 2021.
+    # select(spawn_yr:upperCI) %>%
+    # left_join(node_df %>%
+    #             sf::st_set_geometry(NULL) %>%
+    #             select(Node = node)
+    #           )
   
   trib_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'trib_summ')
+           .f = 'trib_summ') %>%
+    select(-MPG, -POP_NAME)
   
-  N_pop_all = #full_join(valid_est,
+  N_pop_all = inner_join(valid_est,
                         allSumm %>%
                           map_df(.id = NULL,
-                          .f = 'N_pop_summ')# %>%
-                          #select(-MPG) %>%
-                        #  mutate(TRT = ifelse(TRT == 'SFSMA', 'SFMAI', TRT)#)
-                       # )
+                          .f = 'N_pop_summ') %>%
+                          select(-MPG, -POP_NAME))
 
   p_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'p_f')
+           .f = 'p_f') %>%
+    select(-MPG, -POP_NAME)
   
   N_f_all = inner_join(valid_est,
                       allSumm %>%
                         map_df(.id = NULL,
                         .f = 'N_f_summ') %>%
-                        select(-MPG))
+                        select(-MPG, -POP_NAME))
   
   age_prop_all = allSumm %>%
     map_df(.id = NULL,
@@ -556,7 +560,7 @@ for(spp in species){
        'Pop Female Esc' = N_f_all,
        'Pop Age Esc' = age_all,
        'Pop Brood Table' = brood_table,
-       'Pop Stock Recruit' = prod_df,
+       #'Pop Stock Recruit' = prod_df,
        'Pop Female Props' = p_all,
        'Pop Age Props' = age_prop_all,
        'Site Esc' = trib_all,
@@ -564,33 +568,23 @@ for(spp in species){
        'Node Detect Eff' = detect_all) %>%
    writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'_v2.xlsx'))
   
-}
+
 
 # Combine Life History Files
-
-spp <- 'Steelhead'
-
-if(spp == 'Steelhead'){
-    year_range <- c(2010:2020)
-  } else {
-    year_range <- c(2010:2019)
-  }
-
-all_lifehistory= as.list(year_range) %>%
-  rlang::set_names() %>%
-  map_df(.f = function(x){
-    readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',x, '.xlsx'))
-  })
-
-tmp <- readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',2021, '.xlsx'))
-
-steelhead_age <- all_lifehistory %>% 
-  filter(!is.na(TRT)) %>%
-  select(tag_code = TagID, MPG, POP_NAME, TRT_POPID = TRT, spawn_year = SpawnYear, fwAge, swAge, totalAge) %>%
-  bind_rows(tmp %>%
-              mutate(spawn_year = as.character(spawn_year)) %>%
-              filter(!is.na(TRT_POPID)) %>%
-              select(tag_code, MPG, POP_NAME, TRT_POPID, spawn_year, fwAge, swAge, totalAge))
-
-save(steelhead_age, file = './data/LifeHistoryData/All_steelhead_lifehistory.rda')
+# 
+# all_lifehistory= as.list(year_range) %>%
+#   rlang::set_names() %>%
+#   map_df(.f = function(x){
+#     readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',x, '.xlsx'))
+#   })
+# 
+# steelhead_age <- all_lifehistory %>% 
+#   filter(!is.na(TRT)) %>%
+#   select(tag_code = TagID, MPG, POP_NAME, TRT_POPID = TRT, spawn_year = SpawnYear, fwAge, swAge, totalAge) %>%
+#   bind_rows(tmp %>%
+#               mutate(spawn_year = as.character(spawn_year)) %>%
+#               filter(!is.na(TRT_POPID)) %>%
+#               select(tag_code, MPG, POP_NAME, TRT_POPID, spawn_year, fwAge, swAge, totalAge))
+# 
+# save(steelhead_age, file = './data/LifeHistoryData/All_steelhead_lifehistory.rda')
 

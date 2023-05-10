@@ -38,7 +38,7 @@ definePopulations = function(spp = c('Chinook', 'Steelhead')) {
                      'SEUMA/SEMEA/SEMOO' = 'SW1',
                      'SFEFS' = 'ESS',
                      'SFSEC' = 'ZEN',
-                     'SFMAI' = c('KRS', 'SFG_bb'),
+                     'SFSMA' = c('KRS', 'SFG_bb'),
                      'SNASO' = c('ACM', 'ALMOTC', 'ALPOWC', 'TENMC2'),
                      'SNTUC' = c('LTR', 'PENAWC'),
                      'SREFS' = 'SALEFT',

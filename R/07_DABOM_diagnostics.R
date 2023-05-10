@@ -18,11 +18,11 @@ theme_set(theme_bw())
 #---------------------------------------
 # choose species and year combination
 spp = c('Chinook', 'Steelhead')[2]
-yr = 2020
+yr = 2022
 
 #---------------------------------------
 # where are results stored?
-dabomFolder = 'DABOM_results'
+dabomFolder = 'DABOM_results_v2'
 
 # load DABOM model output
 load(paste0(dabomFolder,'/LGR_DABOM_', spp, '_', yr, '.rda'))

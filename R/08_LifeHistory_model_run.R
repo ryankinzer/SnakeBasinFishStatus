@@ -20,8 +20,8 @@ AgeFolder = 'Age_results' # for biologist cleaned files and dabom data
 filepath <- './data/LifeHistoryData/'
 
 # Set species
-spp <- 'Chinook'
-yr <- 2021
+spp <- 'Steelhead'
+yr <- 2022
 
 # Set year range based on spp.
 year_range <- yr
@@ -267,3 +267,4 @@ for(yr in year_range){
   
   rm(age_mod, age_jagsData, modAgeDf)
 }
+

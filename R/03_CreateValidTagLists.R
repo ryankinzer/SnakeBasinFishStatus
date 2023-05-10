@@ -26,7 +26,7 @@ trap_df = read_csv(trap_path)
 #-----------------------------------------------------------------
 # set species and year
 spp = 'Chinook'
-yr <- 2018
+yr <- 2022
 
 sppCode = ifelse(spp == 'Chinook', 1,
                  ifelse(spp == 'Steelhead', 3, NA))
@@ -58,3 +58,12 @@ tag_list <- valid_df %>%
 ptagis_file <- paste0('./data/CompleteTagHistories/LGR_',spp,'_',yr,'.csv')
 qc_detections <- qcTagHistory(ptagis_file)
 qc_detections
+
+validTagFileNm = paste0(tagsFolder, '/LGR_', spp, '_', yr, '.txt')
+
+orphans <- qc_detections$orphan_tags %>%
+  write.table(paste0(tagsFolder,'/Orphan_',spp,'.txt'),
+              quote = F,
+              row.names = F,
+              col.names = F,
+              sep = '\t')
