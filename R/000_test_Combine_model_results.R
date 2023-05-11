@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Script loads DABOM and STADEM model results and combines posteriors to estimate
 # abundance at each DABOM site.  Population abundance posteriors is then combined
-# with sex and age proporiton abundances to estimate the abundance of each
+# with sex and age proportion posteriors to estimate the abundance of each
 # life history group.
 #
 # Author: Ryan Kinzer
@@ -28,7 +28,7 @@ load('./data/ConfigurationFiles/site_config_GRA.rda')
 #------------------------------------------------------------------------------
 # set species, spawn year and develop metadata from configuration file
 spp <- 'Chinook' 
-yr <- 2022
+yr <- 2021
 
 if(spp == 'Chinook'){
   spp_prefix <- 'ch_'
@@ -299,20 +299,20 @@ trt_df <- site_df %>%
     select(spawn_yr, species, MPG, POP_NAME, TRT, age, mean, median, mode, sd, cv, lowerCI, upperCI)
   
   
-  list('LGR_esc' = stadem_df,
-       'Pop_esc' = N_pop_summ,
-       'female_prop' = p_f,
-       'female_escape' = N_f_summ,
-       'age_prop' = age_prop_summ,
-       'age_escape' = age_summ,
-       'Site_esc' = trib_summ,
-       'detection' = detect_summ,
-       'tag_observations' = tag_summ,
-       'sex_data' = sex_df,
-       'age_data' = age_df,
-       'brood_data' = brood_df,
-       'model_obs' = filter_ch) %>%
-    writexl::write_xlsx(path = paste0('./Abundance_results/Escape_',spp,'_',yr,'.xlsx'))
+  # list('LGR_esc' = stadem_df,
+  #      'Pop_esc' = N_pop_summ,
+  #      'female_prop' = p_f,
+  #      'female_escape' = N_f_summ,
+  #      'age_prop' = age_prop_summ,
+  #      'age_escape' = age_summ,
+  #      'Site_esc' = trib_summ,
+  #      'detection' = detect_summ,
+  #      'tag_observations' = tag_summ,
+  #      'sex_data' = sex_df,
+  #      'age_data' = age_df,
+  #      'brood_data' = brood_df,
+  #      'model_obs' = filter_ch) %>%
+  #   writexl::write_xlsx(path = paste0('./Abundance_results/Escape_',spp,'_',yr,'.xlsx'))
 
 # save posteriors
 save(N_pop, p_pop, age_pop,
@@ -522,69 +522,17 @@ if(spp == 'Steelhead'){
              
            })
   
-  # allLGRtags <- as.list(year_range) %>%
-  #   rlang::set_names() %>%
-  #   map_df(.id = 'spawn_year',
-  #          .f = function(x){
-  #            load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-  #            
-  #            tag_dat <- proc_list$ValidTrapData %>%
-  #              summarise(valid_tags = n_distinct(LGDNumPIT)) %>% 
-  #              mutate(origin = 'Natural')
-  #          })
-  # 
-  # stadem_df <- left_join(allLGR, allLGRtags, by = c('spawn_year', 'origin')) %>%
-  #   select(spawn_year, species, origin, valid_tags, everything())
-  
-  stadem_df <- allLGR
-  
-  # Get unique tags per site......should be moved to DABOM tribCalcEstimate fnc.
-  # site_tags <- as.list(year_range) %>%
-  #   rlang::set_names() %>%
-  #   map_df(.id = 'spawn_year',
-  #          .f = function(x){
-  #            load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-  #            
-  #            proc_list$proc_ch %>%
-  #              filter(UserProcStatus) %>%
-  #              group_by(SiteID) %>%
-  #              summarise(n_tags = n_distinct(TagID)) %>%
-  #              mutate(species = spp) %>%
-  #              select(species, everything())
-  #            
-  #          })
-  
   #Save all data as .xlsx
-  list('LGR Esc' = stadem_df, 
+  list('LGR Esc' = allLGR, 
        'Pop Total Esc' = N_pop_all,
        'Pop Female Esc' = N_f_all,
        'Pop Age Esc' = age_all,
        'Pop Brood Table' = brood_table,
-       #'Pop Stock Recruit' = prod_df,
+       'Pop Stock Recruit' = prod_df,
        'Pop Female Props' = p_all,
        'Pop Age Props' = age_prop_all,
        'Site Esc' = trib_all,
        #'Site Unique Tags' = site_tags,
        'Node Detect Eff' = detect_all) %>%
-   writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'_v2.xlsx'))
+   writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
   
-
-
-# Combine Life History Files
-# 
-# all_lifehistory= as.list(year_range) %>%
-#   rlang::set_names() %>%
-#   map_df(.f = function(x){
-#     readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',x, '.xlsx'))
-#   })
-# 
-# steelhead_age <- all_lifehistory %>% 
-#   filter(!is.na(TRT)) %>%
-#   select(tag_code = TagID, MPG, POP_NAME, TRT_POPID = TRT, spawn_year = SpawnYear, fwAge, swAge, totalAge) %>%
-#   bind_rows(tmp %>%
-#               mutate(spawn_year = as.character(spawn_year)) %>%
-#               filter(!is.na(TRT_POPID)) %>%
-#               select(tag_code, MPG, POP_NAME, TRT_POPID, spawn_year, fwAge, swAge, totalAge))
-# 
-# save(steelhead_age, file = './data/LifeHistoryData/All_steelhead_lifehistory.rda')
-
