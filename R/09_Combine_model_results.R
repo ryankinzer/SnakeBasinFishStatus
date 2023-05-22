@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Script loads DABOM and STADEM model results and combines posteriors to estimate
 # abundance at each DABOM site.  Population abundance posteriors is then combined
-# with sex and age proporiton abundances to estimate the abundance of each
+# with sex and age proportion posteriors to estimate the abundance of each
 # life history group.
 #
 # Author: Ryan Kinzer
@@ -12,144 +12,158 @@ library(tidyverse)
 library(lubridate)
 library(PITcleanr)
 library(DABOM)
-library(WriteXLS)
 source('./R/definePopulations2.R')
 source('./R/summarisePosterior.R')
-source('./R/assign_POP_GSI.R')
-
-# load configuration file
-load('./data/ConfigurationFiles/site_config.rda')
+#source('./R/assign_POP_GSI.R')
 
 # set up folder structure
 AbundanceFolder = 'Abundance_results' # for processed files
-if(!dir.exists(AbundanceFolder)) {
-  dir.create(AbundanceFolder)
-}
 
-#dabom_files <- list.files('./DABOM_results')
-#stadem_files <- list.files('./STADEM_results')
+# load configuration file
+load('./data/ConfigurationFiles/site_config_GRA.rda')
+
+# configuration <- configuration %>%
+#   mutate(across(c(contains('st_'), contains('ch_')), ~ifelse(grepl('^GRA$|^LGR$|^LGRLDR$|^GRS$|^GOA$|^NPTH$|^DWL$|^DWOR$|^GOJ$|^GRJ$', site_code), NA, .)))
 
 #------------------------------------------------------------------------------
-# set species, spawn year and time stamp
-species <- 'Steelhead' #c('Steelhead', 'Chinook')  # either Chinook or Steelhead
-yr <- 2020        # tagging operations started at Lower Granite with spawn year 2009.
-#timestp <- gsub('[^0-9]','', Sys.Date())
+# set species, spawn year and develop metadata from configuration file
+spp <- 'Chinook' 
+yr <- 2021
 
-for(spp in species){
-  
-  if(spp == 'Steelhead'){
-    year_range <- c(2010:2019)
-  } else {
-    year_range <- c(2010:2019)
-  }
+if(spp == 'Chinook'){
+  spp_prefix <- 'ch_'
+} else {
+  spp_prefix <- 'st_'
+}
 
-for(yr in year_range){
+node_order <- buildNodeOrder(parent_child) %>%
+  mutate(branch = str_split(path, ' ', simplify = TRUE)[,2],
+         branch = ifelse(path == 'GRA','Black-box',branch)) %>%
+  select(site = node, branch)
+
+node_df <- configuration %>% #SFSMA
+  select(node, contains(spp_prefix)) %>%
+  rename_with(~str_remove(.,spp_prefix)) %>%
+  select(-ESU, -GSI_Group, TRT = TRT_POPID) %>%
+  arrange(node, MPG) %>%
+  distinct(node, .keep_all = TRUE) %>%
+  mutate(site = str_remove(node, '_U|_D|_M')) %>%
+  left_join(node_order)
+
+site_df <- node_df %>%
+  #sf::st_set_geometry(NULL) %>%
+  #mutate(site = str_remove(node, '_U|_D|_M')) %>%
+  select(-node) %>%
+  arrange(site, MPG) %>%
+  distinct(site, .keep_all = TRUE)
+
+trt_df <- site_df %>%
+  sf::st_set_geometry(NULL) %>%
+  select(-site, -branch) %>%
+  filter(!is.na(MPG)) %>%
+  distinct(TRT, .keep_all = TRUE)
   
+  # load data sets
+
   load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',yr,'.rda')) 
-  load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',yr,'.rda'))
-  # steps are necessary b/c each DABOM filename contains a time stamp
-  #spp_files <- dabom_files[str_detect(dabom_files, spp)]
-  #tmp_file <- spp_files[str_detect(spp_files, as.character(paste0("_",yr,"_")))]
   
-  
+  if(yr %in% c(2021, 2022)){
+    load(paste0('./DABOM_results_v2/LGR_DABOM_',spp,'_',yr,'.rda'))
+    dabom_mod <- dabom_output$dabom_mod
+    filter_ch <- dabom_output$filter_ch
+  } else {
+    load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',yr,'.rda'))
+    #dabom_mod <- dabom_output$dabom_mod
+    filter_ch <- proc_list$proc_ch
+  }
+    
   load(paste0('./Sex_results/Population_SexProp_',spp,'_',yr,'.rda'))
   load(paste0('./Age_results/Population_AgeProp_',spp,'_',yr,'.rda'))
   
-  #------------------------------------------------------------------------------
-  ## summarise tag information
-  #------------------------------------------------------------------------------
-  # get which population each site is assigned to
-  site_pop = assign_POP_GSI(species = spp, 
-                            configuration = configuration,
-                            site_df = site_df)[[1]] %>%
-    as_tibble() %>%
-    select(SiteID:SiteName, Node, MPG:GSI_Group)
+  tag_summ = readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_', yr, '.xlsx'),
+                        'TagSummary',
+                        progress = F)
   
+  sex_df = readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_', yr, '.xlsx'),
+                                'SexRatio',
+                                progress = F)
   
-  tag_summ = summariseTagData(capHist_proc = proc_list$proc_ch,
-                              trap_data = proc_list$ValidTrapData) %>%
-    left_join(site_pop %>%
-                select(Node, MPG, POP_NAME, TRT),
-              by = c('AssignSpawnNode' = 'Node'))
+  age_df = readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_', yr, '.xlsx'),
+                                'AgeFreq',
+                                progress = F)
   
-  #------------------------------------------------------------------------------
-  ## Gather Detection Probabilities
-  #------------------------------------------------------------------------------
-  detect_summ = summariseDetectProbs(dabom_mod = dabom_mod,
-                                     capHist_proc = proc_list$proc_ch) %>%
-    mutate(spawn_yr = yr,
-           species = spp,
-           cv = sd/median) %>%
-    select(spawn_yr, species, Node, n_tags, estimate = median, sd, cv, lowerCI, upperCI)
-  
-  #------------------------------------------------------------------------------
-  ## Gather All Transition Probabilities for STADEM
-  #------------------------------------------------------------------------------
-  trans_summ <- summariseTransProbs_LGD(dabom_mod,
-                                        cred_int_prob = 0.95) %>%
-    mutate(spawn_yr = yr,
-           species = spp) %>%
-    select(spawn_yr, species, everything())
-  
-  #------------------------------------------------------------------------------
-  ## Gather Weekly Transition Probabilities 
-  #------------------------------------------------------------------------------
-  wk_trans_summ <- compileWeekTransProbs(dabom_mod) %>%
-    mutate(spawn_yr = yr,
-           species = spp) %>%
-    group_by(spawn_yr, species, week, branch) %>%
-    summarise(estimate = median(prob),
-              sd = sd(prob),
-              cv = sd/estimate,
-              lowerCI = quantile(prob, probs = .025),
-              upperCI = quantile(prob, probs = .975)) 
-  
-  #------------------------------------------------------------------------------
-  ## Gather Tributary Estimates 
-  #------------------------------------------------------------------------------
-  trib_summ = calcTribEscape_LGD(dabom_mod,
-                                 stadem_mod,
-                                 stadem_param_nm = 'X.new.wild',
-                                 bootstrap_samp = 2000, #2000
-                                 node_order = proc_list$NodeOrder,
-                                 summ_results = T,
-                                 pt_est_nm = 'median',
-                                 cred_int_prob = 0.95) %>%
-    mutate(spawn_yr = yr,
-           species = spp) %>%
-    select(spawn_yr, species, everything())
+  brood_df = readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_', yr, '.xlsx'),
+                                'BroodYear',
+                                progress = F)
 
-  #------------------------------------------------------------------------------
-  ## Gather Population Group Estimates -- NEED TO WORK ON!!!!!
-  #------------------------------------------------------------------------------
-  pop_df <- definePopulations(spp)
+# Stadem estimates
+  stadem_df <- stadem_mod$summary %>% as_tibble(rownames = 'param') %>%
+    filter(grepl('X.tot.new.',param)) %>%
+    mutate(species = spp,
+           spawn_yr = yr,
+           origin = case_when(grepl('all', param) ~ 'Total',
+                              grepl('wild',param) ~ 'Natural',
+                              grepl('hatch', param) ~ 'Hatchery Clipped',
+                              grepl('hnc', param) ~ 'Hatchery No-Clipped')) %>%
+    select(spawn_yr,
+           species,
+           origin,
+           estimate = `50%`,
+           lowerCI = `2.5%`,
+           upperCI = `97.5%`,
+           mean,
+           sd)
   
-  #------------------------------------------------------------------------------
-  ## Gather Posterior Estimates -- NEED TO WORK ON!!!!!
-  #------------------------------------------------------------------------------
-  # how many samples from each posterior?
-  nSamps = 1000
-  
-  # abundance at main branches, upstream sites and black-boxes
-  abundance_post = calcTribEscape_LGD(dabom_mod,
-                                      stadem_mod,
-                                      node_order = proc_list$NodeOrder,
-                                      summ_results = F) %>%
-    mutate(spawn_yr = yr, species = spp) %>%
-    select(spawn_yr, species, everything())
-  
-  # Create posteriors of population abundance by combining branches
-  N_post = pop_df %>%
-    left_join(abundance_post, by = 'site') %>%
+# Summarise Detection Probs----
+  detect_summ <- summariseDetectProbs(dabom_mod = dabom_mod,
+                                     filter_ch = filter_ch,
+                                     cred_int_prob = 0.95) %>%
+    mutate(species = spp,
+           spawn_yr = yr,
+           cv = sd/median) %>%
+    filter(n_tags != 0) %>%
+    left_join(node_df) %>%
+    select(species, spawn_yr, MPG, POP_NAME, TRT, branch, Node = node, n_tags, estimate = median,
+           sd, cv, lowerCI, upperCI)
+
+# Escapement
+  trib_summ = calcTribEscape_GRA(dabom_mod = dabom_mod,
+                               stadem_mod = stadem_mod,
+                               stadem_param_nm = "X.new.wild",
+                               parent_child = parent_child,
+                               summ_results = T) %>%
+  mutate(species = spp,
+         spawn_yr = yr,
+         site = str_remove(param, '_bb')) %>%
+  left_join(site_df) %>%
+  select(-site) %>%
+  select(species, spawn_yr, MPG, POP_NAME, TRT, branch, site = param, estimate = median, sd, cv, lowerCI, upperCI)
+
+
+  #Create posteriors of population abundance by combining branches
+  pop_df <- definePopulations(spp) %>%
+    rename(TRT = TRT_POPID)
+
+# Compile Transition Probs----
+#trans_post <- compileTransProbs_GRA(dabom_mod = dabom_mod,
+#                                    parent_child = parent_child)
+
+  abundance_post <- calcTribEscape_GRA(dabom_mod = dabom_mod,
+                                     stadem_mod = stadem_mod,
+                                     stadem_param_nm = "X.new.wild",
+                                     parent_child = parent_child,
+                                     summ_results = F)
+
+  N_post = abundance_post %>%
+    inner_join(pop_df %>%
+              rename(param = site),
+            by = 'param') %>%
     group_by(TRT, iter) %>%
-    summarise_at(vars(escape),
-                 funs(sum),
-                 na.rm = T) %>%
+    summarise(escp = sum(escp)) %>%
     ungroup() %>%
     mutate(spawn_yr = yr, species = spp) %>%
-    rename(N = escape) %>%
-    select(spawn_yr, species, everything())
-  
+    rename(N = escp)
+
   sex_post <- sex_mod$sims.list$p %>%
     as_tibble() %>%
     gather(key = 'popNum', value = p) %>%
@@ -157,12 +171,14 @@ for(yr in year_range){
     group_by(popNum) %>%
     mutate(iter = 1:n()) %>%
     left_join(modSexDf %>%
-                filter(!is.na(TRT)) %>%
+                filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
+                filter(!is.na(TRT_POPID)) %>%
                 mutate(popNum = sex_jagsData$popNum),
-              by = 'popNum')
-  
+              by = 'popNum') %>%
+    rename(spawn_yr = spawn_year, TRT = TRT_POPID)
+
   poss_ages <- modAgeDf %>%
-    filter(!is.na(TRT)) %>%
+    filter(!is.na(TRT_POPID)) %>%
     select(starts_with('age'))
 
   poss_ages <- as_tibble(na.omit(as.numeric(
@@ -183,22 +199,28 @@ for(yr in year_range){
     select(-age_fct) %>%
     #mutate(age = age + 1) %>%
     left_join(modAgeDf %>%
-                filter(!is.na(TRT)) %>%
+                filter(TRT_POPID != 'Not Observed') %>% #!is.na(TRT)) %>%
+                filter(!is.na(TRT_POPID)) %>%
                 mutate(popNum = age_jagsData$popNum) %>%
-                select(popNum, MPG:TRT) %>%
+                select(popNum, species, spawn_year, MPG:TRT_POPID) %>%
                 distinct(),
-              by = 'popNum')
+              by = 'popNum') %>%
+    rename(spawn_yr = spawn_year, TRT = TRT_POPID)
+
+  # Get random samples from each posterior and multiple
+  nSamps = 2000
   
   N_pop <- N_post %>%
     group_by(TRT) %>%
     sample_n(size = nSamps, replace = T) %>%
-    mutate(iter = 1:n())
+    mutate(iter = 1:n()) %>%
+    select(spawn_yr, species, iter, TRT, N)
   
   p_pop <- sex_post %>%
     group_by(TRT) %>%
     sample_n(nSamps, replace = T) %>%
     mutate(iter = 1:n()) %>%
-    select(iter, TRT, p)
+    select(spawn_yr, species, iter, TRT, p)
   
   age_pop <- age_post %>%
     mutate(age = paste0('age', age)) %>%
@@ -206,35 +228,40 @@ for(yr in year_range){
     group_by(TRT) %>%
     sample_n(nSamps, replace = T) %>%
     mutate(iter = 1:n()) %>%
-    select(iter, TRT, starts_with('age'))
+    select(spawn_yr, species, iter, TRT, starts_with('age'))
   
   pop_post <- N_pop %>%
     left_join(p_pop, 
-              by = c('TRT', 'iter')) %>%
+              by = c('TRT', 'iter', 'spawn_yr', 'species')) %>%
     left_join(age_pop,
-              by = c('TRT', 'iter')) %>%
+              by = c('TRT', 'iter', 'spawn_yr', 'species')) %>%
     mutate(N_females = N * p) %>%
     mutate_at(vars(starts_with('age')),
-              list(~ . * N))
-  
+              list(~ . * N)) #SFMAI
+
   # summarize total escapement by population
-  N_pop_summ <- summarisePosterior(pop_post, N, TRT) %>%
+  N_pop_summ <- summarisePosterior(pop_post, N, TRT) %>% #SFMAI
     mutate(spawn_yr = yr, 
            species = spp) %>%
-    left_join(tag_summ %>%
-                group_by(TRT) %>%
-                summarise(n_tags = n_distinct(TagID))) %>%
-    select(spawn_yr, species, TRT, n_tags, everything())
+    left_join(tag_summ %>% #SFSMA
+                group_by(TRT = TRT_POPID) %>%
+                summarise(n_tags = n_distinct(tag_code))) %>%
+    left_join(trt_df) %>% #SFSMA
+    select(spawn_yr, species, MPG, POP_NAME, TRT, n_tags, mean, median, mode, sd, cv, lowerCI, upperCI)
+  
   # summarize proportion female
   p_f <- summarisePosterior(pop_post, p, TRT, round = F) %>%
     mutate(spawn_yr = yr, 
            species = spp) %>%
-    select(spawn_yr, species, everything())
+    left_join(trt_df) %>%
+    select(spawn_yr, species, MPG, POP_NAME, TRT, everything())
+  
   # summarize number of females
   N_f_summ <- summarisePosterior(pop_post, N_females, TRT) %>%
     mutate(spawn_yr = yr, 
            species = spp) %>%
-    select(spawn_yr, species, everything())
+    left_join(trt_df) %>%
+    select(spawn_yr, species, MPG, POP_NAME, TRT, mean, median, mode, sd, cv, lowerCI, upperCI)
   
   # summarize the age proportions
   
@@ -249,22 +276,10 @@ for(yr in year_range){
     unnest(sumPost) %>%
     mutate(spawn_yr = yr,
            species = spp) %>%
-    select(spawn_yr, species, age, everything())
-  
-  # age_prop_summ = summarisePosterior(age_pop, age2, TRT, round = F) %>%
-  #   mutate(age = 2) %>%
-  #   bind_rows(summarisePosterior(age_pop, age3, TRT, round = F) %>%
-  #               mutate(age = 3)) %>%
-  #   bind_rows(summarisePosterior(age_pop, age4, TRT, round = F) %>%
-  #               mutate(age = 4)) %>%
-  #   bind_rows(summarisePosterior(age_pop, age5, TRT, round = F) %>%
-  #               mutate(age = 5)) %>%
-  #   bind_rows(summarisePosterior(age_pop, age6, TRT, round = F) %>%
-  #               mutate(age = 6)) %>%
-  #   mutate(spawn_yr = yr, 
-  #          species = spp) %>%
-  #   select(spawn_yr, species, age, everything())
-  
+    left_join(trt_df) %>%
+    select(spawn_yr, species, TRT, age, mean, median, mode, sd, cv, lowerCI, upperCI)
+
+
   # summarize the escapement by age
   age_summ <- pop_post %>%
     select(-N_females) %>%
@@ -280,47 +295,46 @@ for(yr in year_range){
     unnest(sumPost) %>%
     mutate(spawn_yr = yr,
            species = spp) %>%
-    select(spawn_yr, species, TRT, age, everything())
-  # age_summ <- summarisePosterior(pop_post, age2, TRT) %>%
-  #   mutate(age = 2) %>%
-  #   bind_rows(summarisePosterior(pop_post, age3, TRT) %>%
-  #               mutate(age = 3)) %>%
-  #   bind_rows(summarisePosterior(pop_post, age4, TRT) %>%
-  #               mutate(age = 4)) %>%
-  #   bind_rows(summarisePosterior(pop_post, age5, TRT) %>%
-  #               mutate(age = 5)) %>%
-  #   bind_rows(summarisePosterior(pop_post, age6, TRT) %>%
-  #               mutate(age = 6)) %>%
-  #   mutate(spawn_yr = yr, 
-  #          species = spp) %>%
-  #   select(spawn_yr, species, age, everything())
-
-  # save posteriors
-  save(N_pop, p_pop, age_pop,
-       file = paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', yr, '.rda'))
+    left_join(trt_df) %>%
+    select(spawn_yr, species, MPG, POP_NAME, TRT, age, mean, median, mode, sd, cv, lowerCI, upperCI)
   
+  
+  # list('LGR_esc' = stadem_df,
+  #      'Pop_esc' = N_pop_summ,
+  #      'female_prop' = p_f,
+  #      'female_escape' = N_f_summ,
+  #      'age_prop' = age_prop_summ,
+  #      'age_escape' = age_summ,
+  #      'Site_esc' = trib_summ,
+  #      'detection' = detect_summ,
+  #      'tag_observations' = tag_summ,
+  #      'sex_data' = sex_df,
+  #      'age_data' = age_df,
+  #      'brood_data' = brood_df,
+  #      'model_obs' = filter_ch) %>%
+  #   writexl::write_xlsx(path = paste0('./Abundance_results/Escape_',spp,'_',yr,'.xlsx'))
+
+# save posteriors
+save(N_pop, p_pop, age_pop,
+     file = paste0(AbundanceFolder, '/LGR_Posteriors_', spp, '_', yr, '.rda'))
+
   # save summaries
-  save(detect_summ, trans_summ, wk_trans_summ, trib_summ, N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ,
+save(N_pop_summ, p_f, N_f_summ, age_prop_summ, age_summ, trib_summ, detect_summ, tag_summ, 
        file = paste0(AbundanceFolder, '/LGR_Summary_', spp, '_', yr, '.rda'))
 
-  }
-}
-
 #------------------------------------------------------------------------------
-# combine summaries by year
+# combine summaries by year----
 #------------------------------------------------------------------------------
 valid_est <- read_csv('./data/ConfigurationFiles/valid_trt_estimates.csv')
 
-for(spp in species){
-  
-  if(spp == 'Steelhead'){
-    year_range <- c(2010:2020)
-    prod_range <- 2010:2015
+if(spp == 'Steelhead'){
+    year_range <- c(2010:2022)
+    prod_range <- 2010:2022
   } else {
-    year_range <- c(2010:2019)
-    prod_range <- 2010:2014
+    year_range <- c(2010:2019, 2021, 2022)
+    prod_range <- 2010:2018
   }
-  
+
   allSumm = as.list(year_range) %>%
     rlang::set_names() %>%
     map(.f = function(x) {
@@ -334,28 +348,38 @@ for(spp in species){
            age_summ = age_summ)
     })
   
-  
   detect_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'detect_summ')
+           .f = 'detect_summ') %>%
+    select(-MPG, -POP_NAME)
+  # Doesn't work because site/node names were different prior to 2021.
+    # select(spawn_yr:upperCI) %>%
+    # left_join(node_df %>%
+    #             sf::st_set_geometry(NULL) %>%
+    #             select(Node = node)
+    #           )
   
   trib_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'trib_summ')
+           .f = 'trib_summ') %>%
+    select(-MPG, -POP_NAME)
   
   N_pop_all = inner_join(valid_est,
                         allSumm %>%
                           map_df(.id = NULL,
-                          .f = 'N_pop_summ'))
-  
+                          .f = 'N_pop_summ') %>%
+                          select(-MPG, -POP_NAME))
+
   p_all = allSumm %>%
     map_df(.id = NULL,
-           .f = 'p_f')
+           .f = 'p_f') %>%
+    select(-MPG, -POP_NAME)
   
   N_f_all = inner_join(valid_est,
                       allSumm %>%
                         map_df(.id = NULL,
-                        .f = 'N_f_summ'))
+                        .f = 'N_f_summ') %>%
+                        select(-MPG, -POP_NAME))
   
   age_prop_all = allSumm %>%
     map_df(.id = NULL,
@@ -498,39 +522,8 @@ for(spp in species){
              
            })
   
-  allLGRtags <- as.list(year_range) %>%
-    rlang::set_names() %>%
-    map_df(.id = 'spawn_year',
-           .f = function(x){
-             load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-             
-             tag_dat <- proc_list$ValidTrapData %>%
-               summarise(valid_tags = n_distinct(LGDNumPIT)) %>% 
-               mutate(origin = 'Natural')
-           })
-  
-  stadem_df <- left_join(allLGR, allLGRtags, by = c('spawn_year', 'origin')) %>%
-    select(spawn_year, species, origin, valid_tags, everything())
-  
-  
-  # Get unique tags per site......should be moved to DABOM tribCalcEstimate fnc.
-  site_tags <- as.list(year_range) %>%
-    rlang::set_names() %>%
-    map_df(.id = 'spawn_year',
-           .f = function(x){
-             load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
-             
-             proc_list$proc_ch %>%
-               filter(UserProcStatus) %>%
-               group_by(SiteID) %>%
-               summarise(n_tags = n_distinct(TagID)) %>%
-               mutate(species = spp) %>%
-               select(species, everything())
-             
-           })
-  
   #Save all data as .xlsx
-  list('LGR Esc' = stadem_df, 
+  list('LGR Esc' = allLGR, 
        'Pop Total Esc' = N_pop_all,
        'Pop Female Esc' = N_f_all,
        'Pop Age Esc' = age_all,
@@ -539,8 +532,7 @@ for(spp in species){
        'Pop Female Props' = p_all,
        'Pop Age Props' = age_prop_all,
        'Site Esc' = trib_all,
-       'Site Unique Tags' = site_tags,
+       #'Site Unique Tags' = site_tags,
        'Node Detect Eff' = detect_all) %>%
    writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
   
-}

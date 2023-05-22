@@ -1,4 +1,4 @@
-# Author: Kevin See
+# Author: Ryan Kinzer
 # Purpose: Summarise sex and age structure from PITcleanr
 # Created: 7/1/19
 # Last Modified: 7/9/19
@@ -6,48 +6,88 @@
 
 # load needed libraries
 library(tidyverse)
-library(sf)
 library(magrittr)
-library(readxl)
-#library(WriteXLS)
+library(lubridate)
 library(PITcleanr)
 
 # set up folder structure
 LifeHistory = 'data/LifeHistoryData' # for processed files
-if(!dir.exists(LifeHistory)) {
-  dir.create(LifeHistory)
-}
+PITcleanrFolder <- 'data/PITcleanr_v2/BioProcessed/'
+
+# set trap file path
+trap_database <- 'data/TrappingDbase/tblLGDMasterCombineExportJodyW.csv'
+trap_df <- read_csv(trap_database)
 
 # load configuration and site_df data
-load('./data/ConfigurationFiles/site_config_BON.rda')
+load('./data/ConfigurationFiles/site_config_GRA.rda')
 
-# load function and assign group variables to all sites; TRT POPs and GSI
-source('./R/assign_POP_GSI.R')
-
+node_order <- buildNodeOrder(parent_child)
+  
 # set species
-spp = 'Steelhead'
-
-pop_ls <- assign_POP_GSI(species = spp, configuration, site_df)
-grp_df <- pop_ls[[1]]
-map_df <- pop_ls[[2]]
+spp <- 'Steelhead'
+yr <- 2022
 
 #-----------------------------------------------------------------
-# take tag summaries from PITcleanr, remove duplicate tags and summarise by sex, age and brood year
-for(yr in 2010:2019) {
-  cat(paste('Working on', spp, 'in', yr, '\n'))
-  
-  load(paste0('data/DABOMready/LGR_', spp, '_', yr, '.rda'))
-  
-  # summary of tags
-  tagSumm = summariseTagData(capHist_proc = proc_list$ProcCapHist %>%
-                               filter(UserProcStatus),
-                             trap_data = proc_list$ValidTrapData) %>%
-    # how many records for each tag?
-    group_by(TagID) %>%
-    mutate(Species = spp, nRec = n()) %>%
+# load tag summaries from PITcleanr and used in DABOM model, remove duplicate tags and summarise by sex, age and brood year
+load(paste0('./DABOM_results_v2/LGR_DABOM_',spp, '_',yr,'.rda'))
+
+# exact data run through DABOM
+filter_ch <- dabom_output$filter_ch
+
+if(spp == 'Chinook'){
+  spp_prefix <- 'ch_'
+} else {
+  spp_prefix <- 'st_'
+}
+
+# get final spawn location  
+tagSumm <- estimateSpawnLoc(filter_ch) %>%
+  mutate(species = spp,
+         spawn_year = yr,
+         spawn_site = str_remove(spawn_node, '_U|_D')) %>%
+  select(species, spawn_year, tag_code, spawn_site, spawn_node, tag_detects, everything()) %>%
+  left_join(configuration %>%
+              select(spawn_site = site_code, contains(spp_prefix)) %>%
+              group_by(spawn_site) %>%
+              slice(1))
+
+names(tagSumm) <- gsub(spp_prefix, '', names(tagSumm))
+
+# combine trap database info
+
+tagSumm <- tagSumm %>%
+  left_join(trap_df %>%
+              select(tag_code = LGDNumPIT, CollectionDate, GenSex, LGDSex, GenStock, GenStockProb, GenParentHatchery, GenBY, BioScaleFinalAge))
+
+tagSumm <- tagSumm %>%
+  left_join(node_order,
+            by = c('spawn_site' = 'node')) %>%
+  mutate(branch = str_split(path, ' ', simplify = TRUE)[,2],
+         branch = ifelse(path == 'GRA','Black-box',branch))
+
+# get weeks
+if(spp == 'Steelhead'){
+  week_strata <- STADEM::weeklyStrata(paste0(yr-1,'0701'), paste0(yr,'0630'),
+                                      strata_beg = 'Mon',
+                                      last_strata_min = 3)
+} else {
+  week_strata <- STADEM::weeklyStrata(paste0(yr,'0301'), paste0(yr,'0817'),
+                                      strata_beg = 'Mon',
+                                      last_strata_min = 3)    
+}
+
+tagSumm$week_num = NA
+for(i in 1:length(week_strata)) {
+  tagSumm$week_num[with(tagSumm, which(CollectionDate %within% week_strata[i]))] = i
+}
+
+
+tagSumm <- tagSumm %>%    # how many records for each tag?
+    group_by(tag_code) %>%
+    mutate(nRec = n()) %>%
     ungroup() %>%
     mutate_if(is.factor, as.character) %>%
-    arrange(TagID, CollectionDate)
+    arrange(tag_code, CollectionDate)
   
   # deal with duplicated tags - are these fallback and reascension tags?
   # we could deal with this be changing our join in summariseTagData()
@@ -57,7 +97,7 @@ for(yr in 2010:2019) {
   #n_distinct(dupTags$TagID)
   
   dupTagsKeep1 = dupTags %>%
-    group_by(TagID) %>%
+    group_by(tag_code) %>%
     filter(!grepl('\\?', BioScaleFinalAge),
            BioScaleFinalAge != 'N:A',
            !is.na(BioScaleFinalAge)) %>%
@@ -66,8 +106,8 @@ for(yr in 2010:2019) {
   
   dupTags %>%
     anti_join(dupTagsKeep1 %>%
-                select(TagID)) %>%
-    group_by(TagID) %>%
+                select(tag_code)) %>%
+    group_by(tag_code) %>%
     slice(1) %>%
     ungroup() %>%
     bind_rows(dupTagsKeep1) -> dupTagsKeep
@@ -75,10 +115,6 @@ for(yr in 2010:2019) {
   tagSumm %>%
     filter(nRec == 1) %>%
     bind_rows(dupTagsKeep) -> tagSumm
-  
-  tagSumm %<>%
-    left_join(grp_df, by = c('AssignSpawnNode' = 'Node'))
-
   
   # Calculate age (freshwater, saltwater, total & broody year)
   tagSumm %<>%
@@ -91,7 +127,7 @@ for(yr in 2010:2019) {
                                   '.*:')) %>%
     # for minijacks, replace MJ with 0
     rowwise() %>%
-    mutate(swAge_tmp = if_else(Species == 'Chinook',
+    mutate(swAge_tmp = if_else(species == 'Chinook',
                                str_replace_all(swAge_tmp,
                                                'MJ', '0'),
                                swAge_tmp)) %>%
@@ -107,16 +143,14 @@ for(yr in 2010:2019) {
     select(-swAge_tmp) %>%
     mutate(totalAge = fwAge + swAge + 1) %>%
     # assign brood year
-    mutate(BrdYr = as.integer(str_extract(SpawnYear, '[:digit:]+')) - totalAge)
+    mutate(BrdYr = as.integer(str_extract(spawn_year, '[:digit:]+')) - totalAge)
   
-  
-  # xtabs(~ TRT + NWR_POPID, tagSumm, drop.unused.levels = T)
   
   #-----------------------------------------------------------------
   # join the spawn node to detectSites to bring in MPG, and summarise prop. female by model branch and MPG
   modSexDf = tagSumm %>%
-    group_by(MPG, TRT, Group, GenSex) %>%
-    summarise(nTags = n_distinct(TagID)) %>%
+    group_by(species, spawn_year, MPG, POP_NAME, TRT_POPID, GenSex) %>%
+    summarise(nTags = n_distinct(tag_code)) %>%
     ungroup() %>%
     filter(GenSex %in% c('F', 'M')) %>%
     spread(GenSex, nTags,
@@ -124,43 +158,50 @@ for(yr in 2010:2019) {
     mutate(nSexed = F + M) %>%
     mutate(propF = F / (F + M),
            propF_se = sqrt((propF * (1 - propF)) / (F + M))) %>%
-    select(MPG, TRT, Group, nSexed, everything()) %>%
-    mutate(Group = if_else(is.na(Group), 'NotObserved', Group))
+    select(species, spawn_year, MPG, POP_NAME, TRT_POPID, nSexed, everything()) %>%
+    mutate(across(c(MPG, POP_NAME, TRT_POPID), ~if_else(is.na(.), 'Not Observed', .)))
   
   #-----------------------------------------------------------------
   # summarise age props (and brood year) by model branch and MPG
   
   modAgeDf = tagSumm %>%
     filter(!is.na(totalAge)) %>%
-    group_by(MPG, TRT, Group, totalAge) %>%
-    summarise(nTags = n_distinct(TagID)) %>%
+    group_by(species, spawn_year, MPG, POP_NAME, TRT_POPID, totalAge) %>%
+    summarise(nTags = n_distinct(tag_code)) %>%
     ungroup() %>%
     mutate(totalAge = paste0('age', totalAge)) %>%
     spread(totalAge, nTags,
            fill = 0) %>%
-    mutate(nAged = select(., -(MPG:Group)) %>% rowSums) %>%
-    select(MPG, TRT, Group, nAged, everything()) %>%
-    mutate(Group = if_else(is.na(Group), 'NotObserved', Group))
+    mutate(nAged = select(., -(species:TRT_POPID)) %>% rowSums) %>%
+    select(species, spawn_year, MPG, POP_NAME, TRT_POPID, nAged, everything()) %>%
+    mutate(across(c(MPG, POP_NAME, TRT_POPID), ~if_else(is.na(.), 'Not Observed', .)))
   
   modBrdYrDf = tagSumm %>%
     filter(!is.na(BrdYr)) %>%
-    group_by(MPG, TRT, Group, BrdYr) %>%
-    summarise(nTags = n_distinct(TagID)) %>%
+    group_by(species, spawn_year, MPG, POP_NAME, TRT_POPID, BrdYr) %>%
+    summarise(nTags = n_distinct(tag_code)) %>%
     ungroup() %>%
     spread(BrdYr, nTags,
            fill = 0) %>%
-    mutate(nAged = select(., -(MPG:Group)) %>% rowSums) %>%
-    select(MPG, TRT, Group, nAged, everything()) %>%
-    mutate(Group = if_else(is.na(Group), 'NotObserved', Group))
-  
+    mutate(nAged = select(., -(species:TRT_POPID)) %>% rowSums) %>%
+    select(species, spawn_year, MPG, POP_NAME, TRT_POPID, nAged, everything()) %>%
+    mutate(across(c(MPG, POP_NAME, TRT_POPID), ~if_else(is.na(.), 'Not Observed', .)))
+
+# save results    
   list(TagSummary = tagSumm,
        SexRatio = modSexDf,
        AgeFreq = modAgeDf,
        BroodYear = modBrdYrDf) %>%
     writexl::write_xlsx(paste0(LifeHistory,'/LGR_', spp, '_', yr, '.xlsx'))
   
-#  rm(tagSumm, dupTags, dupTagsKeep, dupTagsKeep1, modAgeDf, modSexDf, modBrdYrDf, proc_list, configuration, startDate, parent_child, site_df)
-  
-}
-
-
+  # check some counts
+#   
+# tagSumm %>%
+#     group_by(week_num, branch) %>%
+#     summarise(n_tags = n_distinct(tag_code)) %>%
+#     group_by(week_num) %>%
+#     mutate(total = sum(n_tags),
+#            p = n_tags/total) %>%
+#     #filter(branch == 'SC1') %>%
+#     ggplot(aes(x = week_num, y = p, colour = branch)) +
+#     geom_line()

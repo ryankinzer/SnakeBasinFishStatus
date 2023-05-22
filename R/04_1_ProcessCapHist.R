@@ -20,8 +20,14 @@ if(!dir.exists(PITcleanrFolder)) {
 #-----------------------------------------------------------------
 # read observations from PTAGIS and process with PITcleanr
 # set species
-spp <- 'Steelhead'
-yr_range <- 2022 #2010:2019
+spp <- 'Chinook'
+
+if(spp == 'Steelhead'){
+  year_range <- c(2010:2022)
+} else {
+  year_range <- c(2010:2019, 2021, 2022)
+}
+
 root_site <- 'BON'  #'noGRS'#'test'# 'BON'# or 'GRA'
 
 # load configuration and site_df data
@@ -31,9 +37,9 @@ load(paste0('./data/ConfigurationFiles/site_config_',root_site,'.rda'))
 
 # load in observations
 
-for(i in 1:length(yr_range)){
+for(i in 1:length(year_range)){
 
-  yr <- yr_range[i]  
+  yr <- year_range[i]  
 
   if(spp == 'Chinook'){
     start_date = lubridate::ymd(paste0(yr,'0301'))

@@ -8,13 +8,14 @@ library(lubridate)
 library(PITcleanr)
 library(scales)
 source('./R/assign_POP_GSI.R')
+source('./R/theme_rk.R')
 
 spp = 'Steelhead'
 
 if(spp == 'Steelhead'){
-  yr_range = c(2010:2021)
+  yr_range = c(2010:2022)
 } else {
-  yr_range = c(2010:2019,2021)
+  yr_range = c(2010:2019,2021, 2022)
 }
 
 # Site/Management Designations
@@ -62,6 +63,8 @@ allLGR <- as.list(yr_range) %>%
            
            })
 
+
+# weekly LGR trap data; tags, night, reascent, origin, PBT, trap rate
 allLGRdata <- as.list(yr_range) %>%
   rlang::set_names() %>%
   map_df(.id = 'spawn_year',
@@ -72,27 +75,45 @@ allLGRdata <- as.list(yr_range) %>%
          }
   )
 
+# if(yr %in% c(2021, 2022)){
+#   load(paste0('./DABOM_results_v2/LGR_DABOM_',spp,'_',yr,'.rda'))
+#   dabom_mod <- dabom_output$dabom_mod
+#   filter_ch <- dabom_output$filter_ch
+#   tag_dat2 <- proc_list$ValidTrapData
+# } else {
+#   load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',yr,'.rda'))
+#   #dabom_mod <- dabom_output$dabom_mod
+#   filter_ch <- proc_list$proc_ch
+# }
+# 
+# 
+# 
 allLGRtags <- as.list(yr_range) %>%
   rlang::set_names() %>%
   map_df(.id = 'spawn_year',
          .f = function(x){
-           
+
            #load(paste0('./STADEM_results/LGR_STADEM_',spp,'_',x[1],'.rda'))
-           load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',x[1],'.rda'))
+           if(x < 2020){
+             load(paste0('./DABOM_results/LGR_DABOM_',spp,'_',yr,'.rda'))
+           } else {
+             load(paste0('./DABOM_results_v2/LGR_DABOM_',spp,'_',yr,'.rda'))
+           }
            
-           tag_dat <- proc_list$ValidTrapData
-           
+
+           tag_dat <- proc_list$ValidTrapData # LGR dbase info for each tag
+
            if(spp == 'Steelhead'){
               strata <- STADEM::weeklyStrata(lubridate::ymd(paste0(x[1]-1,'0701')),lubridate::ymd(paste0(x[1],'0630')))
            } else {
               strata <- STADEM::weeklyStrata(lubridate::ymd(paste0(x[1],'0301')),lubridate::ymd(paste0(x[1],'0817')))
            }
-           
+
            week = vector('integer', nrow(tag_dat))
            for(i in 1:length(strata)) {
              week[which(tag_dat$CollectionDate %within% strata[[i]])] = i
            }
-           
+
            tag_dat %>%
              mutate(week = week) %>%
              arrange(CollectionDate)
@@ -167,77 +188,77 @@ ggsave(paste0('Figures/LGR_win_abund_',spp,'.png'),
        height = 8)
 
 # Weekly Natural-origin
-# lgr_nat_fig <- allLGR %>%
-#   filter(grepl('X.new.wild', param)) %>%
-#   mutate(week = as.integer(str_extract(param, '\\d+'))) %>%
-#   left_join(allLGRtags %>%
-#               group_by(spawn_year, week) %>%
-#               summarise(dabom_tags = n()),
-#             by = c('spawn_year', 'week')) %>%
-#   left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
-#   mutate(p_tagged = dabom_tags/`50%`) %>%
-#   ggplot(aes(x = Start_Date)) +
-#   geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = .2)+
-#     geom_line(aes(y = `50%`)) +
-#     geom_point(aes(y = `50%`, fill = trap_open), colour = 'black', shape = 21, size = 2) +
-#     geom_bar(aes(y = dabom_tags),fill = 'darkblue', stat='identity') +
-#     facet_wrap(~ spawn_year, scales = 'free_x') +
-#   scale_fill_manual(labels = c('Closed', 'Open'), values = c('white', 'darkblue')) +
-# theme_bw() +
-#   theme(strip.text.y = element_text(angle = .45)) +
-#   theme(legend.position = 'bottom') +
-#   labs(title = paste0('Unique Natural-origin ', spp, ' Weekly Abundance at Lower Granite Dam'),
-#        subtitle = 'Vertical bars represent the number of natural-origin fish tagged and released for DABOM.',
-#        x = 'Date',
-#        y = 'Abundance',
-#        fill = 'Trap Operation')
-# lgr_nat_fig
-# 
-# ggsave(paste0('Figures/LGR_nat_week',spp,'.png'),
-#        lgr_nat_fig,
-#        width = 7,
-#        height = 5)
+lgr_nat_fig <- allLGR %>%
+  filter(grepl('X.new.wild', param)) %>%
+  mutate(week = as.integer(str_extract(param, '\\d+'))) %>%
+  left_join(allLGRtags %>%
+              group_by(spawn_year, week) %>%
+              summarise(dabom_tags = n()),
+            by = c('spawn_year', 'week')) %>%
+  left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
+  mutate(p_tagged = dabom_tags/`50%`) %>%
+  ggplot(aes(x = Start_Date)) +
+  geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = .2)+
+    geom_line(aes(y = `50%`)) +
+    geom_point(aes(y = `50%`, fill = trap_open), colour = 'black', shape = 21, size = 2) +
+    geom_bar(aes(y = dabom_tags),fill = 'darkblue', stat='identity') +
+    facet_wrap(~ spawn_year, scales = 'free_x') +
+  scale_fill_manual(labels = c('Closed', 'Open'), values = c('white', 'darkblue')) +
+theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'bottom') +
+  labs(title = paste0('Unique Natural-origin ', spp, ' Weekly Abundance at Lower Granite Dam'),
+       subtitle = 'Vertical bars represent the number of natural-origin fish tagged and released for DABOM.',
+       x = 'Date',
+       y = 'Abundance',
+       fill = 'Trap Operation')
+lgr_nat_fig
+
+ggsave(paste0('Figures/LGR_nat_week',spp,'.png'),
+       lgr_nat_fig,
+       width = 7,
+       height = 5)
 
 # Tag Rate
-# Weekly Natural-origin
-# lgr_tag_fig <- allLGR %>%
-#   filter(grepl('X.new.wild', param)) %>%
-#   mutate(week = as.integer(str_extract(param, '\\d+'))) %>%
-#   left_join(allLGRtags %>%
-#               group_by(spawn_year, week) %>%
-#               summarise(dabom_tags = n()), by = c('spawn_year', 'week')) %>%
-#   left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
-#   mutate(p_tagged = dabom_tags/`50%`) %>%
-#   ggplot(aes(x = Start_Date)) +
-#   geom_line(aes(y = p_tagged)) +
-#   geom_point(aes(y = p_tagged)) +
-#   scale_x_date(date_labels = "%b") +
-#   facet_wrap(~ spawn_year, scales = 'free', nrow = 4) +
-#   theme_bw() +
-#   theme(strip.text.y = element_text(angle = .45)) +
-#   theme(legend.position = 'bottom') +
-#   labs(title = paste0(spp, ' Natural-Origin Tagging Rate at Lower Granite Dam'),
-#        subtitle = 'Tagged proportions greater than 1.0 suggest tagging reascension fish.',
-#        x = 'Date',
-#        y = 'Proportion Tagged',
-#        colour = 'Origin Group')
-# lgr_tag_fig
-# 
-# ggsave(paste0('Figures/LGR_tag_rate',spp,'.png'),
-#        lgr_tag_fig,
-#        width = 7,
-#        height = 5)
+#Weekly Natural-origin
+lgr_tag_fig <- allLGR %>%
+  filter(grepl('X.new.wild', param)) %>%
+  mutate(week = as.integer(str_extract(param, '\\d+'))) %>%
+  left_join(allLGRtags %>%
+              group_by(spawn_year, week) %>%
+              summarise(dabom_tags = n()), by = c('spawn_year', 'week')) %>%
+  left_join(allLGRdata, by = c('spawn_year', 'week' = 'week_num')) %>%
+  mutate(p_tagged = dabom_tags/`50%`) %>%
+  ggplot(aes(x = Start_Date)) +
+  geom_line(aes(y = p_tagged)) +
+  geom_point(aes(y = p_tagged)) +
+  scale_x_date(date_labels = "%b") +
+  facet_wrap(~ spawn_year, scales = 'free', nrow = 4) +
+  theme_bw() +
+  theme(strip.text.y = element_text(angle = .45)) +
+  theme(legend.position = 'bottom') +
+  labs(title = paste0(spp, ' Natural-Origin Tagging Rate at Lower Granite Dam'),
+       subtitle = 'Tagged proportions greater than 1.0 suggest tagging reascension fish.',
+       x = 'Date',
+       y = 'Proportion Tagged',
+       colour = 'Origin Group')
+lgr_tag_fig
+
+ggsave(paste0('Figures/LGR_tag_rate',spp,'.png'),
+       lgr_tag_fig,
+       width = 7,
+       height = 5)
 
 # LGR Data for Comparison of GSI to Obs sites.
-# gsi_dat <- allLGRtags %>%
-#   left_join(grp_df, by = c('PtagisEventLastSpawnSite' = 'SiteID')) %>%
-#   select(spawn_year, MasterID, LGDNumPIT, CollectionDate, week,
-#          MPG, TRT, SiteID = PtagisEventLastSpawnSite, GenSex, BioScaleFinalAge, GenStock, GSI_Group) %>%
-#   mutate(date = format(as.Date(CollectionDate, '%y-%m-%d'), '%m-%d'),
-#          date = lubridate::ymd(paste0('2020-',date)),
-#          sy = as.integer(spawn_year),
-#          MPG = fct_relevel(MPG, c('Dry Clearwater', 'Wet Clearwater', 'Lower Snake', 'Upper Salmon River', 'Grande Ronde / Imnaha', 'Middle Fork Salmon River', 'South Fork Salmon River', NA))) 
-  #filter(spawn_year == 2017)
+gsi_dat <- allLGRtags %>%
+  left_join(grp_df, by = c('PtagisEventLastSpawnSite' = 'SiteID')) %>%
+  select(spawn_year, MasterID, LGDNumPIT, CollectionDate, week,
+         MPG, TRT, SiteID = PtagisEventLastSpawnSite, GenSex, BioScaleFinalAge, GenStock, GSI_Group) %>%
+  mutate(date = format(as.Date(CollectionDate, '%y-%m-%d'), '%m-%d'),
+         date = lubridate::ymd(paste0('2020-',date)),
+         sy = as.integer(spawn_year),
+         MPG = fct_relevel(MPG, c('Dry Clearwater', 'Wet Clearwater', 'Lower Snake', 'Upper Salmon River', 'Grande Ronde / Imnaha', 'Middle Fork Salmon River', 'South Fork Salmon River', NA)))
+filter(spawn_year == 2017)
 
 # Reascencion and Night-Passage Proportions
 
@@ -326,7 +347,7 @@ lgr_night_sum <- lgr_esc_night %>%
 lgr_night <- lgr_esc_night %>%
   ggplot(aes(x = Start_Date)) +
   geom_col(aes(y = `Unique Passage`), colour = 'darkblue', fill = 'lightblue') +
-  geom_line(aes(y = night_p*axis_scale), colour = 'darkred', size = 1) +
+  geom_line(aes(y = night_p*axis_scale), colour = 'darkred', linewidth = 1) +
   scale_colour_viridis_d(end = .75) +
   scale_x_date(date_labels = format("%b-%d")) +
   scale_y_continuous(sec.axis = sec_axis(~./axis_scale, breaks = seq(0,1,.10),

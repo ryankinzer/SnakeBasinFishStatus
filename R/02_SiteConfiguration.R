@@ -14,7 +14,7 @@
 
 # Install PITcleanr
 
-devtools::install_github('ryankinzer/PITcleanr', ref = 'snake_main')
+devtools::install_github('ryankinzer/PITcleanr', ref = 'npt_main')
 
 # load needed libraries
 library(tidyverse)
