@@ -536,3 +536,31 @@ if(spp == 'Steelhead'){
        'Node Detect Eff' = detect_all) %>%
    writexl::write_xlsx(paste0(AbundanceFolder, '/LGR_AllSummaries_',spp,'.xlsx'))
   
+  
+  # Combine Life History Files for annual report.
+  
+  spp <- 'Steelhead'
+  
+  if(spp == 'Steelhead'){
+    year_range <- c(2010:2020)
+  } else {
+    year_range <- c(2010:2019)
+  }
+  
+  all_lifehistory= as.list(year_range) %>%
+    rlang::set_names() %>%
+    map_df(.f = function(x){
+      readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',x, '.xlsx'))
+    })
+  
+  tmp <- readxl::read_excel(paste0('./data/LifeHistoryData/LGR_', spp, '_',2021, '.xlsx'))
+  
+  steelhead_age <- all_lifehistory %>% 
+    filter(!is.na(TRT)) %>%
+    select(tag_code = TagID, MPG, POP_NAME, TRT_POPID = TRT, spawn_year = SpawnYear, fwAge, swAge, totalAge) %>%
+    bind_rows(tmp %>%
+                mutate(spawn_year = as.character(spawn_year)) %>%
+                filter(!is.na(TRT_POPID)) %>%
+                select(tag_code, MPG, POP_NAME, TRT_POPID, spawn_year, fwAge, swAge, totalAge))
+  
+  save(steelhead_age, file = './data/LifeHistoryData/All_steelhead_lifehistory.rda')
