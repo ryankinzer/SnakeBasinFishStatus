@@ -542,9 +542,9 @@ if(spp == 'Steelhead'){
   spp <- 'Steelhead'
   
   if(spp == 'Steelhead'){
-    year_range <- c(2010:2020)
+    year_range <- c(2010:2022)
   } else {
-    year_range <- c(2010:2019)
+    year_range <- c(2010:2019,2021:2022)
   }
   
   all_lifehistory= as.list(year_range) %>%
@@ -564,3 +564,4 @@ if(spp == 'Steelhead'){
                 select(tag_code, MPG, POP_NAME, TRT_POPID, spawn_year, fwAge, swAge, totalAge))
   
   save(steelhead_age, file = './data/LifeHistoryData/All_steelhead_lifehistory.rda')
+  
